@@ -12,15 +12,15 @@ namespace TowerDefense
         public float rotateSpeed = 10;
         public delegate void DestinationHandler(Unit unit);
         public static event DestinationHandler OnDestination;
-        [SerializeField]
-        private float pointToPointThreshold = 0.005f;
-        [SerializeField]
+        [SerializeField, HideInInspector]
+        private float pointToPointThreshold = 0.05f;
+        [SerializeField, HideInInspector]
         private Waypoints m_Path;
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private float m_ProgressDistance;
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private Vector3 pathDynamicOffset;
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private Waypoints.RoutePoint endPoint;
         ISlice ISlice.Clone()
         {
@@ -37,33 +37,54 @@ namespace TowerDefense
         }
         public void Init(Unit unit)
         {
-            var enemy = (unit as UnitEnemy);
-            m_Path = enemy.SubWave.path;
-            float dynamicX = Random.Range(-1f, 1f);
-            float dynamicZ = Random.Range(-1f, 1f);
-            pathDynamicOffset = new Vector3(dynamicX, 0, dynamicZ);
-            Reset(enemy);
+            if (unit is UnitEnemy)
+            {
+                var enemy = (unit as UnitEnemy);
+                m_Path = enemy.SubWave.path;
+                float dynamicX = Random.Range(-1f, 1f);
+                float dynamicZ = Random.Range(-1f, 1f);
+                pathDynamicOffset = new Vector3(dynamicX, 0, dynamicZ);
+                Reset(enemy);
+            }
         }
         public void Update(Unit unit, float deltaTime)
         {
             if (!unit.Dead && m_Path != null)
             {
-                if (MoveToPoint(unit, deltaTime))
+                // Если пересекли конечную точку (и пройденный путь больше длины пути)
+                if (m_Path.Length - m_ProgressDistance <= pointToPointThreshold)
                 {
                     ReachDestination(unit);
                 }
             }
         }
-        //function call to rotate and move toward a pecific point, return true when the point is reached
-        public bool MoveToPoint(Unit unit, float deltaTime)
+        public void FixedUpdate(Unit unit, float deltaTime)
+        {
+            if (!unit.Dead && m_Path != null)
+            {
+                MoveToPoint(unit, deltaTime);
+            }
+        }
+        /// <summary>
+        /// Перемещает объект по пути m_Path(Waypoints)
+        /// </summary>
+        /// <param name="unit">Объект перемещения</param>
+        /// <param name="deltaTime">ВременнАя дельта</param>
+        /// <returns></returns>
+        public void MoveToPoint(Unit unit, float deltaTime)
         {
             var transform = unit.transform;
-            m_ProgressDistance = m_ProgressDistance + (moveSpeed * deltaTime);
+            //Пройденное расстояние: скорость * время
+            m_ProgressDistance += (moveSpeed * deltaTime);
+            //Получам следующую точку из пути, по расстоянию
             Waypoints.RoutePoint progressPoint = m_Path.GetRoutePoint(m_ProgressDistance);
             Vector3 progressDelta = progressPoint.position - transform.position;
+            //Устанавливаем новую позицию 
             transform.position = progressPoint.position + pathDynamicOffset;
-            transform.rotation = Quaternion.LookRotation(progressPoint.direction);
-            return (Vector3.Dot(endPoint.position - transform.position, endPoint.direction) < pointToPointThreshold) && m_ProgressDistance > m_Path.Length;
+
+            //Поворот в направлении точки, со скоростью rotateSpeed
+            Quaternion wantedRot = Quaternion.LookRotation(progressPoint.direction);
+            transform.rotation  = Quaternion.Slerp(transform.rotation, wantedRot, rotateSpeed * deltaTime);
         }
         private void Reset(Unit unit)
         {

@@ -17,7 +17,7 @@ namespace TowerDefense.Core
             Value = Default;
             m_CurrentStagger = 0;
         }
-        public void Update(Unit unit, float deltaTime)
+        public void FixedUpdate(Unit unit, float deltaTime)
         {
             if (Default > 0 && RegenRate > 0 && m_CurrentStagger <= 0)
             {
@@ -26,6 +26,7 @@ namespace TowerDefense.Core
             }
             m_CurrentStagger -= Time.fixedDeltaTime;
         }
+        public void Update(Unit unit, float deltaTime) { }
         ISlice ISlice.Clone()
         {
             return Clone();

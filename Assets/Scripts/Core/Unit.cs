@@ -85,17 +85,17 @@ namespace TowerDefense.Core
 		}
 		public virtual void Update()
         {
-		}
-		public virtual void FixedUpdate()
+            foreach (var prop in Properties)
+                prop.Update(this, Time.deltaTime);
+            foreach (var skill in Skills)
+                skill.Update(this, Time.deltaTime);
+        }
+        public virtual void FixedUpdate()
         {
             foreach (var prop in Properties)
-            {
-                prop.Update(this, Time.fixedDeltaTime);
-            }
+                prop.FixedUpdate(this, Time.fixedDeltaTime);
             foreach (var skill in Skills)
-            {
-                skill.Update(this, Time.fixedDeltaTime);
-            }
+                skill.FixedUpdate(this, Time.fixedDeltaTime);
             /*
             if (target != null && !IsInConstruction() && !stunned)
             {

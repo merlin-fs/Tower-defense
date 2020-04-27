@@ -822,55 +822,13 @@ MonoBehaviour:
     subWaveList:
     - unit: {fileID: 100000, guid: 15034ff00d33b624fbe98f7b78e30f70, type: 3}
       count: 15
-      interval: 2
+      interval: 1
       delay: 0
       path: {fileID: 864871049}
       Properties:
       - id: 0
-      - id: 1
       Skills:
-      - id: 2
-    - unit: {fileID: 100000, guid: 15034ff00d33b624fbe98f7b78e30f70, type: 3}
-      count: 15
-      interval: 3
-      delay: 20
-      path: {fileID: 864871049}
-      Properties:
-      - id: 0
       - id: 1
-      Skills:
-      - id: 3
-    - unit: {fileID: 100000, guid: 15034ff00d33b624fbe98f7b78e30f70, type: 3}
-      count: 15
-      interval: 5
-      delay: 30
-      path: {fileID: 864871049}
-      Properties:
-      - id: 0
-      - id: 1
-      Skills:
-      - id: 4
-    lifeGain: 0
-    energyGain: 0
-    scoreGain: 0
-    rscGainList: 
-    activeUnitCount: 0
-    spawned: 0
-    cleared: 0
-    duration: 0
-    subWaveSpawnedCount: 0
-  - waveID: 0
-    subWaveList:
-    - unit: {fileID: 100000, guid: 15034ff00d33b624fbe98f7b78e30f70, type: 3}
-      count: 25
-      interval: 2
-      delay: 0
-      path: {fileID: 864871049}
-      Properties:
-      - id: 0
-      - id: 1
-      Skills:
-      - id: 5
     lifeGain: 0
     energyGain: 0
     scoreGain: 0
@@ -886,45 +844,12 @@ MonoBehaviour:
       type: {class: Health, ns: TowerDefense.Core, asm: Assembly-CSharp}
       data:
         Default: 10
-        RegenRate: 1
+        RegenRate: 0
         StaggerDuration: 10
     00000001:
-      type: {class: Shield, ns: TowerDefense.Core, asm: Assembly-CSharp}
-      data:
-        Default: 5
-        RegenRate: 1
-        StaggerDuration: 1
-    00000002:
       type: {class: Moving, ns: TowerDefense, asm: Assembly-CSharp}
       data:
         moveSpeed: 3
-        rotateSpeed: 5
-        pointToPointThreshold: 0.005
-        m_Path: {fileID: 0}
-        m_ProgressDistance: 0
-        pathDynamicOffset: {x: 0, y: 0, z: 0}
-    00000003:
-      type: {class: Moving, ns: TowerDefense, asm: Assembly-CSharp}
-      data:
-        moveSpeed: 5
-        rotateSpeed: 10
-        pointToPointThreshold: 0.005
-        m_Path: {fileID: 0}
-        m_ProgressDistance: 0
-        pathDynamicOffset: {x: 0, y: 0, z: 0}
-    00000004:
-      type: {class: Moving, ns: TowerDefense, asm: Assembly-CSharp}
-      data:
-        moveSpeed: 8
-        rotateSpeed: 10
-        pointToPointThreshold: 0.005
-        m_Path: {fileID: 0}
-        m_ProgressDistance: 0
-        pathDynamicOffset: {x: 0, y: 0, z: 0}
-    00000005:
-      type: {class: Moving, ns: TowerDefense, asm: Assembly-CSharp}
-      data:
-        moveSpeed: 8
         rotateSpeed: 10
         pointToPointThreshold: 0.005
         m_Path: {fileID: 0}

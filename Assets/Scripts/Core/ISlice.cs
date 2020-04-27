@@ -8,13 +8,15 @@ namespace TowerDefense.Core
     {
         void Init(Unit unit);
         void Update(Unit unit, float deltaTime);
+        void FixedUpdate(Unit unit, float deltaTime);
         ISlice Clone();
     }
 
-    public class Slice: ISlice
+    public class Slice : ISlice
     {
         public void Init(Unit unit) { }
         public void Update(Unit unit, float deltaTime) { }
+        public void FixedUpdate(Unit unit, float deltaTime) { }
         public ISlice Clone()
         {
             return new Slice();

@@ -14,9 +14,9 @@ namespace TowerDefense.Core
 		public float delay;
 		public Waypoints path;
         [SerializeReference, SerializeReferenceButton]
-        public List<IProperty> Properties = new List<IProperty>() { new Health(), new Shield() };
+        public List<IProperty> Properties = new List<IProperty>();
         [SerializeReference, SerializeReferenceButton]
-        public List<ISkill> Skills = new List<ISkill>() { new Moving() };
+        public List<ISkill> Skills = new List<ISkill>();
         public SubWave Clone()
         {
             SubWave subWave = new SubWave
