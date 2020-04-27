@@ -1,0 +1,7 @@
+/.vs/
+*.meta
+/Bin/
+/Logs/
+/obj/
+/Temp/
+/Library/
