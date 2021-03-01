@@ -1,140 +1,158 @@
 ﻿using System;
 using System.Collections;
+
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
+
+    #if UNITY_EDITOR
+    using UnityEditor;
+    #endif
 
 namespace TowerDefense.Core
-{ 
-    public class Waypoints : MonoBehaviour
+{
+
+    public interface IWaypoints
     {
-        public WaypointList waypointList = new WaypointList();
+        bool Loop { get; }
+        float Length { get; }
+        float GetLengthLerp(float t);
+        Vector3 GetPosition(float length);
+        (Vector3 Position, Vector3 Direction) GetRoutePoint(float length);
+    }
+
+
+    public class Waypoints : MonoBehaviour, IWaypoints
+    {
+        [Serializable]
+        public struct PointObject
+        {
+            public int Length => Objects.Length;
+            public Transform[] Objects;
+            public Transform this[int idx] => Objects[idx];
+        }
+
         [SerializeField]
-        private bool smoothRoute = true;
-        public bool loop = false;
-        [HideInInspector]
-        public int numPoints;
-        [HideInInspector]
-        public Vector3[] points;
-        [HideInInspector]
-        public float[] distances;
+        private bool m_SmoothRoute = true;
+        [SerializeField]
+        private bool m_Loop = false;
+        [SerializeField]
+        private float m_EditorVisualisationSubsteps = 100;
+        [SerializeField]
+        private PointObject m_PointObjects = new PointObject { Objects = new Transform[] { } };
 
-        public float editorVisualisationSubsteps = 100;
-        public float Length { get; private set; }
-        public Transform[] PointObjects { get => waypointList.items; }
+        private Vector3[] m_Points;
+        private float[] m_Distances;
+        private float m_Length;
 
-        //this being here will save GC allocs
-        private int p0n;
-        private int p1n;
-        private int p2n;
-        private int p3n;
+        IWaypoints Self => this;
 
-        private float i;
-        private Vector3 P0;
-        private Vector3 P1;
-        private Vector3 P2;
-        private Vector3 P3;
 
-        // Use this for initialization
         private void Awake()
         {
-            if (PointObjects.Length > 1)
-            {
-                CachePositionsAndDistances();
-            }
-            numPoints = PointObjects.Length;
+            Rebuild();
         }
-        public RoutePoint GetRoutePoint(float dist)
+
+        #region IWaypoints
+        bool IWaypoints.Loop => m_Loop;
+
+        float IWaypoints.Length => m_Length;
+
+        float IWaypoints.GetLengthLerp(float t)
+        {
+            return Mathf.Lerp(0f, m_Length, t);
+        }
+
+        (Vector3 Position, Vector3 Direction) IWaypoints.GetRoutePoint(float length)
         {
             // position and direction
-            Vector3 p1 = GetRoutePosition(dist);
-            Vector3 p2 = GetRoutePosition(dist + 0.1f);
+            Vector3 p1 = GetRoutePosition(length);
+            Vector3 p2 = GetRoutePosition(length + 0.1f);
             Vector3 delta = p2 - p1;
-            return new RoutePoint(p1, delta.normalized);
+            return (p1, delta.normalized);
         }
+
+        Vector3 IWaypoints.GetPosition(float length)
+        {
+            return GetRoutePosition(length);
+        }
+        #endregion
+
+        public void Rebuild()
+        {
+            m_Points = null;
+            m_Distances = null;
+            m_Length = 0;
+            if (m_PointObjects.Length > 1)
+                BuildPath();
+        }
+
         public Vector3 GetRoutePosition(float dist)
         {
             int point = 0;
-            dist = Mathf.Repeat(dist, distances[distances.Length - 1]);
-            while (distances[point] < dist)
-            {
+            dist = Mathf.Repeat(dist, m_Distances[m_Distances.Length - 1]);
+
+            while (m_Distances[point] < dist)
                 ++point;
-            }
+
             // get nearest two points, ensuring points wrap-around start & end of circuit
-            p1n = (point - 1 + numPoints) % numPoints;
-            p2n = point;
+            int idx1 = (point - 1 + m_Points.Length) % m_Points.Length;
+            int idx2 = point;
 
             // found point numbers, now find interpolation value between the two middle points
+            float i = Mathf.InverseLerp(m_Distances[idx1], m_Distances[idx2], dist);
 
-            i = Mathf.InverseLerp(distances[p1n], distances[p2n], dist);
-
-            if (smoothRoute)
+            if (m_SmoothRoute)
             {
                 // smooth catmull-rom calculation between the two relevant points
 
-
                 // get indices for the surrounding 2 points, because
                 // four points are required by the catmull-rom function
-                p0n = (point - 2 + numPoints) % numPoints;
-                p3n = (point + 1) % numPoints;
+                int idx0 = (point - 2 + m_Points.Length) % m_Points.Length;
+                int idx3 = (point + 1) % m_Points.Length;
 
                 // 2nd point may have been the 'last' point - a dupe of the first,
                 // (to give a value of max track distance instead of zero)
                 // but now it must be wrapped back to zero if that was the case.
-                p2n = p2n % numPoints;
+                idx2 %= m_Points.Length;
 
-                P0 = points[p0n];
-                P1 = points[p1n];
-                P2 = points[p2n];
-                P3 = points[p3n];
-
-                return CatmullRom(P0, P1, P2, P3, i);
+                return CatmullRom(m_Points[idx0], m_Points[idx1], m_Points[idx2], m_Points[idx3], i);
             }
             else
             {
                 // simple linear lerp between the two points:
-
-                p1n = (point - 1 + numPoints) % numPoints;
-                p2n = point;
-
-                return Vector3.Lerp(points[p1n], points[p2n], i);
+                return Vector3.Lerp(m_Points[idx1], m_Points[idx2], i);
             }
         }
 
 
         private Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float i)
         {
-            // comments are no use here... it's the catmull-rom equation.
-            // Un-magic this, lord vector!
+            // catmull-rom equation.
             return 0.5f *
                     ((2 * p1) + (-p0 + p2) * i + (2 * p0 - 5 * p1 + 4 * p2 - p3) * i * i +
                     (-p0 + 3 * p1 - 3 * p2 + p3) * i * i * i);
         }
 
-
-        private void CachePositionsAndDistances()
+        private void BuildPath()
         {
             // transfer the position of each point and distances between points to arrays for
-            // speed of lookup at runtime
-            points = new Vector3[PointObjects.Length + 1];
-            distances = new float[PointObjects.Length + 1];
+
+            m_Points = new Vector3[m_PointObjects.Length + 1];
+            m_Distances = new float[m_PointObjects.Length + 1];
 
             float accumulateDistance = 0;
-            for (int i = 0; i < points.Length; ++i)
+            for (int i = 0; i < m_Points.Length; ++i)
             {
-                var t1 = PointObjects[(i) % PointObjects.Length];
-                var t2 = PointObjects[(i + 1) % PointObjects.Length];
-                if (t1 != null && t2 != null)
-                {
-                    Vector3 p1 = t1.position;
-                    Vector3 p2 = t2.position;
-                    points[i] = PointObjects[i % PointObjects.Length].position;
-                    distances[i] = accumulateDistance;
-                    accumulateDistance += (p1 - p2).magnitude;
-                }
+                Vector3 p1 = m_PointObjects[i % m_PointObjects.Length].position;
+                Vector3 p2 = m_PointObjects[(i + 1) % m_PointObjects.Length].position;
+
+                m_Points[i] = p1;
+                m_Distances[i] = accumulateDistance;
+                accumulateDistance += (p1 - p2).magnitude;
             }
-            Length = distances[(loop) ? distances.Length - 1 : distances.Length - 2];
+            int idx = (m_Loop)
+                ? (m_Distances.Length - 1)
+                : (m_Distances.Length - 2 + m_Distances.Length) % m_Distances.Length;
+            m_Length = m_Distances[idx];
         }
 
 
@@ -153,224 +171,35 @@ namespace TowerDefense.Core
         private void DrawGizmos(bool selected)
         {
 #if UNITY_EDITOR
-            CachePositionsAndDistances();
+            Rebuild();
 #endif
-            waypointList.points = this;
-            if (PointObjects.Length > 1)
+            if (m_PointObjects.Length > 1)
             {
-                numPoints = PointObjects.Length;
-
                 Gizmos.color = selected ? Color.yellow : new Color(1, 1, 0, 0.5f);
-                Vector3 prev = PointObjects[0].position;
-                if (smoothRoute)
+                Vector3 prev = m_PointObjects[0].position;
+                if (m_SmoothRoute)
                 {
-                    for (float dist = 0; dist < Length; dist += Length / editorVisualisationSubsteps)
+                    for (float dist = 0; dist < Self.Length; dist += Self.Length / m_EditorVisualisationSubsteps)
                     {
                         Vector3 next = GetRoutePosition(dist + 1);
                         Gizmos.DrawLine(prev, next);
                         prev = next;
                     }
-                    if (loop)
-                        Gizmos.DrawLine(prev, PointObjects[0].position);
+                    if (m_Loop)
+                        Gizmos.DrawLine(prev, m_PointObjects[0].position);
                 }
                 else
                 {
-                    for (int n = loop ? 0 : 1; n < PointObjects.Length; ++n)
+                    for (int n = m_Loop ? 0 : 1; n < m_PointObjects.Length; ++n)
                     {
-                        Vector3 next = (loop)
-                            ? PointObjects[(n + 1) % PointObjects.Length].position
-                            : PointObjects[n].position;
+                        Vector3 next = (m_Loop)
+                            ? m_PointObjects[(n + 1) % m_PointObjects.Length].position
+                            : m_PointObjects[n].position;
                         Gizmos.DrawLine(prev, next);
                         prev = next;
                     }
                 }
             }
         }
-
-
-        [Serializable]
-        public class WaypointList
-        {
-            public Waypoints points;
-            public Transform[] items = new Transform[0];
-        }
-
-        public struct RoutePoint
-        {
-            public Vector3 position;
-            public Vector3 direction;
-
-
-            public RoutePoint(Vector3 position, Vector3 direction)
-            {
-                this.position = position;
-                this.direction = direction;
-            }
-        }
     }
-}
-
-namespace TowerDefense.Core.Inspector
-{
-#if UNITY_EDITOR
-    [CustomPropertyDrawer(typeof(Waypoints.WaypointList))]
-    public class WaypointListDrawer : PropertyDrawer
-    {
-        private float lineHeight = 18;
-        private float spacing = 4;
-
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            EditorGUI.BeginProperty(position, label, property);
-
-            float x = position.x;
-            float y = position.y;
-            float inspectorWidth = position.width;
-
-            // Draw label
-
-
-            // Don't make child fields be indented
-            var indent = EditorGUI.indentLevel;
-            EditorGUI.indentLevel = 0;
-
-            var items = property.FindPropertyRelative("items");
-            var titles = new string[] { "Transform", "", "", "" };
-            var props = new string[] { "transform", "^", "v", "-" };
-            var widths = new float[] { .7f, .1f, .1f, .1f };
-            float lineHeight = 18;
-            bool changedLength = false;
-            if (items.arraySize > 0)
-            {
-                for (int i = -1; i < items.arraySize; ++i)
-                {
-                    SerializedProperty item = null;
-                    item = (i == -1)
-                        ? null
-                        : items.GetArrayElementAtIndex(i);
-                    float rowX = x;
-                    for (int n = 0; n < props.Length; ++n)
-                    {
-                        float w = widths[n] * inspectorWidth;
-
-                        // Calculate rects
-                        Rect rect = new Rect(rowX, y, w, lineHeight);
-                        rowX += w;
-
-                        if (i == -1)
-                        {
-                            EditorGUI.LabelField(rect, titles[n]);
-                        }
-                        else
-                        {
-                            if (n == 0)
-                            {
-                                EditorGUI.ObjectField(rect, item.objectReferenceValue, typeof(Transform), true);
-                            }
-                            else
-                            {
-                                if (GUI.Button(rect, props[n]))
-                                {
-                                    switch (props[n])
-                                    {
-                                        case "-":
-                                            items.DeleteArrayElementAtIndex(i);
-                                            items.DeleteArrayElementAtIndex(i);
-                                            changedLength = true;
-                                            break;
-                                        case "v":
-                                            if (i > 0)
-                                            {
-                                                items.MoveArrayElement(i, i + 1);
-                                            }
-                                            break;
-                                        case "^":
-                                            if (i < items.arraySize - 1)
-                                            {
-                                                items.MoveArrayElement(i, i - 1);
-                                            }
-                                            break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    y += lineHeight + spacing;
-                    if (changedLength)
-                    {
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                // add button
-                var addButtonRect = new Rect((x + position.width) - widths[widths.Length - 1] * inspectorWidth, y,
-                                                widths[widths.Length - 1] * inspectorWidth, lineHeight);
-                if (GUI.Button(addButtonRect, "+"))
-                {
-                    items.InsertArrayElementAtIndex(items.arraySize);
-                }
-
-                y += lineHeight + spacing;
-            }
-
-            // add all button
-            var addAllButtonRect = new Rect(x, y, inspectorWidth, lineHeight);
-            if (GUI.Button(addAllButtonRect, "Assign using all child objects"))
-            {
-                var circuit = property.FindPropertyRelative("points").objectReferenceValue as Waypoints;
-                var children = new Transform[circuit.transform.childCount];
-                int n = 0;
-                foreach (Transform child in circuit.transform)
-                {
-                    children[n++] = child;
-                }
-                Array.Sort(children, new TransformNameComparer());
-                circuit.waypointList.items = new Transform[children.Length];
-                for (n = 0; n < children.Length; ++n)
-                {
-                    circuit.waypointList.items[n] = children[n];
-                }
-            }
-            y += lineHeight + spacing;
-
-            // rename all button
-            var renameButtonRect = new Rect(x, y, inspectorWidth, lineHeight);
-            if (GUI.Button(renameButtonRect, "Auto Rename numerically from this order"))
-            {
-                var circuit = property.FindPropertyRelative("points").objectReferenceValue as Waypoints;
-                int n = 0;
-                foreach (Transform child in circuit.waypointList.items)
-                {
-                    child.name = "Waypoint " + (n++).ToString("000");
-                }
-            }
-            y += lineHeight + spacing;
-
-            // Set indent back to what it was
-            EditorGUI.indentLevel = indent;
-            EditorGUI.EndProperty();
-        }
-
-
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            SerializedProperty items = property.FindPropertyRelative("items");
-            float lineAndSpace = lineHeight + spacing;
-            return 40 + (items.arraySize * lineAndSpace) + lineAndSpace;
-        }
-
-
-        // comparer for check distances in ray cast hits
-        public class TransformNameComparer : IComparer
-        {
-            public int Compare(object x, object y)
-            {
-                return ((Transform)x).name.CompareTo(((Transform)y).name);
-            }
-        }
-    }
-#endif
 }

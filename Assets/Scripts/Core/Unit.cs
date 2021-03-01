@@ -1,101 +1,161 @@
 ﻿using System;
-using UnityEngine;
-using System.Collections;
-using System.Linq;
 using System.Collections.Generic;
+using UnityEngine;
+using St.Common.Core;
 
 namespace TowerDefense.Core
 {
-    public class TypeConstraintAttribute : PropertyAttribute
-    {
-        private System.Type type;
 
-        public TypeConstraintAttribute(System.Type type)
-        {
-            this.type = type;
-        }
+    using View;
 
-        public System.Type Type
-        {
-            get { return type; }
-        }
-    }
-    public static class PropertyDB
+    public interface IUnit: ICoreGameObjectInstantiate
     {
-        public static IProperty[] Properties = new IProperty[] { new Health(), new Shield() };
-        public static ISkill[] Skills = new ISkill[] { new Moving() };
-        public static IInfluence[] Influences = new IInfluence[] { };
-        public static string[] GetSkills()
-        {
-            return Skills.Select(skill => skill.GetType().Name).ToArray();
-        }
+        IReadOnlyCollection<IProperty> Properties { get; }
+        IReadOnlyCollection<ISkill> Skills { get; }
+        IReadOnlyCollection<IInfluence> Influences { get; }
+
+        void AddProperty(IProperty property);
+        void AddSkill(ISkill skill);
+        void AddInfluence(IInfluence influence);
+        
+        void RemoveProperty(IProperty property);
+        void RemoveSkill(ISkill skill);
+        void RemoveInfluence(IInfluence influence);
+
+        bool IsDead { get; }
+        void SetDead(float delay);
+
+        ITurret Turret { get; }
+
+        Transform TargetPoint { get; }
     }
-    public class Unit : MonoBehaviour
+
+
+    public class Unit : MonoBehaviour, IUnit
     {
-        public delegate void DamagedHandler(Unit unit);
+        public delegate void DamagedHandler(IUnit unit);
         //!!!public static event DamagedHandler OnDamaged;
+        public delegate void DestroyedHandler(IUnit unit, float delay);
 
-        public delegate void DestroyedHandler(Unit unit, float delay);
+        private HashSet<IProperty> m_Properties = new HashSet<IProperty>();
+        private HashSet<ISkill> m_Skills = new HashSet<ISkill>();
+        private List<IInfluence> m_Influences = new List<IInfluence>();
+        private IViewManager m_ViewManager = new ViewManager();
+
         public static event DestroyedHandler OnDestroyed;
 
         public string unitName = "unit";
         public Sprite iconSprite;
         public string desp = "";
-        public Transform targetPoint;
-        [SerializeReference, SerializeReferenceButton]
-        public List<IProperty> Properties = new List<IProperty>();
-        [SerializeReference, SerializeReferenceButton]
-        public List<ISkill> Skills = new List<ISkill>();
-        [HideInInspector, SerializeReference]//, SerializeReferenceButton
-        public List<IInfluence> Influences = new List<IInfluence>();
+
+        [SerializeField]
+        private Transform m_TargetPoint;
+        [Serializable]
+        private class TurretContainer : TypedContainer<ITurret> { }
+        [SerializeField]
+        private TurretContainer m_Turret;
+
+
+
         protected LayerMask maskTarget = 0;
-        public bool Dead { get; private set; } = false;
+
+        IUnit Self => this;
+        #region IUnit
+        IReadOnlyCollection<IProperty> IUnit.Properties => m_Properties;
+        IReadOnlyCollection<ISkill> IUnit.Skills => m_Skills;
+        IReadOnlyCollection<IInfluence> IUnit.Influences => m_Influences;
+
+        void IUnit.AddProperty(IProperty property) => m_Properties.Add(property);
+        void IUnit.AddSkill(ISkill skill) => m_Skills.Add(skill);
+        void IUnit.AddInfluence(IInfluence influence) => m_Influences.Add(influence);
+
+        void IUnit.RemoveProperty(IProperty property) => m_Properties.Remove(property);
+        void IUnit.RemoveSkill(ISkill skill) => m_Skills.Remove(skill);
+        void IUnit.RemoveInfluence(IInfluence influence) => m_Influences.Remove(influence);
+
+        void IUnit.SetDead(float delay)
+        {
+            IsDead = true;
+            //if (deadEffectObj != null)
+            //    ObjectPoolManager.Spawn(deadEffectObj, GetTargetT().position, thisT.rotation);
+            OnDestroyed.Invoke(this, delay);
+        }
+
+        Transform IUnit.TargetPoint => m_TargetPoint;
+
+        ITurret IUnit.Turret => m_Turret.Value;
+        public bool IsDead { get; private set; } = false;
+        #endregion
+        #region ICoreGameObjectInstantiate
+        GameObject ICoreGameObject.GameObject => gameObject;
+
+        T ICoreObjectInstantiate.Instantiate<T>()
+        {
+            IUnit clone = Instantiate(this);
+            return (T)clone;
+        }
+
+        ICoreObjectInstantiate ICoreObjectInstantiate.Instantiate()
+        {
+            return Self.Instantiate<ICoreObjectInstantiate>();
+        }
+        void IDisposable.Dispose()
+        {
+            Destroy(gameObject);
+        }
+        #endregion
+
         public LayerMask GetTargetMask()
         {
             return maskTarget;
         }
+        
         private void ClearInfluences()
         {
-            Influences.Clear();
+            m_Influences.Clear();
         }
-        protected void InitSlice<T>(IEnumerable<T> list) where T: ISlice
+        
+        protected void InitSlice<T>(IEnumerable<T> list) where T : ISlice
         {
             foreach (T slice in list)
-                slice.Init(this);
+                (slice as ISliceInit)?.Init(this);
         }
+
         public virtual void Awake()
         {
-            
+
         }
-		public virtual void Init()
+        
+        public virtual void Init()
         {
-            Dead = false;
-            InitSlice(Properties);
-            InitSlice(Skills);
+            IsDead = false;
+            InitSlice(m_Properties);
+            InitSlice(m_Skills);
             ClearInfluences();
         }
-		public virtual void Start()
+
+        public virtual void Start()
         {
-		}
-		public virtual void OnEnable()
+        }
+
+        public virtual void OnEnable()
         {
-		}
-		public virtual void OnDisable()
+        }
+
+        public virtual void OnDisable()
         {
-		}
-		public virtual void Update()
+        }
+
+        public virtual void Update()
         {
-            foreach (var prop in Properties)
+            foreach (var prop in m_Properties)
                 prop.Update(this, Time.deltaTime);
-            foreach (var skill in Skills)
+            foreach (var skill in m_Skills)
                 skill.Update(this, Time.deltaTime);
         }
+
         public virtual void FixedUpdate()
         {
-            foreach (var prop in Properties)
-                prop.FixedUpdate(this, Time.fixedDeltaTime);
-            foreach (var skill in Skills)
-                skill.FixedUpdate(this, Time.fixedDeltaTime);
             /*
             if (target != null && !IsInConstruction() && !stunned)
             {
@@ -148,23 +208,6 @@ namespace TowerDefense.Core
 			}
             */
         }
-        public void DoDead(float delay)
-        {
-			Dead = true;
-			//if (deadEffectObj != null)
-            //    ObjectPoolManager.Spawn(deadEffectObj, GetTargetT().position, thisT.rotation);
-            OnDestroyed.Invoke(this, delay);
-		}
-		void OnDrawGizmos()
-        {
-            /*
-            if (target!=null)
-            {
-				if (IsCreep())
-                    Gizmos.DrawLine(transform.position, target.transform.position);
-			}
-            */
-		}
-	}
+    }
 
 }
