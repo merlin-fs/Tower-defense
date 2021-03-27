@@ -19072,7 +19072,6 @@ GameObject:
   - component: {fileID: 372726054686905086}
   - component: {fileID: 2861091269874589809}
   - component: {fileID: 4677080903927537577}
-  - component: {fileID: 6070792713704122009}
   m_Layer: 10
   m_Name: EnemyShootEffect
   m_TagString: Untagged
@@ -23990,7 +23989,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5645996430924766585}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 710580bcc24dfa841b42fc77d8760680, type: 3}
   m_Name: 
@@ -23999,19 +23998,6 @@ MonoBehaviour:
   death:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &6070792713704122009
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5645996430924766585}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a43ea50f62fc3b548a026bed5a1440e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  initialPoolCapacity: 10
 --- !u!1 &5646001023931817333
 GameObject:
   m_ObjectHideFlags: 0

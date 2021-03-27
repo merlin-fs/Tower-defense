@@ -58,7 +58,8 @@ namespace TowerDefense
         protected virtual void OnTimeEnd()
         {
             death.Invoke();
-            Poolable.TryPool(gameObject);
+            Destroy(gameObject);
+            //Poolable.TryPool(gameObject);
             timer.Reset();
         }
     }

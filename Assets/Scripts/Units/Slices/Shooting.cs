@@ -12,10 +12,10 @@ namespace TowerDefense
     [Serializable]
     public class Shooting : BaseSkill
     {
-        [Serializable]
-        private class ViewContainer : TypedContainer<ISliceVisualizer<ISlice>> { }
+        //[Serializable]
+        //private class ViewContainer : TypedContainer<ISliceVisualizer> { }//<ISlice>
         [SerializeField]
-        private ViewContainer m_View;
+        private VisualizerContainer m_ViewPrefab;
 
         [Serializable]
         private class TargetterContainer : TypedContainer<ITargetProvider> { }
@@ -31,6 +31,7 @@ namespace TowerDefense
         private ITargetProvider m_Targetter;
         private IUnit m_CurrrentTargetable;
         private IUnit m_Unit;
+        private IRootVisualizer m_View;
 
         public override void Init(IUnit unit)
         {
@@ -47,8 +48,22 @@ namespace TowerDefense
             m_Targetter.GameObject.transform.localScale = Vector3.one;
             m_Targetter.OnTargetEnterRange += OnTargetEnterRange;
 
+            m_View = m_ViewPrefab?.Value?.Instantiate() as IRootVisualizer;
+
             if (m_Targetter is ITargetProviderDesign design)
                 design.OnTargetDrawGizmos += OnTargetDrawGizmos;
+        }
+
+        public override void FillFrom(ISlice other)
+        {
+            base.FillFrom(other);
+            if (other is Shooting shooting)
+            {
+                m_ViewPrefab = shooting.m_ViewPrefab;
+                m_TargetterPrefab = shooting.m_TargetterPrefab;
+                m_SearchRate = shooting.m_SearchRate;
+                m_EffectRate = shooting.m_SearchRate;
+            }
         }
 
         private void OnTargetDrawGizmos()
@@ -68,6 +83,7 @@ namespace TowerDefense
                 design.OnTargetDrawGizmos += OnTargetDrawGizmos; 
             m_Targetter.OnTargetEnterRange -= OnTargetEnterRange;
             m_Targetter.Dispose();
+            (m_View as IDisposable).Dispose();
         }
 
         public override void Update(IUnit unit, float deltaTime)
@@ -82,29 +98,15 @@ namespace TowerDefense
 					m_SearchTimer = m_SearchRate;
 			}
 
+            unit.Turret?.AnimTurret(m_CurrrentTargetable);
+
             if (m_EffectTimer <= 0.0f && m_CurrrentTargetable != null)
             {
-                foreach (IInfluence iter in Effects)
-                {
-                    m_CurrrentTargetable.AddInfluence(iter);
-                    iter.Apply(m_CurrrentTargetable);
-                    m_View?.Value?.UpdateView(m_Unit, this, deltaTime);
-                }
+                m_View?.UpdateView(m_Unit, this, deltaTime);
+                ApplyEffects(m_CurrrentTargetable);
                 m_EffectTimer = m_EffectRate;
             }
-            unit.Turret?.AnimTurret(m_CurrrentTargetable);
         }
-
-        public override void FillFrom(ISlice other)
-        {
-            base.FillFrom(other);
-            if (other is Shooting shooting)
-            {
-                m_TargetterPrefab = shooting.m_TargetterPrefab;
-                m_SearchRate = shooting.m_SearchRate;
-            }
-        }
-
 
         //-----------------------------------------
         private IUnit GetNearestTargetable()

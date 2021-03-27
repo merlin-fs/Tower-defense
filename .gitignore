@@ -5,3 +5,7 @@
 /obj/
 /Temp/
 /Library/
+/.vsconfig
+/Assembly-CSharp-Editor.csproj
+/Assembly-CSharp.csproj
+/Tower defense.sln

@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using St.Common.Core;
 
 namespace TowerDefense
 {
     using Core;
     using Targetting;
 
-    public interface ITurret
+    public interface ITurret: ICoreGameObject
     {
         void AnimTurret(IUnit targetable);
     }
@@ -23,6 +24,8 @@ namespace TowerDefense
         private float m_WaitTimer = 0.0f;
         private float m_CurrentRotationSpeed;
         private float m_XRotationCorrectionTime;
+
+        GameObject ICoreGameObject.GameObject => gameObject;
 
         void ITurret.AnimTurret(IUnit targetable)
         {

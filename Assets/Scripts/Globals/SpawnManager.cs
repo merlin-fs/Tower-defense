@@ -3,11 +3,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using St.Common.Core;
 
-using TowerDefense.Core;
 
 namespace TowerDefense
 {
+    using Core;
+
     public class SpawnManager : MonoBehaviour//SerializedMonoBehaviour//
     {
 
@@ -121,7 +123,8 @@ namespace TowerDefense
         IEnumerator DoUnitDestroyed(IUnit unit, float duration)
         {
             yield return new WaitForSeconds(duration);
-            PoolManager.Inst.ReturnPoolable(unit);
+            unit.Dispose();
+            //PoolManager.Inst.ReturnPoolable(unit);
         }
         void OnUnitReachDestination(IUnit unit)
         {
@@ -245,7 +248,8 @@ namespace TowerDefense
             while (spawnCount < subWave.count)
             {
                 //GameObject obj = PoolManager.Inst.GetPoolable<IUnit>(subWave.unit.GetComponent<IUnit>()).GameObject;
-                GameObject obj = null;
+               
+                GameObject obj = subWave.unit.GetComponent<IUnit>().Instantiate<ICoreGameObject>().GameObject;
                 UnitEnemy enemy = obj.GetComponent<UnitEnemy>();
                 obj.SetActive(false);
 

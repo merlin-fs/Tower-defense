@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4042246578432668055}
   - component: {fileID: 4042246578432668056}
   - component: {fileID: 1221017879143021908}
-  - component: {fileID: 1616328489840732460}
   m_Layer: 0
   m_Name: SphereTarget
   m_TagString: Untagged
@@ -58,16 +57,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c5284468c00b1c41bc387f219a331b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1616328489840732460
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4042246578432668057}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a43ea50f62fc3b548a026bed5a1440e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  initialPoolCapacity: 10

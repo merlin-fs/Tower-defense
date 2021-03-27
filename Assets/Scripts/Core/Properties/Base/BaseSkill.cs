@@ -25,9 +25,8 @@ namespace TowerDefense.Core
         }
         public override void FillFrom(ISlice other)
         {
-            if (other is BaseSkill)
+            if (other is BaseSkill skill)
             {
-                BaseSkill skill = (other as BaseSkill);
                 m_Effects.Clear();
                 foreach (var effect in skill.m_Effects)
                     m_Effects.Add(effect.Instantiate<IInfluence>());

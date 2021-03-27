@@ -263,7 +263,6 @@ GameObject:
   - component: {fileID: 325249196}
   - component: {fileID: 325249197}
   - component: {fileID: 325249198}
-  - component: {fileID: 325249199}
   m_Layer: 0
   m_Name: Init
   m_TagString: Untagged
@@ -309,20 +308,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bc7ff6a6ce86844081147ce896c5c26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &325249199
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 325249195}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f1b87e06e572234da6953360b2dd225, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Obj:
-    m_Obj: {fileID: 1077008487063983449, guid: f1ecb13aa66064b44b102d71e33b0e9b, type: 3}
 --- !u!1 &616408093
 GameObject:
   m_ObjectHideFlags: 0
@@ -665,7 +650,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SmoothRoute: 1
-  m_Loop: 0
+  m_Loop: 1
   m_EditorVisualisationSubsteps: 100
   m_PointObjects:
     Objects:
@@ -911,17 +896,6 @@ MonoBehaviour:
       m_Skills:
       - id: 1
       - id: 2
-    - unit: {fileID: 1567776943554846, guid: d9fd82344e2924351b3b1a1249acc412, type: 3}
-      count: 10
-      interval: 5
-      delay: 5
-      path:
-        m_Obj: {fileID: 864871049}
-      m_Properties:
-      - id: 0
-      m_Skills:
-      - id: 3
-      - id: 2
     lifeGain: 0
     energyGain: 0
     scoreGain: 100
@@ -952,8 +926,8 @@ MonoBehaviour:
       type: {class: Shooting, ns: TowerDefense, asm: Assembly-CSharp}
       data:
         m_Effects:
-        - id: 4
-        m_View:
+        - id: 3
+        m_ViewPrefab:
           m_Obj: {fileID: 372726054686905086, guid: 4014b05c4d2acf14fb1fc157e47eeb6b,
             type: 3}
         m_TargetterPrefab:
@@ -962,15 +936,6 @@ MonoBehaviour:
         m_SearchRate: 1
         m_EffectRate: 5
     00000003:
-      type: {class: Moving, ns: TowerDefense, asm: Assembly-CSharp}
-      data:
-        m_Effects: []
-        moveSpeed: 5
-        rotateSpeed: 10
-        pointToPointThreshold: 0.05
-        m_ProgressDistance: 0
-        pathDynamicOffset: {x: 0, y: 0, z: 0}
-    00000004:
       type: {class: DamageBase, ns: TowerDefense, asm: Assembly-CSharp}
       data:
         m_DamageView:

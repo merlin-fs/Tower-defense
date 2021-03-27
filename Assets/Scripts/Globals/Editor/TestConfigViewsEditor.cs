@@ -31,8 +31,6 @@ namespace Words.Main.TabloLogicEditor
 
 			EditorGUILayout.Space();
 
-			if (GUILayout.Button("test"))
-				TestConfigViews.Inst.TestInitView();
 		}
 
 		void Update()
