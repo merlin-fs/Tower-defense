@@ -20,6 +20,7 @@ namespace Common.Core.Progress
         float IProgressWritable.SetProgress(float value)
         {
             m_Value = Interlocked.Exchange(ref m_Value, value);
+            m_OnProgressChange?.Invoke(m_Value);
             return m_Value;
         }
 

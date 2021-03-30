@@ -14,8 +14,8 @@ namespace TowerDefense
         [SerializeField]
         private DamageContainer m_DamageView;
 
-        private Health m_Health;
-        private float m_Damage = 1f;
+        //private Health m_Health;
+        //private float m_Damage = 1f;
         public void Apply(IUnit target)
         {
             m_DamageView.Value.UpdateView(target, this, Time.deltaTime);

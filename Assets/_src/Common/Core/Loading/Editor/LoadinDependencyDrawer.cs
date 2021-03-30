@@ -10,7 +10,6 @@ namespace UnityEditor.Inspector
     [CustomPropertyDrawer(typeof(LoadingManager.Dependency))]
     public class LoadinDependencyDrawer : PropertyDrawer
     {
-        private bool m_InitializeFold = false;
         private bool m_Folded = false;
         private const float LINE_HEIGHT = 18;
         private const float SPACING = 4;

@@ -30,7 +30,7 @@ namespace TowerDefense.Targetting
         /// <summary>
         /// Fires when the current target was lost
         /// </summary>
-        public event Action lostTarget;
+        //public event Action lostTarget;
 
         /// <summary>
         /// The transform to point at the target
@@ -154,7 +154,7 @@ namespace TowerDefense.Targetting
             //targetEntersRange = null;
             //targetExitsRange = null;
             //acquiredTarget = null;
-            lostTarget = null;
+            //lostTarget = null;
 
             // Reset turret facing
             if (turret != null)

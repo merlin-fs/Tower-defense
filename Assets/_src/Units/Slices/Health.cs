@@ -12,12 +12,10 @@ namespace TowerDefense.Core
         public float RegenRate = 0;
         public float StaggerDuration = 10;
         public float Value { get; private set; }
-        private float m_CurrentStagger = 0;
         
         public void Init(IUnit unit)
         {
             Value = Default;
-            m_CurrentStagger = 0;
         }
         
         public void Done(IUnit unit) { }

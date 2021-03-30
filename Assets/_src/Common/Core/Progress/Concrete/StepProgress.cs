@@ -8,8 +8,8 @@ namespace Common.Core.Progress
         private bool m_Done;
         private float[] m_Steps;
         private int m_CurrentStep;
+        private float m_Progress;
         private event IProgress.OnProgressChange m_OnProgressChange;
-        private float Progress { get; set; }
         private IProgressWritable Self => this;
 
         private StepProgress()
@@ -52,7 +52,20 @@ namespace Common.Core.Progress
                 res.m_Steps[i] = 1f / count;
             return res;
         }
-        
+
+        private float Progress
+        {
+            get => m_Progress;
+            set 
+            {
+                if (m_Progress != value)
+                {
+                    m_Progress = value;
+                    m_OnProgressChange?.Invoke(m_Progress);
+                }
+            }
+        }
+
         public float NextStep()
         {
             if (m_CurrentStep < m_Steps.Length - 1)
