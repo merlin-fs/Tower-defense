@@ -1,22 +1,34 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace TowerDefense.Core
 {
+    using View;
+
     [System.Serializable]
-    public class Shield : BaseSlice, IProperty
+    public class Shield : BaseProperty<Shield>
     {
-        public float Default = 0;
-        public float RegenRate = 1;
-        public float StaggerDuration = 1;
-        public float Value { get; private set; }
-        //private float m_CurrentStagger = 0;
-        public void Init(IUnit unit)
+        [SerializeField]
+        private float m_Default = 0;
+        [SerializeField]
+        private float m_RegenRate = 1;
+        [SerializeField]
+        private float m_StaggerDuration = 1;
+        [SerializeField]
+        private float m_Value;
+        
+        protected override void Init(IUnit unit)
         {
-            Value = Default;
+            base.Init(unit);
+            m_Value = m_Default;
         }
-        
-        public void Done(IUnit unit) { }
-        
+
+        protected override float GetValue() => m_Value;
+
+        protected override float GetMaxValue() => m_Default;
+
+        protected override float GetMinValue() => 0;
+
         /*
         public void FixedUpdate(Unit unit, float deltaTime)
         {
@@ -28,17 +40,15 @@ namespace TowerDefense.Core
             m_CurrentStagger -= Time.fixedDeltaTime;
         }
         */
-        
-        public void Update(IUnit unit, float deltaTime) { }
-        
+
         public override void FillFrom(ISlice other)
         {
-            if (other is Shield)
+            base.FillFrom(other);
+            if (other is Shield shield)
             {
-                Shield shield = (other as Shield);
-                Default = shield.Default;
-                RegenRate = shield.RegenRate;
-                StaggerDuration = shield.StaggerDuration;
+                m_Default = shield.m_Default;
+                m_RegenRate = shield.m_RegenRate;
+                m_StaggerDuration = shield.m_StaggerDuration;
             }
         }
     }

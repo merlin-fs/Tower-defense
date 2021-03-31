@@ -50,18 +50,21 @@ namespace UnityEditor.Inspector
                 m_InitializeFold = true;
             }
 
-            string path = GetMonoScriptPathFor(currentObjectType);
-            Rect buttonPosition = new Rect(indentedRect)
+            if (currentObjectType != null)
             {
-                width = 55,
-                x = indentedRect.x + indentedRect.width - 55,
-                height = EditorGUIUtility.singleLineHeight,
-            };
+                string path = GetMonoScriptPathFor(currentObjectType);
+                Rect buttonPosition = new Rect(indentedRect)
+                {
+                    width = 55,
+                    x = indentedRect.x + indentedRect.width - 55,
+                    height = EditorGUIUtility.singleLineHeight,
+                };
 
-            if (GUI.Button(buttonPosition, "edit"))
-            {
-                var texturePath = AssetDatabase.LoadMainAssetAtPath(path);
-                AssetDatabase.OpenAsset(texturePath);
+                if (GUI.Button(buttonPosition, "edit"))
+                {
+                    var texturePath = AssetDatabase.LoadMainAssetAtPath(path);
+                    AssetDatabase.OpenAsset(texturePath);
+                }
             }
             EditorGUI.PropertyField(indentedRect, property, label, true);
         }

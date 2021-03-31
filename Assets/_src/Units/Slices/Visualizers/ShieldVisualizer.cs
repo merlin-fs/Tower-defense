@@ -9,13 +9,8 @@ namespace TowerDefense
     /// <summary>
     /// Class to visualizer the health of a damageable
     /// </summary>
-    public class ShieldVisualizer : BaseVisualizer<Health>
+    public class ShieldVisualizer : BaseVisualizer<Shield>
     {
-        /// <summary>
-        /// The DamageableBehaviour that will be used to assign the damageable
-        /// </summary>
-        //[Tooltip("This field does not need to be populated here, it can be set up in code using AssignDamageable")]
-        //public DamageableBehaviour damageableBehaviour;
         /// <summary>
         /// Основной объект-контейнер, в котором находится прогресс
         /// </summary>
@@ -23,7 +18,7 @@ namespace TowerDefense
         /// <summary>
         /// Объект - полоса жизни
         /// </summary>
-        public Transform healthBar;
+        public Transform bar;
         /// <summary>
         /// The object whose X-scale we change to increase the health bar background. Should have a default uniform scale
         /// </summary>
@@ -54,10 +49,10 @@ namespace TowerDefense
         {
             Vector3 scale = Vector3.one;
 
-            if (healthBar != null)
+            if (bar != null)
             {
                 scale.x = normalizedHealth;
-                healthBar.transform.localScale = scale;
+                bar.transform.localScale = scale;
             }
 
             if (backgroundBar != null)

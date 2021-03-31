@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-using St.Common.Core;
+using Common.Core;
 
 namespace TowerDefense.Core.View
 {
@@ -21,7 +21,10 @@ namespace TowerDefense.Core.View
         #region ICoreObjectInstantiate
         ICoreObjectInstantiate ICoreObjectInstantiate.Instantiate()
         {
-            return Instantiate(gameObject).GetComponent<RootVisualizer>();
+            return this.gameObject.IsPrefab()
+                ? Instantiate(gameObject).GetComponent<RootVisualizer>()
+                : gameObject.GetComponent<RootVisualizer>();
+
         }
 
         T ICoreObjectInstantiate.Instantiate<T>()
@@ -33,7 +36,8 @@ namespace TowerDefense.Core.View
 
         void IDisposable.Dispose()
         {
-            Destroy(gameObject);
+            if (this.gameObject.IsPrefab())
+                Destroy(gameObject);
         }
         #endregion
         #region  ISliceVisualizer

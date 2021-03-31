@@ -576,22 +576,10 @@ MonoBehaviour:
             id: 1
           Dependency:
             m_CommandsIndex: 
-        - Command:
-            id: 2
-          Dependency:
-            m_CommandsIndex: 0000000002000000
-        - Command:
-            id: 3
-          Dependency:
-            m_CommandsIndex: 
     00000001:
-      type: {class: TestCommand2, ns: Game.Loading, asm: Assembly-CSharp}
-    00000002:
       type: {class: LoadScene, ns: Game.Loading, asm: Assembly-CSharp}
       data:
         m_Scene: Game
-    00000003:
-      type: {class: TestCommand1, ns: Game.Loading, asm: Assembly-CSharp}
 --- !u!4 &753144009
 Transform:
   m_ObjectHideFlags: 0

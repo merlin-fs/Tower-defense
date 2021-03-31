@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using St.Common.Core;
+using Common.Core;
 
 namespace TowerDefense.Core
 {
@@ -10,6 +10,9 @@ namespace TowerDefense.Core
 
     public interface IUnit: ICoreGameObjectInstantiate
     {
+        void Init();
+        void Done();
+
         IReadOnlyCollection<IProperty> Properties { get; }
         IReadOnlyCollection<ISkill> Skills { get; }
         IReadOnlyCollection<IInfluence> Influences { get; }
@@ -31,6 +34,10 @@ namespace TowerDefense.Core
     }
 
 
+    [Serializable]
+    public class UnitContainer : TypedContainer<IUnit> { }
+
+
     public class Unit : MonoBehaviour, IUnit
     {
         public delegate void DamagedHandler(IUnit unit);
@@ -40,7 +47,6 @@ namespace TowerDefense.Core
         private HashSet<IProperty> m_Properties = new HashSet<IProperty>();
         private HashSet<ISkill> m_Skills = new HashSet<ISkill>();
         private List<IInfluence> m_Influences = new List<IInfluence>();
-        private IViewManager m_ViewManager = new ViewManager();
 
         public static event DestroyedHandler OnDestroyed;
 
@@ -59,8 +65,18 @@ namespace TowerDefense.Core
 
         protected LayerMask maskTarget = 0;
 
-        IUnit Self => this;
+        protected IUnit Self => this;
         #region IUnit
+        void IUnit.Init()
+        {
+            Init();
+        }
+
+        void IUnit.Done()
+        {
+            Done();
+        }
+
         IReadOnlyCollection<IProperty> IUnit.Properties => m_Properties;
         IReadOnlyCollection<ISkill> IUnit.Skills => m_Skills;
         IReadOnlyCollection<IInfluence> IUnit.Influences => m_Influences;
@@ -120,13 +136,8 @@ namespace TowerDefense.Core
             foreach (T slice in list)
                 (slice as ISliceInit)?.Init(this);
         }
-
-        public virtual void Awake()
-        {
-
-        }
         
-        public virtual void Init()
+        protected virtual void Init()
         {
             IsDead = false;
             InitSlice(m_Properties);
@@ -134,19 +145,11 @@ namespace TowerDefense.Core
             ClearInfluences();
         }
 
-        public virtual void Start()
+        protected virtual void Done()
         {
         }
 
-        public virtual void OnEnable()
-        {
-        }
-
-        public virtual void OnDisable()
-        {
-        }
-
-        public virtual void Update()
+        private void Update()
         {
             foreach (var prop in m_Properties)
                 prop.Update(this, Time.deltaTime);

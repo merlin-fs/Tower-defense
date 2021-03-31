@@ -138,6 +138,7 @@ GameObject:
   - component: {fileID: 266321873}
   - component: {fileID: 266321877}
   - component: {fileID: 266321878}
+  - component: {fileID: 266321879}
   m_Layer: 9
   m_Name: Tesseract
   m_TagString: target
@@ -219,6 +220,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 616408094}
+  - {fileID: 1295744195}
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -252,6 +254,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4a4d71a48d47094f9ae46c2cac6e6de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &266321879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266321872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 840ba85d53746ab49bb66947d50b6d5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Properties:
+  - id: 0
+  - id: 1
+  m_Skills:
+  - id: 2
+  references:
+    version: 1
+    00000000:
+      type: {class: Health, ns: TowerDefense.Core, asm: Assembly-CSharp}
+      data:
+        m_View:
+          m_Obj: {fileID: 1295744194}
+        m_Default: 10
+        m_RegenRate: 0
+        m_StaggerDuration: 10
+        m_Value: 0
+    00000001:
+      type: {class: Shield, ns: TowerDefense.Core, asm: Assembly-CSharp}
+      data:
+        m_View:
+          m_Obj: {fileID: 1295744196}
+        m_Default: 10
+        m_RegenRate: 1
+        m_StaggerDuration: 1
+        m_Value: 0
+    00000002:
+      type: {class: Moving, ns: TowerDefense, asm: Assembly-CSharp}
+      data:
+        m_Effects: []
+        moveSpeed: 3
+        rotateSpeed: 10
+        pointToPointThreshold: 0.05
+        m_ProgressDistance: 0
+        pathDynamicOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &325249195
 GameObject:
   m_ObjectHideFlags: 0
@@ -782,6 +830,110 @@ Transform:
   m_Father: {fileID: 864871048}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1295744193
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 266321876}
+    m_Modifications:
+    - target: {fileID: 166212834725098956, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.00002
+      objectReference: {fileID: 0}
+    - target: {fileID: 6260239059901488471, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6260239059901488471, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6260239059901488471, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6260239059901488471, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6260239059901488471, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 6260239059901488471, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 6260239059901488471, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6260239059901488471, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6260239059901488471, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 6260239059901488471, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6260239059901488471, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265918726068169427, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+        type: 3}
+      propertyPath: m_Name
+      value: HealthBar
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f1ecb13aa66064b44b102d71e33b0e9b, type: 3}
+--- !u!114 &1295744194 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8557182520414039348, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1295744193}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67b8a9f1c389bc04b9b80e98f17e253e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1295744195 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6260239059901488471, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1295744193}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1295744196 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3415652037408461601, guid: f1ecb13aa66064b44b102d71e33b0e9b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1295744193}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d61ab3aaf7b54184991aa24ff0294924, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1333407300
 GameObject:
   m_ObjectHideFlags: 0
@@ -896,16 +1048,6 @@ MonoBehaviour:
       m_Skills:
       - id: 1
       - id: 2
-    - unit: {fileID: 1567776943554846, guid: d9fd82344e2924351b3b1a1249acc412, type: 3}
-      count: 10
-      interval: 5
-      delay: 0
-      path:
-        m_Obj: {fileID: 864871049}
-      m_Properties:
-      - id: 0
-      m_Skills:
-      - id: 3
     lifeGain: 0
     energyGain: 0
     scoreGain: 100
@@ -920,9 +1062,12 @@ MonoBehaviour:
     00000000:
       type: {class: Health, ns: TowerDefense.Core, asm: Assembly-CSharp}
       data:
-        Default: 10
-        RegenRate: 0
-        StaggerDuration: 10
+        m_View:
+          m_Obj: {fileID: 0}
+        m_Default: 10
+        m_RegenRate: 0
+        m_StaggerDuration: 10
+        m_Value: 0
     00000001:
       type: {class: Moving, ns: TowerDefense, asm: Assembly-CSharp}
       data:
@@ -936,7 +1081,7 @@ MonoBehaviour:
       type: {class: Shooting, ns: TowerDefense, asm: Assembly-CSharp}
       data:
         m_Effects:
-        - id: 4
+        - id: 3
         m_ViewPrefab:
           m_Obj: {fileID: 372726054686905086, guid: 4014b05c4d2acf14fb1fc157e47eeb6b,
             type: 3}
@@ -944,17 +1089,8 @@ MonoBehaviour:
           m_Obj: {fileID: 1221017879143021908, guid: b667a6159a130f048a9787eda8923103,
             type: 3}
         m_SearchRate: 1
-        m_EffectRate: 5
+        m_EffectRate: 7
     00000003:
-      type: {class: Moving, ns: TowerDefense, asm: Assembly-CSharp}
-      data:
-        m_Effects: []
-        moveSpeed: 8
-        rotateSpeed: 10
-        pointToPointThreshold: 0.05
-        m_ProgressDistance: 0
-        pathDynamicOffset: {x: 0, y: 0, z: 0}
-    00000004:
       type: {class: DamageBase, ns: TowerDefense, asm: Assembly-CSharp}
       data:
         m_DamageView:

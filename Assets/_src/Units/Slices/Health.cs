@@ -1,46 +1,53 @@
 ﻿using System;
-
 using UnityEngine;
 
 namespace TowerDefense.Core
 {
+    using View;
 
     [Serializable]
-    public class Health : BaseSlice, IProperty
+    public class Health : BaseProperty<Health>
     {
-        public float Default = 10;
-        public float RegenRate = 0;
-        public float StaggerDuration = 10;
-        public float Value { get; private set; }
-        
-        public void Init(IUnit unit)
+        [SerializeField]
+        public float m_Default = 10;
+        [SerializeField]
+        public float m_RegenRate = 0;
+        [SerializeField]
+        public float m_StaggerDuration = 10;
+        [SerializeField]
+        private float m_Value;
+        protected override void Init(IUnit unit)
         {
-            Value = Default;
+            base.Init(unit);
+            m_Value = m_Default - 5;
         }
-        
-        public void Done(IUnit unit) { }
 
-/*        
-        public void FixedUpdate(Unit unit, float deltaTime)
-        {
-            if (Default > 0 && RegenRate > 0 && m_CurrentStagger <= 0)
-            {
-                Value += RegenRate * Time.fixedDeltaTime;
-                Value = Mathf.Clamp(Value, 0, Default);
-            }
-            m_CurrentStagger -= Time.fixedDeltaTime;
-        }
-*/        
-        public void Update(IUnit unit, float deltaTime) { }
+        protected override float GetValue() => m_Value;
+
+        protected override float GetMaxValue() => m_Default;
+
+        protected override float GetMinValue() => 0;
+
+        /*        
+                public void FixedUpdate(Unit unit, float deltaTime)
+                {
+                    if (Default > 0 && RegenRate > 0 && m_CurrentStagger <= 0)
+                    {
+                        Value += RegenRate * Time.fixedDeltaTime;
+                        Value = Mathf.Clamp(Value, 0, Default);
+                    }
+                    m_CurrentStagger -= Time.fixedDeltaTime;
+                }
+        */
         
         public override void FillFrom(ISlice other)
         {
-            if (other is Health)
+            base.FillFrom(other);
+            if (other is Health health)
             {
-                var health = (other as Health);
-                Default = health.Default;
-                RegenRate = health.RegenRate;
-                StaggerDuration = health.StaggerDuration;
+                m_Default = health.m_Default;
+                m_RegenRate = health.m_RegenRate;
+                m_StaggerDuration = health.m_StaggerDuration;
             }
         }
     }

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace TowerDefense.Core.View
 {
 
-    [RequireComponent(typeof(RootVisualizer))]
+    //[RequireComponent(typeof(RootVisualizer))]
     public abstract class BaseVisualizer<I> : MonoBehaviour, ISliceVisualizer<I>
         where I: ISlice
     {

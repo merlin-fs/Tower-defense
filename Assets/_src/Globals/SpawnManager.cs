@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using St.Common.Core;
+using Common.Core;
 
 
 namespace TowerDefense
@@ -248,12 +248,10 @@ namespace TowerDefense
             while (spawnCount < subWave.count)
             {
                 //GameObject obj = PoolManager.Inst.GetPoolable<IUnit>(subWave.unit.GetComponent<IUnit>()).GameObject;
-               
-                GameObject obj = subWave.unit.GetComponent<IUnit>().Instantiate<ICoreGameObject>().GameObject;
-                UnitEnemy enemy = obj.GetComponent<UnitEnemy>();
-                obj.SetActive(false);
 
-                IUnit unit = enemy;
+                IUnit unit = subWave.unit.GetComponent<IUnit>().Instantiate<IUnit>();
+                UnitEnemy enemy = unit.GameObject.GetComponent<UnitEnemy>();
+                unit.GameObject.SetActive(false);
 
                 foreach (var prop in subWave.Properties)
                     unit.AddProperty(prop.Instantiate<IProperty>());
@@ -261,11 +259,10 @@ namespace TowerDefense
                 foreach (var skill in subWave.Skills)
                     unit.AddSkill(skill.Instantiate<ISkill>());
 
-
                 enemy.SubWave = subWave;
-                enemy.Init();
+                unit.Init();
 
-                obj.SetActive(true);
+                unit.GameObject.SetActive(true);
                 totalSpawnCount++;
                 activeUnitCount++;
                 parentWave.activeUnitCount++;

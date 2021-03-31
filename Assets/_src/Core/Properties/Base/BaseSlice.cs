@@ -1,12 +1,15 @@
 ﻿using System;
-using St.Common.Core;
+using Common.Core;
 
 namespace TowerDefense.Core
 {
+    using View;
+
     [System.Serializable]
-    public abstract class BaseSlice : ISlice
+    public abstract class BaseSlice: ISlice
     {
         protected ISlice Self => this;
+        
         T ICoreObjectInstantiate.Instantiate<T>()
         {
             ISlice slice = (ISlice)System.Activator.CreateInstance(GetType());
@@ -23,4 +26,5 @@ namespace TowerDefense.Core
 
         public abstract void FillFrom(ISlice other);
     }
+
 }

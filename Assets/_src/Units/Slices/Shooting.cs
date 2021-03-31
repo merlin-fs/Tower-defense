@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using St.Common.Core;
+using Common.Core;
 using TowerDefense.Core;
 using UnityEngine;
 
@@ -36,7 +36,7 @@ namespace TowerDefense
         private ITargetProvider m_Targetter;
         private IUnit m_CurrrentTargetable;
         private IUnit m_Unit;
-        private IRootVisualizer m_View;
+        private ISliceVisualizer m_View;
 
         public override void Init(IUnit unit)
         {
@@ -53,7 +53,7 @@ namespace TowerDefense
             m_Targetter.GameObject.transform.localScale = Vector3.one;
             m_Targetter.OnTargetEnterRange += OnTargetEnterRange;
 
-            m_View = m_ViewPrefab?.Value?.Instantiate() as IRootVisualizer;
+            m_View = m_ViewPrefab?.Value?.Instantiate() as ISliceVisualizer;
 
             if (m_Targetter is ITargetProviderDesign design)
                 design.OnTargetDrawGizmos += OnTargetDrawGizmos;
@@ -67,7 +67,7 @@ namespace TowerDefense
                 m_ViewPrefab = shooting.m_ViewPrefab;
                 m_TargetterPrefab = shooting.m_TargetterPrefab;
                 m_SearchRate = shooting.m_SearchRate;
-                m_EffectRate = shooting.m_SearchRate;
+                m_EffectRate = shooting.m_EffectRate;
             }
         }
 
@@ -88,7 +88,8 @@ namespace TowerDefense
                 design.OnTargetDrawGizmos += OnTargetDrawGizmos; 
             m_Targetter.OnTargetEnterRange -= OnTargetEnterRange;
             m_Targetter.Dispose();
-            (m_View as IDisposable).Dispose();
+            if (m_View is IDisposable disposable)
+                disposable.Dispose();
         }
 
         public override void Update(IUnit unit, float deltaTime)
