@@ -886,7 +886,7 @@ MonoBehaviour:
   - waveID: -1
     subWaveList:
     - unit: {fileID: 1300474929184216, guid: 0dba493688cc24e6ebe9988434057079, type: 3}
-      count: 10
+      count: 2
       interval: 5
       delay: 0
       path:
