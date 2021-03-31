@@ -1,8 +1,10 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
+ 
 
 namespace UnityEditor.Inspector
 {
@@ -20,7 +22,10 @@ namespace UnityEditor.Inspector
             SubclassSelectorAttribute utility = (SubclassSelectorAttribute)attribute;
             LazyGetAllInheritedType(utility.FieldType);
 
+            var indentedRect = EditorGUI.IndentedRect(position);
             Rect popupPosition = GetPopupPosition(position);
+            popupPosition.width -= 60;
+
             string[] typePopupNameArray = m_ReflectionType.Select(type => type == null ? "<null>" : type.ToString()).ToArray();
             string[] typeFullNameArray = m_ReflectionType.Select(type => type == null ? "" : string.Format("{0} {1}", type.Assembly.ToString().Split(',')[0], type.FullName)).ToArray();
 
@@ -44,9 +49,52 @@ namespace UnityEditor.Inspector
                 property.isExpanded = false;
                 m_InitializeFold = true;
             }
-            EditorGUI.PropertyField(position, property, label, true);
+
+            string path = GetMonoScriptPathFor(currentObjectType);
+            Rect buttonPosition = new Rect(indentedRect)
+            {
+                width = 55,
+                x = indentedRect.x + indentedRect.width - 55,
+                height = EditorGUIUtility.singleLineHeight,
+            };
+
+            if (GUI.Button(buttonPosition, "edit"))
+            {
+                var texturePath = AssetDatabase.LoadMainAssetAtPath(path);
+                AssetDatabase.OpenAsset(texturePath);
+            }
+            EditorGUI.PropertyField(indentedRect, property, label, true);
         }
 
+
+        private static string GetMonoScriptPathFor(Type type)
+        {
+            var asset = "";
+            var guids = AssetDatabase.FindAssets(string.Format("{0} t:script", type.Name));
+            if (guids.Length > 1)
+            {
+                foreach (var guid in guids)
+                {
+                    var assetPath = AssetDatabase.GUIDToAssetPath(guid);
+                    var filename = Path.GetFileNameWithoutExtension(assetPath);
+                    if (filename == type.Name)
+                    {
+                        asset = guid;
+                        break;
+                    }
+                }
+            }
+            else if (guids.Length == 1)
+            {
+                asset = guids[0];
+            }
+            else
+            {
+                Debug.LogErrorFormat("Unable to locate {0}", type.Name);
+                return null;
+            }
+            return AssetDatabase.GUIDToAssetPath(asset);
+        }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
