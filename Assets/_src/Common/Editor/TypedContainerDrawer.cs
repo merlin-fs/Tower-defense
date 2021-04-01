@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
-using UnityEditor;
 using UnityEngine;
 
-namespace System.Inspector
+namespace UnityEditor.Inspector
 {
 	[CustomPropertyDrawer(typeof(ATypedContainer), true)]
 	public class TypedContainerClassDrawer : PropertyDrawer

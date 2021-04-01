@@ -1,6 +1,6 @@
 using System;
 
-namespace Common.Core.Loading
+namespace St.Common.Core.Loading
 {
     public interface ILoadingCommand
     {

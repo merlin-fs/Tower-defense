@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Common.Core.Progress
+namespace St.Common.Core.Progress
 {
     public class MultiProgress : IProgressWritable
     {

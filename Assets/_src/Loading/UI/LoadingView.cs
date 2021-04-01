@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Common.Core;
 using TMPro;
+using St.Common.Core;
 
 
 namespace Game.Loading.View
@@ -27,7 +25,7 @@ namespace Game.Loading.View
         // Update is called once per frame
         void Update()
         {
-            float progress = Core.Inst.Loading?.Progress.Value ?? 0;
+            float progress = Root.Inst.Loading?.Progress.Value ?? 0;
             m_Progress.fillAmount = progress;
             float x = m_Progress.GetComponent<RectTransform>().rect.width * progress;
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Common.Core.Loading
+namespace St.Common.Core.Loading
 {
     using Progress;
 

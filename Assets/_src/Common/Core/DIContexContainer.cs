@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Common.Core
+namespace St.Common.Core
 {
     public interface IDIContextContainer
     {

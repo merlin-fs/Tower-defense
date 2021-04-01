@@ -1,8 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
-using Common.Core.Loading;
+using St.Common.Core.Loading;
 
 namespace Game.Loading
 {

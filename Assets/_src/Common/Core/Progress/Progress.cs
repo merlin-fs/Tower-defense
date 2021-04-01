@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Common.Core.Progress
+namespace St.Common.Core.Progress
 {
     public interface IProgress
     {

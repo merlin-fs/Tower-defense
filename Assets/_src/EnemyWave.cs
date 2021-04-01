@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using UnityEngine;
 
-namespace TowerDefense
+namespace Game
 {
     using Core;
-    using Core.View;
+    using Entities;
 
     [Serializable]
     public class WaypointsContainer : TypedContainer<IWaypoints> { }

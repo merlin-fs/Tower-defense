@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace St.Common
+namespace St.Common.Core.DI
 {
     public interface IDIContext
     {

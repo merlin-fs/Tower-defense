@@ -1,12 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Common.Core;
 
-
-namespace TowerDefense.Units
+namespace Game.Entities
 {
-    using Core;
 
     public class SpawnUnit : MonoBehaviour
     {

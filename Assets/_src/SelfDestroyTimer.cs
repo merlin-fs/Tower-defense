@@ -1,10 +1,9 @@
-﻿using TowerDefense.Core;
-
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
-namespace TowerDefense
+namespace Game
 {
+    using Core;
     /// <summary>
     /// A helper component for self destruction
     /// </summary>

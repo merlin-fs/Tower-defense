@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace Common.Core.Progress
+namespace St.Common.Core.Progress
 {
     public sealed class SimpleProgress : IProgressWritable
     {

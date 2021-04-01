@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
-
 namespace UnityEditor.Inspector
 {
     [CustomPropertyDrawer(typeof(SceneSelectorFieldAttribute))]

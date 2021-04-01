@@ -1,7 +1,7 @@
 
 namespace Game.Loading
 {
-    public class LoadingManager: Common.Core.Loading.LoadingManager
+    public class LoadingManager: St.Common.Core.Loading.LoadingManager
     {
         
     }

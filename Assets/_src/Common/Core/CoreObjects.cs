@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Common.Core
+namespace St.Common.Core
 {
     public interface ICoreObject
     {
