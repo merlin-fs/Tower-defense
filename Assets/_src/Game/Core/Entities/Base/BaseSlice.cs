@@ -22,7 +22,12 @@ namespace Game.Entities
             return Self.Instantiate<ICoreObjectInstantiate>();
         }
 
-        void IDisposable.Dispose() { }
+        public event Action<ICoreDisposable> OnDispose;
+        
+        void ICoreDisposable.Dispose() 
+        {
+            OnDispose?.Invoke(this);
+        }
 
         public abstract void FillFrom(ISlice other);
     }

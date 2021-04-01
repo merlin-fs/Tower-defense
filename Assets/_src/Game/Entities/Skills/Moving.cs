@@ -90,7 +90,7 @@ namespace Game.Entities
         private void ReachDestination(IUnit unit)
         {
             var target = GameObject.FindObjectOfType<UserBase>();
-            ApplyEffects(target);
+            ApplyEffects(unit, target);
             OnDestination?.Invoke(unit);
             if (m_Path.Loop)
             {

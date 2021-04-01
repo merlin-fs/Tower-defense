@@ -39,6 +39,10 @@ namespace Game.Entities
         }
         */
 
+        protected override void OnDamage(IUnit sender)
+        {
+        }
+
         public override void FillFrom(ISlice other)
         {
             base.FillFrom(other);

@@ -1,10 +1,9 @@
 using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using St.Common.Core;
+using St.Common.Core.Loading;
 
-namespace St.Common.Core
-{
-    using Loading;
 
     public interface IRoot
     {
@@ -12,6 +11,7 @@ namespace St.Common.Core
 
         event Action OnReloadGame;
     }
+
 
     public class Root : MonoBehaviour, IRoot
     {
@@ -83,10 +83,9 @@ namespace St.Common.Core
             m_Loading?.Start();
         }
 
-        #region ICore
+        #region IRoot
         ILoadingManager IRoot.Loading => m_Loading;
 
         public event Action OnReloadGame;
         #endregion
     }
-}

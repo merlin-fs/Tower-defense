@@ -12,7 +12,13 @@ namespace St.Common.Core
         GameObject GameObject { get; }
     }
 
-    public interface ICoreObjectInstantiate : ICoreObject, IDisposable
+    public interface ICoreDisposable
+    {
+        event Action<ICoreDisposable> OnDispose;
+        void Dispose();
+    }
+
+    public interface ICoreObjectInstantiate : ICoreObject, ICoreDisposable
     {
         ICoreObjectInstantiate Instantiate();
         T Instantiate<T>() where T : ICoreObject;

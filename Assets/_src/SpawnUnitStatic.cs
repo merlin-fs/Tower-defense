@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using St.Common.Core;
 
 namespace Game
 {
@@ -19,7 +20,13 @@ namespace Game
 
         private void Start()
         {
+            Restart();
+        }
+
+        private void Restart()
+        {
             IUnit unit = GetComponent<IUnit>();
+            unit.OnDispose += OnDeadTarget;
 
             foreach (var iter in Properties)
                 unit.AddProperty(iter.Instantiate<IProperty>());
@@ -29,6 +36,12 @@ namespace Game
             unit.Init();
 
             unit.GameObject.SetActive(true);
+        }
+
+        private void OnDeadTarget(ICoreDisposable disposable)
+        {
+            IUnit unit = GetComponent<IUnit>();
+            unit.Instantiate();
         }
     }
 }

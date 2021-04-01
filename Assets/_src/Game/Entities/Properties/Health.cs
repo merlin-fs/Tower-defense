@@ -17,7 +17,7 @@ namespace Game.Entities
         protected override void Init(IUnit unit)
         {
             base.Init(unit);
-            m_Value = m_Default - 5;
+            m_Value = m_Default;
         }
 
         protected override float GetValue() => m_Value;
@@ -38,6 +38,12 @@ namespace Game.Entities
                 }
         */
         
+        protected override void OnDamage(IUnit sender)
+        {
+            if ((this as IProperty).Value <= 0)
+                Owner.SetDead(0);
+        }
+
         public override void FillFrom(ISlice other)
         {
             base.FillFrom(other);

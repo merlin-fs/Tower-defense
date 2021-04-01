@@ -49,6 +49,7 @@ namespace Game.Entities
             m_Targetter.GameObject.transform.localPosition = Vector3.zero;
             m_Targetter.GameObject.transform.localScale = Vector3.one;
             m_Targetter.OnTargetEnterRange += OnTargetEnterRange;
+            m_Targetter.OnTargetExitRange += OnTargetExitRange;
 
             m_View = m_ViewPrefab?.Value?.Instantiate() as ISliceVisualizer;
 
@@ -79,6 +80,13 @@ namespace Game.Entities
 
         }
 
+        private void OnTargetExitRange(ITargetable targetable)
+        {
+            var unit = targetable.GameObject.GetComponent<IUnit>();
+            if (m_CurrrentTargetable == unit)
+                m_CurrrentTargetable = null;
+        }
+
         public override void Done(IUnit unit) 
         {
             if (m_Targetter is ITargetProviderDesign design)
@@ -106,7 +114,7 @@ namespace Game.Entities
             if (m_EffectTimer <= 0.0f && m_CurrrentTargetable != null)
             {
                 m_View?.UpdateView(m_Unit, this, deltaTime);
-                ApplyEffects(m_CurrrentTargetable);
+                ApplyEffects(m_Unit, m_CurrrentTargetable);
                 m_EffectTimer = m_EffectRate;
             }
         }

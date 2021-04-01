@@ -29,6 +29,6 @@ namespace Game.Entities
         /// «начение должно быть расчитано в соответствии с Absorb и Resist
         /// </summary>
         /// <param name="value"></param>
-        void AddDamage(float value);
+        void AddDamage(IUnit sender, float value);
     }
 }

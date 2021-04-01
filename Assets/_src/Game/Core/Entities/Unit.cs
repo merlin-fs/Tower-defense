@@ -90,6 +90,9 @@ namespace Game.Entities
 
         void IUnit.SetDead(float delay)
         {
+            if (IsDead)
+                return;
+
             IsDead = true;
             //if (deadEffectObj != null)
             //    ObjectPoolManager.Spawn(deadEffectObj, GetTargetT().position, thisT.rotation);
@@ -114,8 +117,12 @@ namespace Game.Entities
         {
             return Self.Instantiate<ICoreObjectInstantiate>();
         }
-        void IDisposable.Dispose()
+
+        public event Action<ICoreDisposable> OnDispose;
+
+        void ICoreDisposable.Dispose()
         {
+            OnDispose?.Invoke(this);
             Destroy(gameObject);
         }
         #endregion

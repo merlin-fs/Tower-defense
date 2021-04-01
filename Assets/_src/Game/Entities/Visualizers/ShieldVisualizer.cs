@@ -35,7 +35,8 @@ namespace Game.Entities.View
 
         protected override void UpdateView(IUnit unit, ISlice slice, float deltaTime)
         {
-
+            if (slice is IProperty prop)
+                UpdateHealth(prop.Value);
         }
         /// <summary>
         /// Updates the visualization of the health

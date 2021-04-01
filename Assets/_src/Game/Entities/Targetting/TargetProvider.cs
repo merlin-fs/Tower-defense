@@ -11,7 +11,7 @@ namespace Game.Entities
         event Action OnTargetDrawGizmos;
     }
 
-    public interface ITargetProvider : ICoreGameObjectInstantiate, IDisposable
+    public interface ITargetProvider : ICoreGameObjectInstantiate
     {
         event Action<ITargetable> OnTargetEnterRange;
         event Action<ITargetable> OnTargetExitRange;
@@ -53,6 +53,9 @@ namespace Game.Entities
             if (!m_Targetables.Contains(targetable) && targetable != null)
             {
                 m_Targetables.Add(targetable);
+                ICoreDisposable dispose = targetable.GameObject.GetComponent<ICoreDisposable>();
+                if (dispose != null)
+                    dispose.OnDispose += OnDeadTarget;
                 OnTargetEnterRange?.Invoke(targetable);
             }
         }
@@ -62,6 +65,16 @@ namespace Game.Entities
             var targetable = other.GetComponent<ITargetable>();
             if (m_Targetables.Contains(targetable))
             {
+                m_Targetables.Remove(targetable);
+                OnTargetExitRange?.Invoke(targetable);
+            }
+        }
+
+        private void OnDeadTarget(ICoreDisposable disposable)
+        {
+            if (disposable is ICoreGameObject obj)
+            {
+                var targetable = obj.GameObject.GetComponent<ITargetable>();
                 m_Targetables.Remove(targetable);
                 OnTargetExitRange?.Invoke(targetable);
             }
@@ -88,10 +101,12 @@ namespace Game.Entities
         #region ICoreGameObject
         GameObject ICoreGameObject.GameObject => gameObject;
         #endregion
-        #region IDisposable
-        void IDisposable.Dispose()
-        {
+        #region ICoreDisposable
+        public event Action<ICoreDisposable> OnDispose;
 
+        void ICoreDisposable.Dispose()
+        {
+            OnDispose?.Invoke(this);
         }
         #endregion
     }

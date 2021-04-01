@@ -34,8 +34,10 @@ namespace Game.Entities.View
 
         GameObject ICoreGameObject.GameObject => gameObject;
 
-        void IDisposable.Dispose()
+        public event Action<ICoreDisposable> OnDispose;
+        void ICoreDisposable.Dispose()
         {
+            OnDispose?.Invoke(this);
             if (this.gameObject.IsPrefab())
                 Destroy(gameObject);
         }

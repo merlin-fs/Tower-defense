@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Game.Entities
 {
+    using Core;
     using View;
 
     public class DamageBase : BaseSlice, IInfluence
@@ -14,15 +15,18 @@ namespace Game.Entities
         private class DamageContainer : TypedContainer<ISliceVisualizer<IInfluence>> { }
         [SerializeField]
         private DamageContainer m_DamageView;
+        private IDamageManager DamageManager => Root.Get<IDamageManager>();
 
+        #region IInfluence
         IReadOnlyCollection<IDamage> IInfluence.Damages => m_Damages;
 
-        public void Apply(IUnit target)
+        void IInfluence.Apply(IUnit sender, IUnit target)
         {
-
+            foreach (var iter in m_Damages)
+                DamageManager.Damage(sender, target, iter);
             m_DamageView.Value.UpdateView(target, this, Time.deltaTime);
         }
-
+        #endregion
         public void Done(IUnit unit)
         {
             unit.RemoveInfluence(this);

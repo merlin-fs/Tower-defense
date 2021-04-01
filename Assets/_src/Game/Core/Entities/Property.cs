@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using St.Common.Core;
 
 namespace Game.Entities
 {
@@ -31,6 +32,7 @@ namespace Game.Entities
         private List<IDamage> m_Resists = new List<IDamage>();
 
         private float m_Damage;
+        protected IUnit Owner { get; private set; }
 
         protected ISliceVisualizer<T> View => m_View.Value;
 
@@ -38,13 +40,15 @@ namespace Game.Entities
         IReadOnlyCollection<IDamage> IDamaged.Absorb => m_Absorbs;
 
         IReadOnlyCollection<IDamage> IDamaged.Resist => m_Resists;
-        void IDamaged.AddDamage(float value)
+
+        void IDamaged.AddDamage(IUnit sender, float value)
         {
             m_Damage += value;
+            OnDamage(sender);
         }
         #endregion
 
-        #region  IProperty
+        #region IProperty
         float IProperty.Value => Mathf.InverseLerp(GetMinValue(), GetMaxValue(), GetValue() - m_Damage);
         #endregion
         #region  ISliceUpdate
@@ -60,6 +64,8 @@ namespace Game.Entities
             if (other is BaseProperty<T> prop)
             {
                 m_View = prop.m_View;
+                m_Absorbs = new List<IDamage>(prop.m_Absorbs);
+                m_Resists = new List<IDamage>(prop.m_Resists);
             }
         }
 
@@ -68,15 +74,17 @@ namespace Game.Entities
         protected abstract float GetMaxValue();
         
         protected abstract float GetMinValue();
-        
+
+        protected abstract void OnDamage(IUnit sender);
+
         protected virtual void Init(IUnit unit)
         {
-
+            Owner = unit;
         }
         
         protected virtual void Done(IUnit unit)
         {
-            if (m_View is IDisposable disposable)
+            if (m_View is ICoreDisposable disposable)
                 disposable.Dispose();
         }
 
