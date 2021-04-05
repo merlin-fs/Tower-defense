@@ -13,6 +13,7 @@ namespace Game.Entities
     public interface IProperty : ISlice, ISliceInit, ISliceUpdate, IDamaged
     {
         float Value { get; }
+        float Normalize { get; }
     }
 
 
@@ -49,7 +50,8 @@ namespace Game.Entities
         #endregion
 
         #region IProperty
-        float IProperty.Value => Mathf.InverseLerp(GetMinValue(), GetMaxValue(), GetValue() - m_Damage);
+        float IProperty.Value => GetValue() - m_Damage;
+        float IProperty.Normalize => Mathf.InverseLerp(GetMinValue(), GetMaxValue(), (this as IProperty).Value);
         #endregion
         #region  ISliceUpdate
         void ISliceUpdate.Update(IUnit unit, float deltaTime) => Update(unit, deltaTime);
