@@ -20,6 +20,7 @@ namespace Game.Core
         {
             Root.Bind<IDamageManager>(this);
             m_PropertyPriority.Add(typeof(Shield));
+            //m_PropertyPriority.Add(typeof(Armor));
             m_PropertyPriority.Add(typeof(Health));
         }
 

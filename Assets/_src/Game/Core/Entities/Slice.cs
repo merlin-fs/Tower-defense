@@ -3,7 +3,7 @@ using St.Common.Core;
 
 namespace Game.Entities
 {
-    public interface ISlice : ICoreObjectInstantiate
+    public interface ISlice : ICoreInstantiate
     {
         /// <summary>
         /// Заполнение свойств из другого слайса.

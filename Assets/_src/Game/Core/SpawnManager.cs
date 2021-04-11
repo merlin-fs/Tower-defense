@@ -66,6 +66,8 @@ namespace Game.Core
             if (instance != null)
                 return;
             instance = this;
+            QualitySettings.vSyncCount = 1;
+            Application.targetFrameRate = 60;
         }
         // Use this for initialization
         void Start()
@@ -238,22 +240,22 @@ namespace Game.Core
         IEnumerator SpawnSubWave(SubWave subWave, Wave parentWave)
         {
             yield return new WaitForSeconds(subWave.delay);
+            
             IWaypoints path = subWave.path.Value != null 
                 ? subWave.path.Value
                 : m_DefaultPath.Value;
             int spawnCount = 0;
+            
             while (spawnCount < subWave.count)
             {
-                //GameObject obj = PoolManager.Inst.GetPoolable<IUnit>(subWave.unit.GetComponent<IUnit>()).GameObject;
-
-                IUnit unit = subWave.unit.GetComponent<IUnit>().Instantiate<IUnit>();
+                IUnit unit = subWave.UnitConfig.Unit.GameObject.GetComponent<IUnit>().Instantiate<IUnit>();
                 UnitEnemy enemy = unit.GameObject.GetComponent<UnitEnemy>();
                 unit.GameObject.SetActive(false);
 
-                foreach (var prop in subWave.Properties)
+                foreach (var prop in subWave.UnitConfig.Properties)
                     unit.AddProperty(prop.Instantiate<IProperty>());
                     
-                foreach (var skill in subWave.Skills)
+                foreach (var skill in subWave.UnitConfig.Skills)
                     unit.AddSkill(skill.Instantiate<ISkill>());
 
                 enemy.SubWave = subWave;

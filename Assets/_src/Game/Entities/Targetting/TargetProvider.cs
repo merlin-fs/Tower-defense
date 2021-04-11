@@ -72,7 +72,7 @@ namespace Game.Entities
 
         private void OnDeadTarget(ICoreDisposable disposable)
         {
-            if (disposable is ICoreGameObject obj)
+            if (disposable is ICoreMonoObject obj)
             {
                 var targetable = obj.GameObject.GetComponent<ITargetable>();
                 m_Targetables.Remove(targetable);
@@ -88,18 +88,18 @@ namespace Game.Entities
         IReadOnlyList<ITargetable> ITargetProvider.Targets => m_Targetables.ToList();
         #endregion
         #region ICoreObjectInstantiate
-        ICoreObjectInstantiate ICoreObjectInstantiate.Instantiate()
+        ICoreInstantiate ICoreInstantiate.Instantiate()
         {
             return Instantiate(this);
         }
 
-        T ICoreObjectInstantiate.Instantiate<T>()
+        T ICoreInstantiate.Instantiate<T>()
         {
             return (T)Self.Instantiate();
         }
         #endregion
         #region ICoreGameObject
-        GameObject ICoreGameObject.GameObject => gameObject;
+        GameObject ICoreMonoObject.GameObject => gameObject;
         #endregion
         #region ICoreDisposable
         public event Action<ICoreDisposable> OnDispose;

@@ -10,4 +10,5 @@ namespace Game.Entities
         /// </summary>
         List<IInfluence> Effects { get; }
     }
+
 }

@@ -12,12 +12,12 @@ GameObject:
   - component: {fileID: 2296303936814550185}
   - component: {fileID: 2296303936814550186}
   - component: {fileID: 2296303936814550187}
-  m_Layer: 26
+  m_Layer: 8
   m_Name: TerrainObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &2296303936814550228
 Transform:
@@ -70,6 +70,7 @@ MeshRenderer:
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -94,3 +95,4 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}

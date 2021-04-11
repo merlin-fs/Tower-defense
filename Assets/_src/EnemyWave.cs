@@ -6,6 +6,7 @@ namespace Game
 {
     using Core;
     using Entities;
+    using Config;
 
     [Serializable]
     public class WaypointsContainer : TypedContainer<IWaypoints> { }
@@ -13,38 +14,18 @@ namespace Game
     [Serializable]
     public class SubWave
     {
-        public GameObject unit;
+        public UnitConfiguration UnitConfig;
         public int count = 1;
         public float interval = 1;
         public float delay;
         public WaypointsContainer path;
 
-
-        [SerializeReference, SubclassSelector(typeof(IProperty))]
-        private List<IProperty> m_Properties = new List<IProperty>();
-
-        [SerializeReference, SubclassSelector(typeof(ISkill))]
-        private List<ISkill> m_Skills = new List<ISkill>();
-
-        public IReadOnlyCollection<IProperty> Properties => m_Properties;
-        public IReadOnlyCollection<ISkill> Skills => m_Skills;
-
         public SubWave Clone()
         {
             SubWave subWave = new SubWave
             {
-                unit = unit,
-                count = count,
-                interval = interval,
-                delay = delay,
-                path = path
+                UnitConfig = UnitConfig,
             };
-
-            foreach (IProperty prop in m_Properties)
-                subWave.m_Properties.Add(prop.Instantiate<IProperty>());
-            foreach (ISkill skill in m_Skills)
-                subWave.m_Skills.Add(skill.Instantiate<ISkill>());
-
             return subWave;
         }
     }

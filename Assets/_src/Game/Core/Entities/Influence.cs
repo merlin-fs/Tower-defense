@@ -2,9 +2,9 @@
 
 namespace Game.Entities
 {
-    public interface IInfluence : ISlice
+    public interface IInfluence : ISlice, ISliceUpdate, ISliceInit
     {
         IReadOnlyCollection<IDamage> Damages { get; }
-        void Apply(IUnit sender, IUnit target);
+        void Activate(IUnit sender, IUnit target, float deltaTime);
     }
 }

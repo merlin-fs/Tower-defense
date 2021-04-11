@@ -25,14 +25,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6265918726068169427}
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 367600772644922483}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8557182520414039348
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -48,7 +48,7 @@ MonoBehaviour:
   rootObject: {fileID: 6260239059901488471}
   m_Bar: {fileID: 7570952419896700072}
   m_Value: {fileID: 7324059473732074223}
-  showWhenFull: 0
+  showWhenFull: 1
 --- !u!114 &3415652037408461601
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,7 +63,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rootObject: {fileID: 6260239059901488471}
   m_Bar: {fileID: 6516830068141648928}
-  showWhenFull: 0
+  showWhenFull: 1
 --- !u!1 &8823506491919659615
 GameObject:
   m_ObjectHideFlags: 0
@@ -306,6 +306,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -6876157278908506460, guid: fdc21a7f069a3d64886b53b0e5ec7e06,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -4852618002202739737, guid: fdc21a7f069a3d64886b53b0e5ec7e06,
         type: 3}
       propertyPath: m_CastShadows
@@ -341,15 +346,40 @@ PrefabInstance:
       propertyPath: m_Name
       value: info
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: fdc21a7f069a3d64886b53b0e5ec7e06,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1550612116741059217, guid: fdc21a7f069a3d64886b53b0e5ec7e06,
         type: 3}
       propertyPath: m_Name
       value: Shield
       objectReference: {fileID: 0}
+    - target: {fileID: 1550612116741059217, guid: fdc21a7f069a3d64886b53b0e5ec7e06,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1550612116741059217, guid: fdc21a7f069a3d64886b53b0e5ec7e06,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7204098144255774466, guid: fdc21a7f069a3d64886b53b0e5ec7e06,
         type: 3}
       propertyPath: m_Name
       value: Health
+      objectReference: {fileID: 0}
+    - target: {fileID: 7204098144255774466, guid: fdc21a7f069a3d64886b53b0e5ec7e06,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7204098144255774466, guid: fdc21a7f069a3d64886b53b0e5ec7e06,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7746805526537056048, guid: fdc21a7f069a3d64886b53b0e5ec7e06,
         type: 3}
@@ -365,6 +395,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Plaque
+      objectReference: {fileID: 0}
+    - target: {fileID: 8417212939451727593, guid: fdc21a7f069a3d64886b53b0e5ec7e06,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8417212939451727593, guid: fdc21a7f069a3d64886b53b0e5ec7e06,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fdc21a7f069a3d64886b53b0e5ec7e06, type: 3}

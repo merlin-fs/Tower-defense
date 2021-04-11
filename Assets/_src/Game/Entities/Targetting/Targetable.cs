@@ -4,12 +4,12 @@ using St.Common.Core;
 
 namespace Game.Entities
 {
-    public interface ITargetable: ICoreGameObject
+    public interface ITargetable: ICoreMonoObject
     {
     }
 
     public class Targetable: MonoBehaviour, ITargetable
     {
-        GameObject ICoreGameObject.GameObject => gameObject;
+        GameObject ICoreMonoObject.GameObject => gameObject;
     }
 }

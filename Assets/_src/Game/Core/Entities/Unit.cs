@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using St.Common.Core;
 
 namespace Game.Entities
 {
-    using St.Common.Core;
     using View;
 
     public interface IUnit: ICoreGameObjectInstantiate
@@ -17,11 +18,12 @@ namespace Game.Entities
         IReadOnlyCollection<IInfluence> Influences { get; }
 
         void AddProperty(IProperty property);
-        void AddSkill(ISkill skill);
-        void AddInfluence(IInfluence influence);
-        
         void RemoveProperty(IProperty property);
+
+        void AddSkill(ISkill skill);
         void RemoveSkill(ISkill skill);
+
+        void AddInfluence(IInfluence influence);
         void RemoveInfluence(IInfluence influence);
 
         bool IsDead { get; }
@@ -37,7 +39,7 @@ namespace Game.Entities
     public class UnitContainer : TypedContainer<IUnit> { }
 
 
-    public class Unit : MonoBehaviour, IUnit
+    public class Unit : BaseMonoSlice, IUnit
     {
         public delegate void DamagedHandler(IUnit unit);
         //!!!public static event DamagedHandler OnDamaged;
@@ -55,6 +57,7 @@ namespace Game.Entities
 
         [SerializeField]
         private Transform m_TargetPoint;
+
         [Serializable]
         private class TurretContainer : TypedContainer<ITurret> { }
         [SerializeField]
@@ -100,32 +103,22 @@ namespace Game.Entities
         }
 
         Transform IUnit.TargetPoint => m_TargetPoint;
-
         ITurret IUnit.Turret => m_Turret.Value;
         public bool IsDead { get; private set; } = false;
         #endregion
         #region ICoreGameObjectInstantiate
-        GameObject ICoreGameObject.GameObject => gameObject;
+        GameObject ICoreMonoObject.GameObject => gameObject;
 
-        T ICoreObjectInstantiate.Instantiate<T>()
+        #endregion
+        protected override void Dispose()
         {
-            IUnit clone = Instantiate(this);
-            return (T)clone;
-        }
-
-        ICoreObjectInstantiate ICoreObjectInstantiate.Instantiate()
-        {
-            return Self.Instantiate<ICoreObjectInstantiate>();
-        }
-
-        public event Action<ICoreDisposable> OnDispose;
-
-        void ICoreDisposable.Dispose()
-        {
-            OnDispose?.Invoke(this);
             Destroy(gameObject);
         }
-        #endregion
+
+        protected override void FillFrom(ISlice other)
+        {
+
+        }
 
         public LayerMask GetTargetMask()
         {
@@ -157,10 +150,21 @@ namespace Game.Entities
 
         private void Update()
         {
-            foreach (var prop in m_Properties)
-                prop.Update(this, Time.deltaTime);
-            foreach (var skill in m_Skills)
-                skill.Update(this, Time.deltaTime);
+            float time = Time.deltaTime;
+            
+            StartCoroutine(Update(m_Properties, time));
+            StartCoroutine(Update(m_Skills, time));
+            StartCoroutine(Update(m_Influences, time));
+
+            IEnumerator Update<I>(ICollection<I> @in, float time)
+                where I: ISliceUpdate
+            {
+                yield return null;
+                I[] list = new I[@in.Count];
+                @in.CopyTo(list, 0);
+                foreach (var iter in list)
+                    iter.Update(this, time);
+            }
         }
 
         public virtual void FixedUpdate()

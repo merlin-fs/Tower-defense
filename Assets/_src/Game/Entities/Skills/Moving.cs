@@ -5,7 +5,7 @@ namespace Game.Entities
     using Core;
 
     [System.Serializable]
-    public class Moving : BaseSkill
+    public class Moving : BaseSkill<Moving>
     {
         public float moveSpeed = 3;
         public float rotateSpeed = 10;
@@ -90,7 +90,7 @@ namespace Game.Entities
         private void ReachDestination(IUnit unit)
         {
             var target = GameObject.FindObjectOfType<UserBase>();
-            ApplyEffects(unit, target);
+            ApplyEffects(unit, target, Time.deltaTime);
             OnDestination?.Invoke(unit);
             if (m_Path.Loop)
             {

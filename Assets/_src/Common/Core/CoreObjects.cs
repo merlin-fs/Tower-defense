@@ -7,7 +7,7 @@ namespace St.Common.Core
     {
     }
 
-    public interface ICoreGameObject : ICoreObject
+    public interface ICoreMonoObject : ICoreObject
     {
         GameObject GameObject { get; }
     }
@@ -18,13 +18,13 @@ namespace St.Common.Core
         void Dispose();
     }
 
-    public interface ICoreObjectInstantiate : ICoreObject, ICoreDisposable
+    public interface ICoreInstantiate : ICoreObject, ICoreDisposable
     {
-        ICoreObjectInstantiate Instantiate();
+        ICoreInstantiate Instantiate();
         T Instantiate<T>() where T : ICoreObject;
     }
 
-    public interface ICoreGameObjectInstantiate : ICoreObjectInstantiate, ICoreGameObject
+    public interface ICoreGameObjectInstantiate : ICoreInstantiate, ICoreMonoObject
     {
     }
 
@@ -32,9 +32,9 @@ namespace St.Common.Core
     [Serializable]
     public class CoreObjectContainer : TypedContainer<ICoreObject> { }
     [Serializable]
-    public class CoreGameObjectContainer : TypedContainer<ICoreGameObject> { }
+    public class CoreGameObjectContainer : TypedContainer<ICoreMonoObject> { }
     [Serializable]
-    public class CoreObjectInstantiateContainer : TypedContainer<ICoreObjectInstantiate> { }
+    public class CoreObjectInstantiateContainer : TypedContainer<ICoreInstantiate> { }
 
     [Serializable]
     public class CoreGameObjectInstantiateContainer : TypedContainer<ICoreGameObjectInstantiate> { }

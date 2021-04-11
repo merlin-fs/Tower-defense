@@ -27,6 +27,13 @@ namespace Game.Entities.View
         /// </summary>
         protected Transform m_CameraToFace;
 
+        private MaterialPropertyBlock m_Props;
+
+        private void Awake()
+        {
+            m_Props = new MaterialPropertyBlock();
+        }
+
         /// <summary>
         /// Turns us to face the camera
         /// </summary>
@@ -48,6 +55,15 @@ namespace Game.Entities.View
             m_CameraToFace = UnityEngine.Camera.main.transform;
         }
 
+        protected override void Init(IUnit unit)
+        {
+            m_Bar.gameObject.SetActive(true);
+        }
+
+        protected override void Done(IUnit unit)
+        {
+        }
+
         protected override void UpdateView(IUnit unit, ISlice slice, float deltaTime)
         {
             if (slice is IProperty prop)
@@ -60,7 +76,13 @@ namespace Game.Entities.View
         /// <param name="value">IProperty</param>
         private void UpdateValue(IProperty value)
         {
-            m_Bar?.material.SetFloat("_Cutoff", value.Normalize);
+            m_Bar?.GetPropertyBlock(m_Props);
+
+            if (!float.Equals(m_Props.GetFloat("_Cutoff"), value.Normalize))
+            {
+                m_Props.SetFloat("_Cutoff", value.Normalize);
+                m_Bar?.SetPropertyBlock(m_Props);
+            }
             SetVisible(showWhenFull || value.Normalize < 1.0f);
         }
 

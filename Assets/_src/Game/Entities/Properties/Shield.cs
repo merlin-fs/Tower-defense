@@ -4,28 +4,14 @@ using UnityEngine;
 namespace Game.Entities
 {
     [System.Serializable]
-    public class Shield : BaseProperty<Shield>
+    public sealed class Shield : BaseProperty<Shield>
     {
         [SerializeField]
-        private float m_Default = 0;
+        private float m_Value;
         [SerializeField]
         private float m_RegenRate = 1;
         [SerializeField]
         private float m_StaggerDuration = 1;
-        [SerializeField]
-        private float m_Value;
-        
-        protected override void Init(IUnit unit)
-        {
-            base.Init(unit);
-            m_Value = m_Default;
-        }
-
-        protected override float GetValue() => m_Value;
-
-        protected override float GetMaxValue() => m_Default;
-
-        protected override float GetMinValue() => 0;
 
         /*
         public void FixedUpdate(Unit unit, float deltaTime)
@@ -39,6 +25,8 @@ namespace Game.Entities
         }
         */
 
+        protected override float GetValue() => m_Value;
+
         protected override void OnDamage(IUnit sender)
         {
         }
@@ -48,7 +36,7 @@ namespace Game.Entities
             base.FillFrom(other);
             if (other is Shield shield)
             {
-                m_Default = shield.m_Default;
+                m_Value = shield.m_Value;
                 m_RegenRate = shield.m_RegenRate;
                 m_StaggerDuration = shield.m_StaggerDuration;
             }

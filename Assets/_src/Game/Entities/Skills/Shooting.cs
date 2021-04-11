@@ -7,21 +7,12 @@ namespace Game.Entities
     using View;
 
     [Serializable]
-    public class Shooting : BaseSkill
+    public class Shooting : BaseSkill<Shooting>
     {
-        //[Serializable]
-        //private class ViewContainer : TypedContainer<ISliceVisualizer> { }//<ISlice>
-        [SerializeField]
-        private VisualizerContainer m_ViewPrefab;
-
         [Serializable]
         private class TargetterContainer : TypedContainer<ITargetProvider> { }
         [SerializeField]
         private TargetterContainer m_TargetterPrefab;
-
-        //[SerializeReference, SubclassSelector(typeof(ITargetProvider))]
-        //private ITargetProvider m_TargetterPrefab;
-
 
         [SerializeField]
         private float m_SearchRate = 1;
@@ -33,10 +24,10 @@ namespace Game.Entities
         private ITargetProvider m_Targetter;
         private IUnit m_CurrrentTargetable;
         private IUnit m_Unit;
-        private ISliceVisualizer m_View;
 
         public override void Init(IUnit unit)
         {
+            base.Init(unit);
             m_Unit = unit;
             if (unit is UnitEnemy)
             {
@@ -50,11 +41,11 @@ namespace Game.Entities
             m_Targetter.GameObject.transform.localScale = Vector3.one;
             m_Targetter.OnTargetEnterRange += OnTargetEnterRange;
             m_Targetter.OnTargetExitRange += OnTargetExitRange;
-
-            m_View = m_ViewPrefab?.Value?.Instantiate() as ISliceVisualizer;
-
             if (m_Targetter is ITargetProviderDesign design)
                 design.OnTargetDrawGizmos += OnTargetDrawGizmos;
+
+
+
         }
 
         public override void FillFrom(ISlice other)
@@ -62,7 +53,6 @@ namespace Game.Entities
             base.FillFrom(other);
             if (other is Shooting shooting)
             {
-                m_ViewPrefab = shooting.m_ViewPrefab;
                 m_TargetterPrefab = shooting.m_TargetterPrefab;
                 m_SearchRate = shooting.m_SearchRate;
                 m_EffectRate = shooting.m_EffectRate;
@@ -89,12 +79,11 @@ namespace Game.Entities
 
         public override void Done(IUnit unit) 
         {
+            base.Done(unit);
             if (m_Targetter is ITargetProviderDesign design)
                 design.OnTargetDrawGizmos += OnTargetDrawGizmos; 
             m_Targetter.OnTargetEnterRange -= OnTargetEnterRange;
             m_Targetter.Dispose();
-            if (m_View is IDisposable disposable)
-                disposable.Dispose();
         }
 
         public override void Update(IUnit unit, float deltaTime)
@@ -113,8 +102,8 @@ namespace Game.Entities
 
             if (m_EffectTimer <= 0.0f && m_CurrrentTargetable != null)
             {
-                m_View?.UpdateView(m_Unit, this, deltaTime);
-                ApplyEffects(m_Unit, m_CurrrentTargetable);
+                View?.UpdateView(m_Unit, this, deltaTime);
+                ApplyEffects(m_Unit, m_CurrrentTargetable, deltaTime);
                 m_EffectTimer = m_EffectRate;
             }
         }

@@ -4,7 +4,7 @@ using St.Common.Core;
 
 namespace Game.Entities
 {
-    public interface ITurret: ICoreGameObject
+    public interface ITurret: ICoreMonoObject
     {
         void AnimTurret(IUnit targetable);
     }
@@ -21,7 +21,7 @@ namespace Game.Entities
         private float m_CurrentRotationSpeed;
         private float m_XRotationCorrectionTime;
 
-        GameObject ICoreGameObject.GameObject => gameObject;
+        GameObject ICoreMonoObject.GameObject => gameObject;
 
         void ITurret.AnimTurret(IUnit targetable)
         {

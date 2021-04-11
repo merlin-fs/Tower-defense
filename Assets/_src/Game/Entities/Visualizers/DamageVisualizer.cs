@@ -1,25 +1,38 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace Game.Entities.View
 {
-    // вместо IInfluence нужен конкретный тип
     public class DamageVisualizer : BaseVisualizer<IInfluence>
     {
-        protected override void UpdateView(IUnit unit, ISlice slice, float deltaTime)
+        protected override void Init(IUnit unit)
         {
             var parent = unit.TargetPoint;
+            transform.parent = parent;
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+            transform.localScale = Vector3.one;
+        }
 
-            //Poolable.TryGetPoolable<ICoreGameObjectInstantiate>(gameObject).GameObject;
-            var go = Instantiate(gameObject);
-            go.transform.parent = parent;
-            go.transform.localPosition = Vector3.zero;
-            go.transform.localRotation = Quaternion.identity;
-            go.transform.localScale = Vector3.one;
+        protected override void Done(IUnit unit)
+        {
+
+        }
+
+        protected override void UpdateView(IUnit unit, ISlice slice, float deltaTime)
+        {
             if (unit.Turret != null)
-                go.transform.localRotation = unit.Turret.GameObject.transform.localRotation;
+                transform.localRotation = unit.Turret.GameObject.transform.localRotation;
 
-            var system = go.GetComponent<ParticleSystem>();
+            var system = GetComponent<ParticleSystem>();
             system.Play(true);
+
+            StartCoroutine(WaitStop());
+            IEnumerator WaitStop()
+            {
+                yield return new WaitForSeconds(5);
+                system.Stop();
+            }
         }
     }
 }

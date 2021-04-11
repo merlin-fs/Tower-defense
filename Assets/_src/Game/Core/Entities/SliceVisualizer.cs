@@ -1,8 +1,9 @@
 ﻿using System;
+using St.Common.Core;
 
 namespace Game.Entities.View
 {
-    public interface ISliceVisualizer
+    public interface ISliceVisualizer: ISlice, ISliceInit
     {
         void UpdateView(IUnit unit, ISlice slice, float deltaTime);
     }

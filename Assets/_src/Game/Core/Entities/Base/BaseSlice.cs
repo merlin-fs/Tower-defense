@@ -10,16 +10,16 @@ namespace Game.Entities
     {
         protected ISlice Self => this;
         
-        T ICoreObjectInstantiate.Instantiate<T>()
+        T ICoreInstantiate.Instantiate<T>()
         {
             ISlice slice = (ISlice)System.Activator.CreateInstance(GetType());
             slice.FillFrom(this);
             return (T)slice;
         }
 
-        ICoreObjectInstantiate ICoreObjectInstantiate.Instantiate()
+        ICoreInstantiate ICoreInstantiate.Instantiate()
         {
-            return Self.Instantiate<ICoreObjectInstantiate>();
+            return Self.Instantiate<ICoreInstantiate>();
         }
 
         public event Action<ICoreDisposable> OnDispose;

@@ -2,60 +2,95 @@ Shader "Fade/FillAmount2Color"
 {
     Properties
     {
-        _Color("Tint", Color) = (1,1,1,1)
+        [MainColor] _Color("Tint", Color) = (1,1,1,1)
         _Color2("Second Tint", Color) = (1,1,1,1)
-        _MainTex("Sprite Texture", 2D) = "white" {}
+        [MainTexture] _MainTex("Sprite Texture", 2D) = "white" {}
         _TransitionTex("Transition Texture", 2D) = "white" {}
+        //[PerRendererData] 
         _Cutoff("Cutoff", Range(0, 1)) = 0
-        [MaterialToggle] PixelSnap("Pixel snap", Float) = 0
-
     }
+
         SubShader
         {
             Tags
             {
-                "Queue" = "Transparent"
-                "IgnoreProjector" = "True"
+                "Queue" = "Overlay"
                 "RenderType" = "Opaque"
+                "ForceNoShadowCasting" = "True"
+                "IgnoreProjector" = "True"
+                "CanUseSpriteAtlas" = "True"
             }
-            LOD 300
+            LOD 100
+
             Cull Off
             Lighting Off
             ZWrite Off
-            //Blend One OneMinusSrcAlpha
             Blend SrcAlpha OneMinusSrcAlpha
 
+            Pass
+            {
             CGPROGRAM
-                #pragma surface surf Ramp alpha:fade
+                //#pragma target 3.0
+                #pragma vertex vert
+                #pragma fragment frag
+                //#pragma multi_compile_fog
+                #pragma multi_compile_instancing
 
-              half4 LightingRamp(SurfaceOutput s, half3 lightDir, half atten) 
-              {
-            
-                  return half4(s.Albedo.r, s.Albedo.g, s.Albedo.b, s.Alpha);
-              }
+                #pragma instancing_options assumeuniformscaling
+                #pragma instancing_options nolodfade
+                #pragma instancing_options nolightprobe
+                #pragma instancing_options nolightmap
+                #include "UnityCG.cginc"
+
+                struct appdata
+                {
+                    UNITY_VERTEX_INPUT_INSTANCE_ID
+
+                    float2 uv       : TEXCOORD0;
+                    float4 vertex   : POSITION;
+                };
+
+                struct v2f
+                {
+                    UNITY_VERTEX_INPUT_INSTANCE_ID
+                    
+                    float2 uv       : TEXCOORD0;
+                    float4 vertex   : SV_POSITION;
+                };
 
                 sampler2D _MainTex;
                 sampler2D _TransitionTex;
-                float _Cutoff;
                 fixed4 _Color;
                 fixed4 _Color2;
 
-                struct Input
+                UNITY_INSTANCING_BUFFER_START(Props)
+                    UNITY_DEFINE_INSTANCED_PROP(float, _Cutoff)
+                UNITY_INSTANCING_BUFFER_END(Props)
+
+                v2f vert(appdata _in)
                 {
-                    float2 uv_MainTex;
-                };
+                    v2f _out;
+                    UNITY_SETUP_INSTANCE_ID(_in);
+                    UNITY_TRANSFER_INSTANCE_ID(_in, _out);
+                    _out.vertex = UnityObjectToClipPos(_in.vertex);
+                    _out.uv = _in.uv;
+                    return _out;
+                }
 
-                void surf(Input IN, inout SurfaceOutput o) {
+                fixed4 frag(v2f _in) : SV_Target
+                {
+                    UNITY_SETUP_INSTANCE_ID(_in);
 
-                    fixed4 diffuse = tex2D(_MainTex, IN.uv_MainTex);
+                    float cutoff = UNITY_ACCESS_INSTANCED_PROP(Props, _Cutoff);
+                    fixed4 _out = tex2D(_MainTex, _in.uv);
+                    fixed4 transit = tex2D(_TransitionTex, _in.uv);
 
-                    fixed4 fadeSample = tex2D(_TransitionTex, IN.uv_MainTex);
-
-                    bool cut = (fadeSample.r + fadeSample.g + fadeSample.b) / 3.0 < _Cutoff ? false : true;
-                    o.Albedo = cut ? diffuse.rgb * _Color2 : diffuse.rgb * _Color;
-                    o.Alpha = cut ? diffuse.a * _Color2.a : diffuse.a * _Color.a;
+                    bool cut = transit.b > cutoff;
+                    _out.rgb = cut ? _out.rgb * _Color2 : _out.rgb * _Color;
+                    _out.a = cut ? _out.a * _Color2.a : _out.a * _Color.a;
+                    return _out;
                 }
             ENDCG
+            }
         }
-        FallBack "Transparent/Cutout/Diffuse"
 }
