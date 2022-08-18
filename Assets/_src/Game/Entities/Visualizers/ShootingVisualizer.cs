@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+/*
 namespace Game.Entities.View
 {
     public class ShootingVisualizer : BaseVisualizer<Shooting>
@@ -28,3 +28,4 @@ namespace Game.Entities.View
         }
     }
 }
+*/

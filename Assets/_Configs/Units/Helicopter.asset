@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 626a8dd62a4a61d42a169b9ac1532f8c, type: 3}
+  m_Name: Helicopter
+  m_EditorClassIdentifier: 
+  m_DefineableType:
+    m_Type: Game.Model.Units.Unit, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  m_Prefab: {fileID: 582579425051373145, guid: e1914b5dd59b41a40bc5b5543c9b7135, type: 3}
+  m_Skills:
+  - id: 0
+  m_Propirties:
+  - id: 1
+  m_Parts: []
+  m_Logic:
+    id: 2
+  references:
+    version: 1
+    00000000:
+      type: {class: Move/MovingDef, ns: Game.Model.Units.Skills, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Model.Units.Skills.Move+Moving, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+        InitPosition:
+          x: 10
+          y: 10
+        Speed: 200
+    00000001:
+      type: {class: HealthDef, ns: Game.Model.Units, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Model.Units.Health, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+        m_Absorb: []
+        m_Resist: []
+        m_Value: 140
+        m_Prefab: {fileID: 150954280697512265, guid: b738ce36907196e45b199bfb29b62de9, type: 3}
+    00000002:
+      type: {class: LogicDef, ns: Game.Core, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Core.Logic, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null

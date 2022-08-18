@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 626a8dd62a4a61d42a169b9ac1532f8c, type: 3}
+  m_Name: Buggy
+  m_EditorClassIdentifier: 
+  m_DefineableType:
+    m_Type: Game.Model.Units.Unit, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  m_Prefab: {fileID: 2959890941341858537, guid: f573bbdb89cdb9447b683ae67dcbbea7, type: 3}
+  m_Skills:
+  - id: 0
+  - id: 1
+  m_Propirties:
+  - id: 2
+  m_Parts: []
+  m_Logic:
+    id: 3
+  references:
+    version: 1
+    00000000:
+      type: {class: PathMovingDef, ns: Game.Model.Units, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Model.Units.PathMoving, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+        Speed: 50
+    00000001:
+      type: {class: CannonDef, ns: Game.Model.Units, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Model.Units.Cannon, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+        Distance: 150
+        FindDelay: 1
+        Frequency: 2
+        m_Particle: {fileID: 0}
+        m_Damages: []
+    00000002:
+      type: {class: HealthDef, ns: Game.Model.Units, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Model.Units.Health, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+        m_Absorb: []
+        m_Resist: []
+        m_Value: 30
+        m_Prefab: {fileID: 150954280697512265, guid: b738ce36907196e45b199bfb29b62de9, type: 3}
+    00000003:
+      type: {class: LogicDef, ns: Game.Core, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Core.Logic, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null

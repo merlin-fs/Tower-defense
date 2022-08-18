@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
-
+/*
 namespace Game.Entities.View
 {
     public class DamageVisualizer : BaseVisualizer<IInfluence>
@@ -36,3 +36,4 @@ namespace Game.Entities.View
         }
     }
 }
+*/

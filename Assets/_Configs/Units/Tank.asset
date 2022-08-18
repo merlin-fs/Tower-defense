@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 626a8dd62a4a61d42a169b9ac1532f8c, type: 3}
+  m_Name: Tank
+  m_EditorClassIdentifier: 
+  m_DefineableType:
+    m_Type: Game.Model.Units.Unit, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  m_Prefab: {fileID: 3970950483509372958, guid: 177c4415a5370da498b0da9c6378cd74, type: 3}
+  m_Skills:
+  - id: 0
+  - id: 1
+  m_Propirties:
+  - id: 2
+  m_Parts:
+  - id: 3
+  m_Logic:
+    id: 4
+  references:
+    version: 1
+    00000000:
+      type: {class: Move/MovingDef, ns: Game.Model.Units.Skills, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Model.Units.Skills.Move+Moving, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+        InitPosition:
+          x: 82
+          y: 53
+        Speed: 80
+    00000001:
+      type: {class: CannonDef, ns: Game.Model.Units, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Model.Units.Cannon, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+        Distance: 100
+        FindDelay: 2
+        Frequency: 3
+        m_Particle: {fileID: 3265312031583032158, guid: 177c4415a5370da498b0da9c6378cd74, type: 3}
+        m_Damages:
+        - id: 5
+    00000002:
+      type: {class: HealthDef, ns: Game.Model.Units, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Model.Units.Health, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+        m_Absorb: []
+        m_Resist: []
+        m_Value: 140
+        m_Prefab: {fileID: 150954280697512265, guid: b738ce36907196e45b199bfb29b62de9, type: 3}
+    00000003:
+      type: {class: TurretDef, ns: Game.Model.Units.Defs, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Model.Units.Turret, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+        m_Part: {fileID: 4312988005664731421, guid: 177c4415a5370da498b0da9c6378cd74, type: 3}
+        m_IdleRotationSpeed: 10
+        m_IdleCorrectionTime: 2
+        m_IdleWaitTime: 2
+        m_RotationRange:
+          x: -180
+          y: 180
+    00000004:
+      type: {class: LogicDef, ns: Game.Core, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Core.Logic, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+    00000005:
+      type: {class: Kinetic, ns: Game.Model.Units.Defs, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Model.Units.DamageSimple, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+        m_Value: 1

@@ -1,0 +1,10 @@
+*.anim filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.fbx filter=lfs diff=lfs merge=lfs -text
+*.mp3 filter=lfs diff=lfs merge=lfs -text
+all.anim filter=lfs diff=lfs merge=lfs -text
+All.png filter=lfs diff=lfs merge=lfs -text
+Alisa_fin.png filter=lfs diff=lfs merge=lfs -text
+*.so filter=lfs diff=lfs merge=lfs -text
+*.tgz filter=lfs diff=lfs merge=lfs -text
+com.ptc.vuforia.engine-10.5.5.tgz filter=lfs diff=lfs merge=lfs -text

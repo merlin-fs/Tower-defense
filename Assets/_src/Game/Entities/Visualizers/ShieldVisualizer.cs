@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+/*
 namespace Game.Entities.View
 {
     /// <summary>
@@ -92,3 +93,4 @@ namespace Game.Entities.View
         }
     }
 }
+*/
