@@ -10,7 +10,7 @@ using Debug = UnityEngine.Debug;
 namespace Game.Model.World
 {
 
-    public partial struct Map
+    public partial class Map
     {
         public struct GenerateMapTag : ISystemStateComponentData
         {
@@ -43,9 +43,11 @@ namespace Game.Model.World
         {
             private EntityCommandBufferSystem m_CommandBuffer;
             private EntityQuery m_Query;
+            public static Generate Instance { get; private set; }
 
             protected override void OnCreate()
             {
+                Instance = this;
                 m_CommandBuffer = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
 
                 m_Query = GetEntityQuery(
@@ -56,24 +58,18 @@ namespace Game.Model.World
 
             protected override void OnUpdate()
             {
-                //var tt = new System.Diagnostics.Stopwatch();
-                //tt.Start();
-
-                var configs = m_Query.ToComponentDataArray<GenerateMapTag>(Allocator.TempJob);
+                var config = m_Query.GetSingleton<GenerateMapTag>();
                 var buffer = m_CommandBuffer.CreateCommandBuffer();
 
-                NativeArray<Map> maps = new NativeArray<Map>(configs.Length, Allocator.TempJob);
-                
-                for (var i = 0; i < maps.Length; i++)
-                    maps[i] = new Map(configs[i].Size, configs[i].HeightMax, configs[i].InitProperties);
+                var map = new Map.Data(config.Size, config.HeightMax, config.InitProperties);
 
                 Dependency = new InitJob()
                 {
-                    Maps = maps,
-                    Configs = configs,
+                    Map = map,
+                    Config = config,
                     Writer = buffer.AsParallelWriter(),
 
-                }.Schedule(configs.Length, 10, Dependency);
+                }.Schedule(Dependency);
 
                 //m_CommandBuffer.AddJobHandleForProducer(Dependency);
                 Dependency.Complete();

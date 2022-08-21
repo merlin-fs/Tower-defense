@@ -15,17 +15,21 @@ namespace Game.Model.World
         public float TerrainFrequency = 1.25f;
         public int Seed = 12023;
 
-        public void Execute(Action<Map> callback)
+        public void Execute(Action<Map.Data> callback)
         {
             StartCoroutine(MakeNewMap(callback));
         }
 
-        IEnumerator MakeNewMap(Action<Map> callback)
+        IEnumerator MakeNewMap(Action<Map.Data> callback)
         {
+            var manager = Unity.Entities.World.DefaultGameObjectInjectionWorld.EntityManager;
+            var q = manager.CreateEntityQuery(
+                ComponentType.ReadWrite<Map.Data>()
+            );
+            manager.DestroyEntity(q);
 
             if (Seed == 0)
                 Seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
-            var manager = Unity.Entities.World.DefaultGameObjectInjectionWorld.EntityManager;
 
             var entity = manager.CreateEntity();
             manager.AddComponentData(entity, new Map.GenerateMapTag(
@@ -41,26 +45,23 @@ namespace Game.Model.World
             yield break;
         }
 
-        IEnumerator MakeMesh(Action<Map> callback)
+        IEnumerator MakeMesh(Action<Map.Data> callback)
         {
             var manager = Unity.Entities.World.DefaultGameObjectInjectionWorld.EntityManager;
 
             var q = manager.CreateEntityQuery(
-                ComponentType.ReadWrite<Map>()
+                ComponentType.ReadWrite<Map.Data>()
             );
 
-            while (q.CalculateEntityCount() <= 0)
+            while (!Map.Singleton.IsInit())
             {
                 yield return null;
             }
 
-            Map map = q.GetSingleton<Map>();
+            var map = q.GetSingleton<Map.Data>();
             var obj = GetComponent<MapView>().InitMesh(map);
             map.InitView(obj.worldToLocalMatrix, obj.localToWorldMatrix, obj.GetComponent<MeshFilter>().sharedMesh.bounds);
-
             //UnityEditor.AssetDatabase.CreateAsset(obj.GetComponent<MeshFilter>().sharedMesh, "Assets/test.Mesh");
-
-            q.SetSingleton<Map>(map);
             callback?.Invoke(map);
 
             yield break;

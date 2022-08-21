@@ -1,16 +1,14 @@
 using System;
-using System.Collections.Generic;
-using Unity.Entities;
 
 namespace Game.Core
 {
-    public partial class LogicSystem
+    public abstract partial class LogicSystem
     {
         public LogicStateMachine.Configuration Configure => new LogicStateMachine.Configuration(m_StateMachine);
         private LogicStateMachine m_StateMachine;
         public LogicStateMachine StateMachine => m_StateMachine;
     }
-
+    
     public partial class LogicStateMachine
     {
         public class Configuration

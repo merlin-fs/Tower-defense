@@ -4,17 +4,12 @@ using UnityEngine;
 using Unity.Entities;
 using Unity.Collections;
 using Unity.Mathematics;
+using Common.Core;
 
 namespace Game.Model.World
 {
-    public partial struct Map : IComponentData, IDisposable
+    public partial class Map
     {
-        private GCHandle m_ProperiesHandle;
-
-        public int2 Size;
-        public ViewDataStruct ViewData;
-        public TilesData Tiles => (TilesData)m_ProperiesHandle.Target;
-
         public struct ViewDataStruct
         {
             public float4x4 WorldToLocalMatrix;
@@ -23,27 +18,38 @@ namespace Game.Model.World
             public int HeightMax;
         }
 
-        public void InitView(float4x4 worldToLocalMatrix, float4x4 localToWorldMatrix, Bounds bounds)
+        public partial struct Data: IComponentData, IDisposable
         {
-            ViewData.WorldToLocalMatrix = worldToLocalMatrix;
-            ViewData.LocalToWorldMatrix = localToWorldMatrix;
-            ViewData.Bounds = bounds;
-        }
+            public int2 Size;
+            public ViewDataStruct ViewData;
+            public ReferenceObject<TilesData> m_TilesData;
+            public TilesData Tiles => m_TilesData.Link;
 
-        public Map(int2 size, int heightMax, Initialization initialization)
-        {
-            Size = size;
-            ViewData = new ViewDataStruct() { HeightMax = heightMax, };
-            m_ProperiesHandle = TilesData.Create();
-            Tiles.Init(size.x * size.y);
+            public bool IsInit()
+            {
+                return math.all(Size != 0);
+            }
 
-            initialization?.Invoke(Tiles, size);
-        }
+            public void InitView(float4x4 worldToLocalMatrix, float4x4 localToWorldMatrix, Bounds bounds)
+            {
+                ViewData.WorldToLocalMatrix = worldToLocalMatrix;
+                ViewData.LocalToWorldMatrix = localToWorldMatrix;
+                ViewData.Bounds = bounds;
+            }
+            public Data(int2 size, int heightMax, Initialization initialization)
+            {
+                Size = size;
+                ViewData = new ViewDataStruct() { HeightMax = heightMax, };
+                m_TilesData = new ReferenceObject<TilesData>(new TilesData());
+                Tiles.Init(size.x * size.y);
 
-        public void Dispose()
-        {
-            Tiles.Dispose();
-            m_ProperiesHandle.Free();
+                initialization?.Invoke(Tiles, size);
+            }
+
+            public void Dispose()
+            {
+                m_TilesData.Dispose();
+            }
         }
     }
 }

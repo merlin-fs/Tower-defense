@@ -27,7 +27,7 @@ namespace Game.Model.World
         [SerializeField]
         bool _water = false;
 
-        private Map m_Map;
+        private Map.Data m_Map;
         private Chunk m_ChunkInst;
 
         #region IMapView
@@ -74,7 +74,7 @@ namespace Game.Model.World
             return true;
         }
 
-        public Transform InitMesh(Map map)
+        public Transform InitMesh(Map.Data map)
         {
             m_Map = map;
             Debug.Log($"map size {m_Map.Size}");

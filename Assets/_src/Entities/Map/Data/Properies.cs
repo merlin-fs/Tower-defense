@@ -9,11 +9,11 @@ using System.Runtime.InteropServices;
 
 namespace Game.Model.World
 {
-    public partial struct Map
+    public partial class Map
     {
         public delegate void Initialization(TilesData value, int2 size);
 
-        public partial class TilesData : IDisposable
+        public partial class TilesData
         {
             public IReadOnlyList<Height> Heights => m_Heights;
             public IReadOnlyList<HeightType> HeightTypes => m_HeightTypes;
@@ -28,23 +28,11 @@ namespace Game.Model.World
             private HeightType[] m_HeightTypes;
             private Bitmask[] m_Bitmasks;
 
-            public static GCHandle Create()
-            {
-                return GCHandle.Alloc(new TilesData());
-            }
-
             public void Init(int length)
             {
                 m_Heights = new Height[length];
                 m_HeightTypes = new HeightType[length];
                 m_Bitmasks = new Bitmask[length];
-            }
-
-            public virtual void Dispose()
-            {
-                m_Heights = null;
-                m_HeightTypes = null;
-                m_Bitmasks = null;
             }
         }
     }

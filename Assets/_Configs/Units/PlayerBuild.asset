@@ -35,8 +35,8 @@ MonoBehaviour:
           y: 53
         Speed: 80
     00000001:
-      type: {class: LogicDef, ns: Game.Core, asm: Assembly-CSharp}
+      type: {class: TowerLogicDef, ns: Game.Model.Units.Logics, asm: Assembly-CSharp}
       data:
         m_DefineableType:
-          m_Type: Game.Core.Logic, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-            PublicKeyToken=null
+          m_Type: Game.Model.Units.Logics.TowerLogic, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null

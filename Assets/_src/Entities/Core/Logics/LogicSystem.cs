@@ -15,46 +15,69 @@ using System.Runtime.InteropServices;
 
 namespace Game.Core
 {
-    [UpdateInGroup(typeof(GameLogicInitSystemGroup), OrderFirst = true)]
-    public partial class LogicSystem: CallbackSystem
+    public abstract partial class LogicSystem : CallbackSystem
     {
         protected EntityCommandBufferSystem m_CommandBuffer;
-        protected EntityQuery m_Query;
 
+        public EntityQuery BuildEntityQuery(params ComponentType[] componentTypes)
+        {
+            return GetEntityQuery(componentTypes);
+        }
+
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+            m_CommandBuffer = World.GetOrCreateSystem<GameLogicCommandBufferSystem>();
+            m_StateMachine = new LogicStateMachine(EntityManager, this, m_CommandBuffer);
+        }
+    }
+
+    [UpdateInGroup(typeof(GameLogicInitSystemGroup), OrderFirst = true)]
+    public partial class LogicSystem<T, S>: LogicSystem
+        where T : struct, ILogic
+        where S : struct, ILogicState
+    {
+        protected EntityQuery m_Query;
         private FunctionPointer<StateCallback> m_Callback;
+
         protected override void OnCreate()
         {
             base.OnCreate();
 
             m_CommandBuffer = World.GetOrCreateSystem<GameLogicCommandBufferSystem>();
-            m_StateMachine = new LogicStateMachine(EntityManager, this, m_CommandBuffer);
 
             m_Query = GetEntityQuery(new EntityQueryDesc
             {
-                All = new ComponentType[] { ComponentType.ReadWrite<Logic>(), ComponentType.ReadWrite<Logic.State>() },
+                All = new ComponentType[] { ComponentType.ReadWrite<T>(), ComponentType.ReadWrite<S>() },
                 Options = EntityQueryOptions.IncludeDisabled
             });
-            m_Query.AddChangedVersionFilter(ComponentType.ReadWrite<Logic.State>());
+            m_Query.AddChangedVersionFilter(ComponentType.ReadWrite<S>());
             RequireForUpdate(m_Query);
 
-            m_Callback = new FunctionPointer<StateCallback>(Marshal.GetFunctionPointerForDelegate<StateCallback>(SetState));
+            m_Callback = new FunctionPointer<StateCallback>(Marshal.GetFunctionPointerForDelegate<StateCallback>(SetResult));
             //JobsUtility.JobDebuggerEnabled = false;
         }
 
-        static void SetState(ref EntityCommandBuffer.ParallelWriter writer, ref Entity entity, JobResult result, int sortKey)
+        static void SetResult(EntityCommandBuffer.ParallelWriter writer, Entity entity, JobResult result, int sortKey)
         {
-            var state = result == JobResult.Error? JobState.Error : JobState.None;
-            Logic.State.SetState(ref writer, ref entity, state, sortKey);
+            var state = result == JobResult.Error ? JobState.Error : JobState.None;
+            SetState(writer, entity, state, sortKey);
         }
 
-        struct LogicJob : IJobEntityBatch
+        static void SetState(EntityCommandBuffer.ParallelWriter writer, Entity entity, JobState state, int sortKey)
+        {
+            new S().SetState(writer, entity, state, sortKey);
+        }
+
+        public struct LogicJob : IJobEntityBatch
         {
             [ReadOnly] public uint LastSystemVersion;
             [ReadOnly] public EntityTypeHandle InputEntity;
             public FunctionPointer<StateCallback> Callback;
 
-            public ComponentTypeHandle<Logic> InputLogic;
-            public ComponentTypeHandle<Logic.State> InputState;
+            public ComponentTypeHandle<T> InputLogic;
+            public ComponentTypeHandle<S> InputState;
+
             public EntityCommandBuffer.ParallelWriter Writer;
 
             public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
@@ -71,7 +94,7 @@ namespace Game.Core
                 {
                     var state = states[i];
                     if (state.Value == JobState.Running)
-                        return;
+                        continue;
 
                     var iter = datas[i];
                     var entity = entities[i];
@@ -85,6 +108,7 @@ namespace Game.Core
                             state.Value = JobState.Running;
                             try
                             {
+                                SetState(Writer, entity, state.Value, batchIndex);
                                 iter.CurrentJob = next;
                                 var context = new ExecuteContext(Writer, batchInChunk, entity, i, Callback, batchIndex);
                                 logicJob.Execute(context);
@@ -92,12 +116,12 @@ namespace Game.Core
                             catch
                             {
                                 state.Value = JobState.Error;
+                                SetState(Writer, entity, state.Value, batchIndex);
                                 throw;
                             }
                             finally
                             {
                                 datas[i] = iter;
-                                Logic.State.SetState(ref Writer, ref entity, state.Value, batchIndex);
                             }
                         }
                     }
@@ -112,8 +136,8 @@ namespace Game.Core
                 Writer = m_CommandBuffer.CreateCommandBuffer().AsParallelWriter(),
                 LastSystemVersion = LastSystemVersion,
                 Callback = m_Callback,
-                InputLogic = GetComponentTypeHandle<Logic>(false),
-                InputState = GetComponentTypeHandle<Logic.State>(false),
+                InputLogic = GetComponentTypeHandle<T>(false),
+                InputState = GetComponentTypeHandle<S>(false),
                 InputEntity = GetEntityTypeHandle(),
             };
 
@@ -123,4 +147,33 @@ namespace Game.Core
             //m_CommandBuffer.AddJobHandleForProducer(Dependency);
         }
     }
+
+    public struct ExecuteContext
+    {
+        public Entity Entity { get; }
+        public EntityCommandBuffer.ParallelWriter Writer { get; }
+        public int SortKey { get; }
+        public FunctionPointer<StateCallback> Callback { get; }
+
+        private int m_Index;
+        private ArchetypeChunk m_BatchInChunk;
+
+
+        public T GetData<T>(ComponentTypeHandle<T> handle)
+            where T : struct, IComponentData
+        {
+            return m_BatchInChunk.GetNativeArray(handle)[m_Index];
+        }
+
+        public ExecuteContext(EntityCommandBuffer.ParallelWriter writer, ArchetypeChunk batchInChunk, Entity entity, int index, FunctionPointer<StateCallback> callback, int sortKey)
+        {
+            Writer = writer;
+            Entity = entity;
+            SortKey = sortKey;
+            m_Index = index;
+            m_BatchInChunk = batchInChunk;
+            Callback = callback;
+        }
+    }
+
 }

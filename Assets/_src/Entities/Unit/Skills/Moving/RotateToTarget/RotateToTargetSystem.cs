@@ -10,6 +10,7 @@ namespace Game.Model.Units.Skills
 {
     using World;
 
+    /*
     [UpdateInGroup(typeof(GameTransformSystemGroup))]
     public partial class RotateToTargetSystem : SystemBase
     {
@@ -20,7 +21,7 @@ namespace Game.Model.Units.Skills
         {
             m_Query = GetEntityQuery(
                 ComponentType.ReadOnly<SetPositionOnMap>(),
-                ComponentType.ReadOnly<Target>(),
+                ComponentType.ReadOnly<FindTarget.Target>(),
                 ComponentType.ReadOnly<Rotation>(),
                 ComponentType.ReadWrite<Translation>()
             );
@@ -31,16 +32,11 @@ namespace Game.Model.Units.Skills
 
         struct LookToTarhetJob : IJobEntityBatch
         {
-            [ReadOnly]
-            public ComponentDataFromEntity<Translation> InputTranslation;
-            [ReadOnly]
-            public EntityTypeHandle InputEntity;
-            [ReadOnly]
-            public ComponentTypeHandle<SetPositionOnMap> InputPosition;
-            [ReadOnly]
-            public ComponentTypeHandle<Target> InputTarget;
-            [ReadOnly]
-            public float Delta;
+            [ReadOnly] public float Delta;
+            [ReadOnly] public ComponentDataFromEntity<Translation> InputTranslation;
+            [ReadOnly] public EntityTypeHandle InputEntity;
+            [ReadOnly] public ComponentTypeHandle<SetPositionOnMap> InputPosition;
+            [ReadOnly] public ComponentTypeHandle<FindTarget.Target> InputTarget;
 
             public ComponentTypeHandle<Rotation> InputRotation;
             public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
@@ -81,11 +77,12 @@ namespace Game.Model.Units.Skills
                 Delta = Time.DeltaTime,
                 InputPosition = GetComponentTypeHandle<SetPositionOnMap>(true),
                 InputEntity = GetEntityTypeHandle(),
-                InputTarget = GetComponentTypeHandle<Target>(true),
+                InputTarget = GetComponentTypeHandle<FindTarget.Target>(true),
                 InputTranslation = GetComponentDataFromEntity<Translation>(true),
                 InputRotation = GetComponentTypeHandle<Rotation>(false),
             };
             Dependency = job.ScheduleParallel(m_Query, Dependency);
         }
     }
+    */
 }

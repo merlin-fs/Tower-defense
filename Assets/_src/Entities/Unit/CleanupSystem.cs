@@ -7,6 +7,9 @@ using Unity.Collections;
 
 namespace Game.Model.Units
 {
+    using Skills;
+
+    /*
     [UpdateInGroup(typeof(GameDoneSystemGroup), OrderLast = true)]
     public partial class CleanupSystem : SystemBase
     {
@@ -22,7 +25,7 @@ namespace Game.Model.Units
             );
 
             m_QueryTarget = GetEntityQuery(
-                ComponentType.ReadOnly<Target>()
+                ComponentType.ReadOnly<FindTarget.Target>()
             );
             RequireForUpdate(m_Query);
         }
@@ -31,7 +34,7 @@ namespace Game.Model.Units
         {
             [DeallocateOnJobCompletion]
             public NativeArray<Entity> RemovedTarget;
-            public ComponentTypeHandle<Target> InputTarget;
+            public ComponentTypeHandle<FindTarget.Target> InputTarget;
 
             public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
             {
@@ -44,10 +47,9 @@ namespace Game.Model.Units
                         {
                             if (targets[i].Value == removed[j])
                             {
-                                targets[i] = Entity.Null;
+                                targets[i] = new FindTarget.Target { State = Core.JobState.None, Value = Entity.Null };
                                 UnityEngine.Debug.Log($"remove Target");
                             }
-                                
                         });
                 }
             }
@@ -83,7 +85,7 @@ namespace Game.Model.Units
             var removeTargetJob = new RemoveTargetJob()
             {
                 RemovedTarget = m_Query.ToEntityArray(Allocator.TempJob),
-                InputTarget = GetComponentTypeHandle<Target>(false),
+                InputTarget = GetComponentTypeHandle<FindTarget.Target>(false),
             };
             Dependency = removeTargetJob.ScheduleParallel(m_QueryTarget, Dependency);
             m_CommandBuffer.AddJobHandleForProducer(Dependency);
@@ -97,4 +99,5 @@ namespace Game.Model.Units
             m_CommandBuffer.AddJobHandleForProducer(Dependency);
         }
     }
+    */
 }

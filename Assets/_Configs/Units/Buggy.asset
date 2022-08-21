@@ -17,7 +17,6 @@ MonoBehaviour:
       PublicKeyToken=null
   m_Prefab: {fileID: 2959890941341858537, guid: f573bbdb89cdb9447b683ae67dcbbea7, type: 3}
   m_Skills:
-  - id: 0
   - id: 1
   m_Propirties:
   - id: 2
@@ -26,13 +25,6 @@ MonoBehaviour:
     id: 3
   references:
     version: 1
-    00000000:
-      type: {class: PathMovingDef, ns: Game.Model.Units, asm: Assembly-CSharp}
-      data:
-        m_DefineableType:
-          m_Type: Game.Model.Units.PathMoving, Assembly-CSharp, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
-        Speed: 50
     00000001:
       type: {class: CannonDef, ns: Game.Model.Units, asm: Assembly-CSharp}
       data:
@@ -55,8 +47,8 @@ MonoBehaviour:
         m_Value: 30
         m_Prefab: {fileID: 150954280697512265, guid: b738ce36907196e45b199bfb29b62de9, type: 3}
     00000003:
-      type: {class: LogicDef, ns: Game.Core, asm: Assembly-CSharp}
+      type: {class: EnemyLogicDef, ns: Game.Model.Units.Logics, asm: Assembly-CSharp}
       data:
         m_DefineableType:
-          m_Type: Game.Core.Logic, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-            PublicKeyToken=null
+          m_Type: Game.Model.Units.Logics.EnemyLogic, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null

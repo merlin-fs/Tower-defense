@@ -10,7 +10,7 @@ using Debug = UnityEngine.Debug;
 
 namespace Game.Model.World
 {
-    public partial struct Map
+    public partial class Map
     {
         public struct PathFinder
         {
@@ -18,12 +18,12 @@ namespace Game.Model.World
 
             internal IReadOnlyList<HeightType> m_HeightsType;
             internal IReadOnlyList<Height> m_Heights;
-            internal Map m_Map;
+            internal Map.Data m_Map;
             internal Entity Entity;
 
             internal GetCostTile m_GetCostTile;
 
-            public static NativeArray<int2> Execute(GetCostTile getCostTile, Entity entity, int2 source, int2 target, Map map,
+            public static NativeArray<int2> Execute(GetCostTile getCostTile, Entity entity, int2 source, int2 target, Map.Data map,
                 int? pathLimit = null)
             {
                 var finder = new PathFinder()
@@ -74,7 +74,7 @@ namespace Game.Model.World
 
             }
 
-            private void GetNeighbors(int2 source, Map map, Array en, NativeArray<Node.Edge> inList)
+            private void GetNeighbors(int2 source, Map.Data map, Array en, NativeArray<Node.Edge> inList)
             {
                 var list = inList;
                 Parallel.For(0, en.Length, 

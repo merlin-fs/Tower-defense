@@ -17,9 +17,9 @@ namespace Game.Core
         Error,
     }
 
-    public delegate void StateCallback(ref EntityCommandBuffer.ParallelWriter writer, ref Entity entity, JobResult state, int sortKey);
+    public delegate void StateCallback(EntityCommandBuffer.ParallelWriter writer, Entity entity, JobResult state, int sortKey);
 
-    public interface ICallbackComponent : IDefineable, IComponentData 
+    public interface ICallbackComponent
     {
     }
 }

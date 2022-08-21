@@ -16,7 +16,6 @@ namespace Game.Model.Units.Skills
         private EntityCommandBufferSystem m_CommandBuffer;
 
         private EntityQuery m_Query;
-        private EntityQuery m_MapQuery;
         protected override void OnCreate()
         {
             m_CommandBuffer = World.GetOrCreateSystem<GameSpawnSystemCommandBufferSystem>();
@@ -25,11 +24,6 @@ namespace Game.Model.Units.Skills
                 ComponentType.ReadOnly<TestSpawn.SpawnState>(),
                 ComponentType.ReadOnly<Teams>()
             );
-
-            m_MapQuery = GetEntityQuery(
-                ComponentType.ReadOnly<Map>()
-            );
-
             RequireForUpdate(m_Query);
         }
 
@@ -37,8 +31,6 @@ namespace Game.Model.Units.Skills
         {
             var buff = m_CommandBuffer.CreateCommandBuffer();
             var configs = m_Query.ToEntityArray(Unity.Collections.Allocator.Temp);
-
-            var map = m_MapQuery.GetSingleton<Map>();
 
             try
             {

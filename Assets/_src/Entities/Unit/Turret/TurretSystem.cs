@@ -9,6 +9,9 @@ using UnityEngine;
 
 namespace Game.Model.Units.Turrets
 {
+    using Skills;
+
+    /*
     [UpdateInGroup(typeof(GameTransformSystemGroup))]
     public partial class TurretSystem : SystemBase
     {
@@ -18,21 +21,18 @@ namespace Game.Model.Units.Turrets
         {
             m_Query = GetEntityQuery(
                 ComponentType.ReadWrite<Turret>(),
-                ComponentType.ReadOnly<Target>()
+                ComponentType.ReadOnly<FindTarget.Target>()
             );
             RequireForUpdate(m_Query);
         }
 
         struct TurretIdleJob : IJobEntityBatch
         {
-            [ReadOnly]
-            public float Delta;
-            [ReadOnly]
-            public float Rnd;
-            public ComponentTypeHandle<Turret> InputTurret;
-            [ReadOnly]
-            public ComponentTypeHandle<Target> InputTarget;
+            [ReadOnly] public float Delta;
+            [ReadOnly] public float Rnd;
+            [ReadOnly] public ComponentTypeHandle<FindTarget.Target> InputTarget;
 
+            public ComponentTypeHandle<Turret> InputTurret;
             public ComponentDataFromEntity<Rotation> InputRotation;
 
             public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
@@ -115,19 +115,14 @@ namespace Game.Model.Units.Turrets
 
         struct TurretTargetJob : IJobEntityBatch
         {
-            [ReadOnly]
-            public float Delta;
-            public ComponentTypeHandle<Turret> InputTurret;
-            [ReadOnly]
-            public ComponentTypeHandle<Target> InputTarget;
-            public ComponentDataFromEntity<Rotation> InputRotation;
+            [ReadOnly] public float Delta;
+            [ReadOnly] public ComponentTypeHandle<FindTarget.Target> InputTarget;
+            [ReadOnly] public ComponentDataFromEntity<Translation> InputTranslation;
+            [ReadOnly] public ComponentDataFromEntity<LocalToWorld> InputLocalToWorld;
+            [ReadOnly] public ComponentDataFromEntity<LocalToParent> InputLocalToParent;
 
-            [ReadOnly]
-            public ComponentDataFromEntity<Translation> InputTranslation;
-            [ReadOnly]
-            public ComponentDataFromEntity<LocalToWorld> InputLocalToWorld;
-            [ReadOnly]
-            public ComponentDataFromEntity<LocalToParent> InputLocalToParent;
+            public ComponentTypeHandle<Turret> InputTurret;
+            public ComponentDataFromEntity<Rotation> InputRotation;
             public ComponentTypeHandle<WeaponReady> InputStateReady;
 
             public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
@@ -203,7 +198,7 @@ namespace Game.Model.Units.Turrets
                 Rnd = UnityEngine.Random.value,
 
                 InputTurret = GetComponentTypeHandle<Turret>(false),
-                InputTarget = GetComponentTypeHandle<Target>(true),
+                InputTarget = GetComponentTypeHandle<FindTarget.Target>(true),
                 InputRotation = GetComponentDataFromEntity<Rotation>(false),
 
             };
@@ -217,7 +212,7 @@ namespace Game.Model.Units.Turrets
                 InputRotation = GetComponentDataFromEntity<Rotation>(false),
                 InputStateReady = GetComponentTypeHandle<WeaponReady>(false),
 
-                InputTarget = GetComponentTypeHandle<Target>(true),
+                InputTarget = GetComponentTypeHandle<FindTarget.Target>(true),
                 InputTranslation = GetComponentDataFromEntity<Translation>(true),
                 InputLocalToWorld = GetComponentDataFromEntity<LocalToWorld>(true),
                 InputLocalToParent = GetComponentDataFromEntity<LocalToParent>(true),
@@ -226,4 +221,5 @@ namespace Game.Model.Units.Turrets
             Dependency = job.Schedule(m_Query, Dependency);
         }
     }
+    */
 }

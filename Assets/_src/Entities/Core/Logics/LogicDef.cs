@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using Common.Defs;
-using Common.Entities.Tools;
 
 namespace Game.Core
 {
@@ -17,13 +16,12 @@ namespace Game.Core
         where T : struct, ILogic
     {
         protected static LogicSystem m_System;
+        public LogicStateMachine Logic => m_System.StateMachine;
+
 
         static System.Random m_Random = new System.Random();
 
         public abstract int GetTransition(int value, JobResult jobResult);
-
-        public static LogicStateMachine SLogic => m_System.StateMachine;
-        public LogicStateMachine Logic => m_System.StateMachine;
 
         protected static ILogicPart Random(IEnumerable<ILogicPart> list)
         {

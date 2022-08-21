@@ -8,7 +8,7 @@ using Unity.Mathematics;
 
 namespace Game.Model.World
 {
-    public partial struct Map
+    public partial class Map
     {
         public partial struct Path
         {

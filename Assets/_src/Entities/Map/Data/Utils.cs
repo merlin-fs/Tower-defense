@@ -8,11 +8,11 @@ using Unity.Mathematics;
 
 namespace Game.Model.World
 {
-    public partial struct Map
+    public partial class Map
     {
-        public NativeParallelHashSet<int2> GetCells(int2 center, int radius, Func<Map, int2, bool> isPassable)
+        public static NativeParallelHashSet<int2> GetCells(int2 center, int radius, Func<int2, bool> isPassable)
         {
-            var set = new NativeParallelHashSet<int2>(radius * 8, Allocator.Persistent);
+            var set = new NativeParallelHashSet<int2>(radius * 8, Allocator.Temp);
             int idx;
             for (int x = center.x - radius; x <= center.x + radius; x = idx)
             {
@@ -21,7 +21,7 @@ namespace Game.Model.World
                     if ((center.x - x) * (center.x - x) + (center.y - y) * (center.y - y) <= radius * radius)
                     {
                         var value = new int2(x, y);
-                        bool passable = isPassable?.Invoke(this, value) ?? true;
+                        bool passable = isPassable?.Invoke(value) ?? true;
                         if (passable)
                             set.Add(value);
                     }

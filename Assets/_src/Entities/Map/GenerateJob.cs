@@ -10,26 +10,20 @@ using AccidentalNoise;
 
 namespace Game.Model.World
 {
-    public partial struct Map
+    public partial class Map
     {
         public delegate float GetHeight(float x, float y);
            
         //[BurstCompile]
-        struct InitJob : IJobParallelFor
+        struct InitJob : IJob
         {
-            [ReadOnly, DeallocateOnJobCompletion]
-            public NativeArray<GenerateMapTag> Configs;
-            [ReadOnly, DeallocateOnJobCompletion]
-            public NativeArray<Map> Maps;
-
+            public GenerateMapTag Config;
             public EntityCommandBuffer.ParallelWriter Writer;
 
-            [NativeDisableUnsafePtrRestriction]
-            private Map m_Map;
+            public Map.Data Map;
 
-            public void Execute(int index)
+            public void Execute()
             {
-                GenerateMapTag config = Configs[index];
                 //var tt = new System.Diagnostics.Stopwatch();
                 //tt.Start();
 
@@ -38,31 +32,28 @@ namespace Game.Model.World
                     FractalType.FRACTIONALBROWNIANMOTION, //FractalType.RIDGEDMULTI, //FractalType.FRACTIONALBROWNIANMOTION,//FractalType.BILLOW,//FractalType.MULTI,
                     BasisType.SIMPLEX,
                     InterpolationType.QUINTIC,
-                    config.TerrainOctaves,           //Settings.TerrainOctaves,
-                    config.TerrainFrequency,         //Settings.TerrainFrequency,
-                    config.Seed);                    //seed 12023
+                    Config.TerrainOctaves,           //Settings.TerrainOctaves,
+                    Config.TerrainFrequency,         //Settings.TerrainFrequency,
+                    Config.Seed);                    //seed 12023
 
                 float max = float.MinValue;
                 float min = float.MaxValue;
 
-                m_Map = Maps[index];
-
-                InitHeights(m_Map.Tiles.WriteHeights,
+                InitHeights(Map.Tiles.WriteHeights,
                     (x, y) => (float)heightMap.Get(x, y),
-                    m_Map, ref min, ref max);
+                    Map, ref min, ref max);
 
-                InitHeightTypes(m_Map.Tiles.WriteHeightTypes, m_Map.Tiles.WriteHeights, m_Map, min, max);
-                InitBitmask(m_Map.Tiles.WriteBitmasks, m_Map.Tiles.WriteHeightTypes, m_Map);
+                InitHeightTypes(Map.Tiles.WriteHeightTypes, Map.Tiles.WriteHeights, Map, min, max);
+                InitBitmask(Map.Tiles.WriteBitmasks, Map.Tiles.WriteHeightTypes, Map);
 
-                var entity = Writer.CreateEntity(index);
-                Writer.AddComponent<Map>(index, entity, m_Map);
-
+                var entity = Writer.CreateEntity(0);
+                Writer.AddComponent<Map.Data>(0, entity, Map);
                 //tt.Stop();
                 //Debug.Log("Fill: " + tt.Elapsed);
             }
         }
 
-        internal static void InitHeights(IList<Height> tiles, GetHeight getHeight, Map map, ref float min, ref float max)
+        internal static void InitHeights(IList<Height> tiles, GetHeight getHeight, Map.Data map, ref float min, ref float max)
         {
             float localMin = min;
             float localMax = max;
@@ -83,7 +74,7 @@ namespace Game.Model.World
             max = localMax;
         }
 
-        internal static void InitHeightTypes(IList<HeightType> tiles, IList<Height> height, Map map, float min, float max)
+        internal static void InitHeightTypes(IList<HeightType> tiles, IList<Height> height, Map.Data map, float min, float max)
         {
             map.ParallelForeachTiles(
                 (x, y) =>
@@ -118,7 +109,7 @@ namespace Game.Model.World
             );
         }
 
-        internal static void InitBitmask(IList<Bitmask> tiles, IList<HeightType> height, Map map)
+        internal static void InitBitmask(IList<Bitmask> tiles, IList<HeightType> height, Map.Data map)
         {
             map.ParallelForeachTiles(
                 (x, y) =>

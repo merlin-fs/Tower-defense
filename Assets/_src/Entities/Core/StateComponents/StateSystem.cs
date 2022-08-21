@@ -5,7 +5,7 @@ using Unity.Entities;
 namespace Game.Core
 {
     public abstract partial class StateSystem<T> : CallbackSystem
-        where T : struct, ICallbackComponent
+        where T : struct, IComponentData, ICallbackComponent
     {
         protected EntityCommandBufferSystem m_CommandBuffer;
 

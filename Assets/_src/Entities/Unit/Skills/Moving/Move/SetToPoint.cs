@@ -9,7 +9,7 @@ namespace Game.Model.Units.Skills
 
     public partial class Move
     {
-        public static bool SetToPoint(Map map, ref Moving moving,
+        public static bool SetToPoint(Map.Data map, ref Moving moving,
             ref Translation translation, ref Rotation rotation)
         {
 

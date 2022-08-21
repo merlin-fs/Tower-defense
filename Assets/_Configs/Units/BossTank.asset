@@ -17,7 +17,6 @@ MonoBehaviour:
       PublicKeyToken=null
   m_Prefab: {fileID: 2632909179583991111, guid: e4401e9165f516f48966ff8e72fea20e, type: 3}
   m_Skills:
-  - id: 0
   - id: 1
   m_Propirties:
   - id: 2
@@ -27,19 +26,6 @@ MonoBehaviour:
     id: 4
   references:
     version: 1
-    00000000:
-      type: {class: SetPositionOnMapDef, ns: Game.Model.Units, asm: Assembly-CSharp}
-      data:
-        m_DefineableType:
-          m_Type: Game.Model.Units.SetPositionOnMap, Assembly-CSharp, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
-        InitPosition:
-          x: 10
-          y: 10
-        TargetPosition:
-          x: 48
-          y: 48
-        Speed: 80
     00000001:
       type: {class: CannonDef, ns: Game.Model.Units, asm: Assembly-CSharp}
       data:
@@ -76,11 +62,11 @@ MonoBehaviour:
           x: -100
           y: 100
     00000004:
-      type: {class: LogicDef, ns: Game.Core, asm: Assembly-CSharp}
+      type: {class: EnemyLogicDef, ns: Game.Model.Units.Logics, asm: Assembly-CSharp}
       data:
         m_DefineableType:
-          m_Type: Game.Core.Logic, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-            PublicKeyToken=null
+          m_Type: Game.Model.Units.Logics.EnemyLogic, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
     00000005:
       type: {class: Kinetic, ns: Game.Model.Units.Defs, asm: Assembly-CSharp}
       data:

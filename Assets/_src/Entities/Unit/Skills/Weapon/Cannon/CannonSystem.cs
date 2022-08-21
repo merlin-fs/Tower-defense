@@ -10,7 +10,7 @@ using Unity.Mathematics;
 
 namespace Game.Model.Units.Skills
 {
-    //[DisableAutoCreation]
+    /*
     [UpdateInGroup(typeof(GameLogicInitSystemGroup))]
     public partial class CannonInitSystem : SystemBase
     {
@@ -23,7 +23,6 @@ namespace Game.Model.Units.Skills
 
             m_Query = GetEntityQuery(
                 ComponentType.ReadWrite<Cannon>(),
-                ComponentType.ReadWrite<FindTarget>(),
                 ComponentType.ReadOnly<Teams>(),
                 ComponentType.ReadOnly<Translation>()
             );
@@ -31,40 +30,32 @@ namespace Game.Model.Units.Skills
 
         struct CannonInitJob : IJobEntityBatch
         {
-            [ReadOnly]
-            public float Delta;
-            [ReadOnly]
-            public ComponentTypeHandle<Translation> InputTranslation;
-            [ReadOnly]
-            public ComponentTypeHandle<Teams> InputTeams;
-            
+            [ReadOnly] public float Delta;
+            [ReadOnly] public ComponentTypeHandle<Translation> InputTranslation;
+            [ReadOnly] public ComponentTypeHandle<Teams> InputTeams;
+            [ReadOnly] public EntityTypeHandle InputEntity;
+
             public ComponentTypeHandle<Cannon> InputWeapon;
-            public ComponentTypeHandle<FindTarget> InputFindTarget;
-            
+
             public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
             {
                 var weapons = batchInChunk.GetNativeArray(InputWeapon);
                 var translation = batchInChunk.GetNativeArray(InputTranslation);
                 var teams = batchInChunk.GetNativeArray(InputTeams);
-                var finds = batchInChunk.GetNativeArray(InputFindTarget);
+                var entities = batchInChunk.GetNativeArray(InputEntity);
 
                 for (var i = 0; i < batchInChunk.Count; i++)
                 {
-                    Cannon iter = weapons[i];
+                    var iter = weapons[i];
+                    var entity = entities[i];
                     try
                     {
                         iter.TimeFind += Delta;
                         if (iter.Def.Link.FindDelay > iter.TimeFind)
                             continue;
-                        iter.TimeFind = 0;
 
-                        finds[i] = new FindTarget()
-                        {
-                            Find = true,
-                            SelfPosition = translation[i].Value,
-                            SelfRadius = iter.Def.Link.Distance,
-                            Teams = teams[i].EnemyTeams,
-                        };
+                        iter.TimeFind = 0;
+                        FindTarget.FindEnemy(entity, teams[i].EnemyTeams, translation[i].Value, 5f, default, batchIndex);
                     }
                     finally
                     {
@@ -78,123 +69,14 @@ namespace Game.Model.Units.Skills
         {
             var job = new CannonInitJob
             {
+                InputEntity = GetEntityTypeHandle(),
                 InputWeapon = GetComponentTypeHandle<Cannon>(),
-                InputFindTarget = GetComponentTypeHandle<FindTarget>(),
                 InputTeams = GetComponentTypeHandle<Teams>(true),
                 InputTranslation = GetComponentTypeHandle<Translation>(true),
                 Delta = Time.DeltaTime,
             };
             Dependency = job.ScheduleParallel(m_Query, Dependency);
-            m_CommandBuffer.AddJobHandleForProducer(Dependency);
-        }
-    }
-
-    [DisableAutoCreation]
-    [UpdateInGroup(typeof(GameLogicSystemGroup), OrderLast = true)]
-    public partial class FindTargetSystem : SystemBase
-    {
-        private EntityQuery m_Query;
-        private EntityQuery m_QueryFind;
-
-        protected override void OnCreate()
-        {
-            m_Query = GetEntityQuery(
-                ComponentType.ReadWrite<FindTarget>()
-            );
-            m_QueryFind = GetEntityQuery(
-                ComponentType.ReadOnly<Teams>(),
-                ComponentType.ReadOnly<Translation>()
-            );
-        }
-
-        struct FindTargetJob : IJobEntityBatch
-        {
-            [ReadOnly, DeallocateOnJobCompletion]
-            public NativeArray<Entity> InputEntities;
-            [ReadOnly]
-            public EntityTypeHandle InputEntity;
-            [ReadOnly]
-            public ComponentDataFromEntity<Translation> InputTranslation;
-            [ReadOnly]
-            public ComponentDataFromEntity<Teams> InputTeams;
-            
-            public ComponentTypeHandle<FindTarget> InputFind;
-            public ComponentTypeHandle<Target> InputTarget;
-
-            struct TempFindTarget
-            {
-                public Entity Entity;
-                public float Magnitude;
-            }
-
-            public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
-            {
-                var entities = batchInChunk.GetNativeArray(InputEntity);
-                var finds = batchInChunk.GetNativeArray(InputFind);
-                var targetEntities = InputEntities;
-                var targets = batchInChunk.GetNativeArray(InputTarget);
-                var positions = InputTranslation;
-                var teams = InputTeams;
-
-                for (var i = 0; i < batchInChunk.Count; i++)
-                {
-                    if (!finds[i].Find)
-                        continue;
-
-                    FindTarget iter = finds[i];
-                    try
-                    {
-                        var CounterLock = new object();
-                        TempFindTarget find = new TempFindTarget { Entity = Entity.Null, Magnitude = float.MaxValue };
-
-                        Parallel.For(0, InputEntities.Length,
-                            j =>
-                            {
-                                var target = targetEntities[j];
-                                var team = teams[target];
-                                //Проверка нужной коммнады
-                                if ((team.Team & iter.Teams) == 0)
-                                    return;
-
-                                var targetPos = positions[target].Value;
-                                var magnitude = (iter.SelfPosition - targetPos).magnitude();
-                                //Проверка пересечения двух сфер
-                                if (magnitude < find.Magnitude &&
-                                    // TODO: (5f) перенести в конфиг Unit
-                                    utils.SpheresIntersect(iter.SelfPosition, iter.SelfRadius, targetPos, 5f, out float3 vector))
-                                {
-                                    lock (CounterLock)
-                                    {
-                                        find.Magnitude = magnitude;
-                                        find.Entity = target;
-                                    }
-                                }
-
-                            });
-
-                        targets[i] = find.Entity;
-                    }
-                    finally
-                    {
-                        iter.Find = false;
-                        finds[i] = iter;
-                    }
-                }
-            }
-        }
-
-        protected override void OnUpdate()
-        {
-            var job = new FindTargetJob
-            {
-                InputEntities = m_QueryFind.ToEntityArray(Allocator.TempJob),
-                InputEntity = GetEntityTypeHandle(),
-                InputTranslation = GetComponentDataFromEntity<Translation>(true),
-                InputTeams = GetComponentDataFromEntity<Teams>(true),
-                InputFind = GetComponentTypeHandle<FindTarget>(false),
-                InputTarget = GetComponentTypeHandle<Target>(false),
-            };
-            Dependency = job.ScheduleParallel(m_Query, Dependency);
+            //m_CommandBuffer.AddJobHandleForProducer(Dependency);
         }
     }
 
@@ -210,7 +92,7 @@ namespace Game.Model.Units.Skills
 
             m_Query = GetEntityQuery(
                 ComponentType.ReadWrite<Cannon>(),
-                ComponentType.ReadOnly<Target>(),
+                ComponentType.ReadOnly<FindTarget.Target>(),
                 ComponentType.ReadOnly<WeaponReady>()
             );
             RequireForUpdate(m_Query);
@@ -218,14 +100,12 @@ namespace Game.Model.Units.Skills
 
         struct CannonShotJob : IJobEntityBatch
         {
-            [ReadOnly]
-            public EntityTypeHandle InputEntity;
+            [ReadOnly] public float Delta;
+            [ReadOnly] public EntityTypeHandle InputEntity;
+            [ReadOnly] public ComponentTypeHandle<FindTarget.Target> InputTarget;
             public EntityCommandBuffer.ParallelWriter Writer;
             public ComponentTypeHandle<Cannon> InputWeapon;
-            public ComponentTypeHandle<Target> InputTarget;
             public ComponentTypeHandle<WeaponReady> InputReady;
-            [ReadOnly]
-            public float Delta;
 
 
             public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
@@ -252,6 +132,7 @@ namespace Game.Model.Units.Skills
                             //add to Target components
                             foreach (var damage in iter.Def.Link.Damages)
                                 damage.AddComponentData(targets[i].Value, Writer, batchIndex);
+
                             Writer.AddComponent(batchIndex, targets[i].Value, new StateShotDone { Delay = 0.01f });
                         };
                     }
@@ -271,7 +152,7 @@ namespace Game.Model.Units.Skills
                 InputEntity = GetEntityTypeHandle(),
                 Writer = m_CommandBuffer.CreateCommandBuffer().AsParallelWriter(),
                 InputWeapon = GetComponentTypeHandle<Cannon>(),
-                InputTarget = GetComponentTypeHandle<Target>(),
+                InputTarget = GetComponentTypeHandle<FindTarget.Target>(true),
                 InputReady = GetComponentTypeHandle<WeaponReady>(),
 
                 Delta = Time.DeltaTime,

@@ -8,7 +8,7 @@ namespace Game.Model.Units.Skills
 
     public partial class Move
     {
-        public static bool FindPath(Map map, Entity entity, ref Moving moving, ref Map.Path.Info info, DynamicBuffer<Map.Path.Points> points, DynamicBuffer<Map.Path.Times> times)
+        public static bool FindPath(Map.Data map, Entity entity, ref Moving moving, ref Map.Path.Info info, DynamicBuffer<Map.Path.Points> points, DynamicBuffer<Map.Path.Times> times)
         {
             var path = Map.PathFinder.Execute(map.GetCostTile, entity, moving.CurrentPosition, moving.TargetPosition, map);
             try

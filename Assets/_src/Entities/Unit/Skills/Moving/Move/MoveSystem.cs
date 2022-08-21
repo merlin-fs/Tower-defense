@@ -20,12 +20,15 @@ namespace Game.Model.Units.Skills
             Service.Writer.SetComponent(sortKey, entity, new Commands() { Value = State.Init, TargetPosition = value, Callback = callback });
         }
 
-        //[DisableAutoCreation]
+        public static void MoveTo(Entity entity, int2 value, FunctionPointer<StateCallback> callback, int sortKey)
+        {
+            Service.Writer.SetComponent(sortKey, entity, new Commands() { Value = State.FindPath, TargetPosition = value, Callback = callback });
+        }
+
         [UpdateInGroup(typeof(GameLogicSystemGroup))]
         public class System : StateSystem<Moving>
         {
             private EntityQuery m_Query;
-            private EntityQuery m_MapQuery;
             private Unity.Mathematics.Random m_Random;
 
             protected override void OnCreate()
@@ -38,9 +41,6 @@ namespace Game.Model.Units.Skills
 
                 m_Query.AddChangedVersionFilter(ComponentType.ReadWrite<Commands>());
 
-                m_MapQuery = GetEntityQuery(
-                    ComponentType.ReadOnly<Map>()
-                );
                 RequireForUpdate(m_Query);
 
                 m_Random = new Unity.Mathematics.Random(847568);
@@ -50,7 +50,7 @@ namespace Game.Model.Units.Skills
 
             struct NewPositionJob : IJobEntityBatch
             {
-                [ReadOnly] public Map Map;
+                [ReadOnly] public Map.Data Map;
                 [ReadOnly] public uint LastSystemVersion;
                 [ReadOnly] public float Delta;
                 [ReadOnly] public EntityTypeHandle InputEntity;
@@ -154,14 +154,14 @@ namespace Game.Model.Units.Skills
                             {
                                 cmd.Value = State.None;
                                 Writer.SetComponent(batchIndex, entity, cmd);
-                                cmd.Callback.Invoke(ref Writer, ref entity, JobResult.Done, batchIndex);
+                                cmd.Callback.Invoke(Writer, entity, JobResult.Done, batchIndex);
                             }
                             break;
                             case State.Error:
                             {
                                 cmd.Value = State.None;
                                 Writer.SetComponent(batchIndex, entity, cmd);
-                                cmd.Callback.Invoke(ref Writer, ref entity, JobResult.Error, batchIndex);
+                                cmd.Callback.Invoke(Writer, entity, JobResult.Error, batchIndex);
                             }
                             break;
                         }
@@ -171,7 +171,7 @@ namespace Game.Model.Units.Skills
 
             protected override void OnUpdate()
             {
-                var map = m_MapQuery.GetSingleton<Map>();
+                var map = Map.Singleton;
 
                 var job = new NewPositionJob()
                 {
@@ -197,7 +197,7 @@ namespace Game.Model.Units.Skills
                 };
 
                 Dependency = job.ScheduleParallel(m_Query, Dependency);
-                m_CommandBuffer.AddJobHandleForProducer(Dependency); 
+                m_CommandBuffer.AddJobHandleForProducer(Dependency);
             }
         }
     } 

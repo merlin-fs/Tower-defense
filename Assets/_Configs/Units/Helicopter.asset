@@ -46,8 +46,8 @@ MonoBehaviour:
         m_Value: 140
         m_Prefab: {fileID: 150954280697512265, guid: b738ce36907196e45b199bfb29b62de9, type: 3}
     00000002:
-      type: {class: LogicDef, ns: Game.Core, asm: Assembly-CSharp}
+      type: {class: EnemyLogicDef, ns: Game.Model.Units.Logics, asm: Assembly-CSharp}
       data:
         m_DefineableType:
-          m_Type: Game.Core.Logic, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-            PublicKeyToken=null
+          m_Type: Game.Model.Units.Logics.EnemyLogic, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null

@@ -8,6 +8,7 @@ using Common.Core;
 namespace Game.Model.Units.Defs
 {
     using Core;
+    using Skills;
 
     public interface IUnitDef: IDef
     {
@@ -55,10 +56,8 @@ namespace Game.Model.Units.Defs
         protected override void AddComponentData(Entity entity, EntityManager manager, GameObjectConversionSystem conversionSystem)
         {
             base.AddComponentData(entity, manager, conversionSystem);
-
-            manager.AddComponent<Target>(entity);
-            manager.AddComponent<FindTarget>(entity);
             manager.AddComponentData<WeaponReady>(entity, true);
+
 
             AddComponents(m_Skills);
             AddComponents(m_Propirties);

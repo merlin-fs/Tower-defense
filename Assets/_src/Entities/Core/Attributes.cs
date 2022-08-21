@@ -6,24 +6,6 @@ using Unity.Mathematics;
 
 namespace Game.Model.Units
 {
-    public struct FindTarget : IComponentData
-    {
-        public bool Find;
-        /// <summary>
-        /// flags find teams
-        /// </summary>
-        public uint Teams;
-
-        public float SelfRadius;
-        public float3 SelfPosition;
-    }
-
-    public struct Target : IComponentData
-    {
-        public Entity Value;
-        public static implicit operator Target(Entity value) => new Target { Value = value };
-    }
-
     public struct WeaponReady : IComponentData
     {
         public bool IsReady;

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Entities;
+using Unity.Mathematics;
 using Common.Defs;
 
 using UnityEngine.AddressableAssets;
@@ -12,6 +13,7 @@ using TMPro;
 using Game.Core;
 using Game.Core.Repositories;
 using Game.Model.Units.Defs;
+using Game.Model.Units.Skills;
 using Game.Model.Units;
 using Game.Model.World;
 
@@ -40,6 +42,56 @@ public class PrefabDef : MonoBehaviour, IConvertGameObjectToEntity
 }
 
 
+namespace Game.Model.World
+{
+    public partial class Map
+    {
+        public static Data Singleton
+        {
+            get {
+                return Generate.Instance.HasSingleton<Data>()
+                    ? Generate.Instance.GetSingleton<Data>()
+                    : default;
+            }
+        }
+
+        public static void SetSingleton(Data value)
+        {
+            Generate.Instance.SetSingleton(value);
+        }
+
+        public static unsafe void GeneratePosition(Map.Data map, ref int2 position)
+        {
+            if (map.Tiles.EntityExist(position, null))
+            {
+                using (var cells = Map.GetCells(position, 5,
+                    (value) =>
+                    {
+                        bool result = map.Tiles.EntityExist(value);
+                        result |= IsNotPassable(map.Tiles.HeightTypes[map.At(value)].Value);
+
+                        return !result;
+                    }))
+                {
+                    position = cells.RandomElement();
+                }
+            }
+
+            static bool IsNotPassable(Map.HeightType value)
+            {
+                switch (value.Value)
+                {
+                    case Map.HeightType.Type.Snow:
+                    case Map.HeightType.Type.DeepWater:
+                    case Map.HeightType.Type.ShallowWater:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        }
+    }
+}
 
 [DisableAutoCreation]
 class DefConversion : GameObjectConversionSystem
@@ -92,8 +144,6 @@ public class MainStart : MonoBehaviour
     [SerializeField]
     GenerateMap m_GenerateMap;
 
-    Map m_Map;
-
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
@@ -105,7 +155,9 @@ public class MainStart : MonoBehaviour
     private async void Awake()
     {
         m_Button.onClick.AddListener(() => OnSpawn(1));
-        m_Pack.onClick.AddListener(() => OnSpawn(1000));
+        //m_Pack.onClick.AddListener(() => OnSpawn(1000));
+        m_Pack.onClick.AddListener(() => OnSpawn(20));
+
         m_GenerateMapButton.onClick.AddListener(() => GenerateMap(null));
 
         foreach (var iter in m_Defs)
@@ -127,9 +179,13 @@ public class MainStart : MonoBehaviour
         settings = settings.WithExtraSystem<DefConversion>();
 
         var repo = await Repositories.Instance.RepositoryAsync<UnitDef>();
+
         HealthDef.Initialize(m_CanvasParent, m_Prefab);
         
-        LogicDef.Initialize();
+        
+        //TODO: перенести ! (как вариант событие (шина) на инициализацию мира)
+        Game.Model.Units.Logics.EnemyLogicDef.Initialize();
+        Game.Model.Units.Logics.TowerLogicDef.Initialize();
 
 
         foreach (var iter in repo.Find())
@@ -153,15 +209,16 @@ public class MainStart : MonoBehaviour
             DstEntityManager.AddComponentData(reference, data);
         }
 
+
         GenerateMap(
             (map) =>
             {
-                m_Map = map;
-               // CreatePlayerBuild();
+                Map.SetSingleton(map);
+                CreatePlayerBuild();
             });
     }
 
-    private void GenerateMap(Action<Map> callback)
+    private void GenerateMap(Action<Map.Data> callback)
     {
         m_GenerateMap.Execute(callback);
     }
@@ -171,7 +228,7 @@ public class MainStart : MonoBehaviour
     {
         var def = (await m_Build.LoadAssetAsync().Task) as IUnitDef;
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        SpawnObject(m_Map, def, m_PlayerTeam, manager);
+        SpawnObject(Map.Singleton, def, m_PlayerTeam, manager);
     }
 
     private void OnSpawn(int count)
@@ -179,7 +236,7 @@ public class MainStart : MonoBehaviour
         StartCoroutine(SpawnObjects(count));
     }
 
-    private void SpawnObject(Map map, IUnitDef def, ITeamDef team, EntityManager manager)
+    private void SpawnObject(Map.Data map, IUnitDef def, ITeamDef team, EntityManager manager)
     {
         var entity = manager.CreateEntity(typeof(TestSpawn.SpawnState), typeof(Teams), typeof(HealthView));
         team.AddComponentData(entity, manager, null);
@@ -191,48 +248,6 @@ public class MainStart : MonoBehaviour
         //manager.AddComponentData(entity, position);
     }
 
-    unsafe void GeneratePosition(Map map, ref SetPositionOnMap position)
-    {
-        using (var cells = map.GetCells(position.InitPosition, 5,
-            (m, value) =>
-            {
-                bool result = m.Tiles.EntityExist(value);
-                result |= IsNotPassable(map.Tiles.HeightTypes[map.At(value)].Value);
-
-                return !result;
-            }))
-        {
-            position.InitPosition = cells.RandomElement();
-        }
-
-        using (var cells = map.GetCells(position.TargetPosition, 5,
-            (m, value) =>
-            {
-                //m.GetCostTile
-                bool result = m.Tiles.EntityExist(value);
-                result |= IsNotPassable(m.Tiles.HeightTypes[map.At(value)].Value);
-
-                return !result;
-            }))
-        {
-            position.TargetPosition = cells.RandomElement();
-        }
-
-        static bool IsNotPassable(Map.HeightType value)
-        {
-            switch (value.Value)
-            {
-                case Map.HeightType.Type.Snow:
-                case Map.HeightType.Type.DeepWater:
-                case Map.HeightType.Type.ShallowWater:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-    }
-
-
     IEnumerator SpawnObjects(int count)
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -240,7 +255,7 @@ public class MainStart : MonoBehaviour
         {
             var rnd = UnityEngine.Random.Range(0, m_Defs.Length);
             var def = m_Defs[rnd].Asset as IUnitDef;
-            SpawnObject(m_Map, def, m_Team, manager);
+            SpawnObject(Map.Singleton, def, m_Team, manager);
             yield return null;// new WaitForSeconds(0.1f);
         }
         yield break;

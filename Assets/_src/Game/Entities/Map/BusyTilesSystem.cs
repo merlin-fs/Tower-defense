@@ -9,45 +9,53 @@ using Unity.Mathematics;
 namespace Game.Model.Units
 {
     using World;
+    using Skills;
 
     //[DisableAutoCreation]
     [UpdateInGroup(typeof(GameSpawnSystemGroup))]
     public partial class BusyAddTilesSystem : SystemBase
     {
         private EntityQuery m_Query;
-        private EntityQuery m_QueryMap;
 
         protected override void OnCreate()
         {
             m_Query = GetEntityQuery(
-                ComponentType.ReadOnly<StateInit>(),
-                ComponentType.ReadOnly<SetPositionOnMap>()
+                ComponentType.ReadOnly<Move.Moving>(),
+                ComponentType.ReadOnly<Move.Commands>()
             );
-
-            m_QueryMap = GetEntityQuery(
-                ComponentType.ReadWrite<Map>()
-            );
+            m_Query.AddChangedVersionFilter(ComponentType.ReadWrite<Move.Commands>());
             RequireForUpdate(m_Query);
         }
 
 
         struct InitPositionJob : IJobEntityBatch
         {
-            [ReadOnly]
-            public EntityTypeHandle InputEntity;
-            [ReadOnly]
-            public ComponentTypeHandle<SetPositionOnMap> InputPosition;
-            [ReadOnly]
-            public Map Map;
+            [ReadOnly] public EntityTypeHandle InputEntity;
+            [ReadOnly] public ComponentTypeHandle<Move.Moving> InputPosition;
+            [ReadOnly] public ComponentTypeHandle<Move.Commands> InputState;
+            [ReadOnly] public Map.Data Map;
 
             public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
             {
                 var positions = batchInChunk.GetNativeArray(InputPosition);
                 var entities = batchInChunk.GetNativeArray(InputEntity);
-
+                var commands = batchInChunk.GetNativeArray(InputState);
                 for (var i = 0; i < batchInChunk.Count; i++)
                 {
-                    Map.Tiles.AddEntity(positions[i].TargetPosition, entities[i]);
+                    switch (commands[i].Value)
+                    {
+                        case Move.State.Init:
+                        {
+                            Map.Tiles.AddEntity(commands[i].TargetPosition, entities[i]);
+                        }
+                        break;
+                        case Move.State.MoveToPoint:
+                        {
+                            Map.Tiles.DelEntity(positions[i].CurrentPosition);
+                            Map.Tiles.AddEntity(commands[i].TargetPosition, entities[i]);
+                        }
+                        break;
+                    }
                 }
             }
         }
@@ -56,9 +64,10 @@ namespace Game.Model.Units
         {
             var job = new InitPositionJob()
             {
-                Map = m_QueryMap.GetSingleton<Map>(),
+                Map = Map.Singleton,
                 InputEntity = GetEntityTypeHandle(),
-                InputPosition = GetComponentTypeHandle<SetPositionOnMap>(true),
+                InputPosition = GetComponentTypeHandle<Move.Moving>(true),
+                InputState = GetComponentTypeHandle<Move.Commands>(true),
             };
             Dependency = job.ScheduleParallel(m_Query, Dependency);
         }
@@ -68,17 +77,12 @@ namespace Game.Model.Units
     public partial class BusyRemoveTilesSystem : SystemBase
     {
         private EntityQuery m_Query;
-        private EntityQuery m_QueryMap;
-
+        
         protected override void OnCreate()
         {
             m_Query = GetEntityQuery(
                 ComponentType.ReadOnly<StateDead>(),
-                ComponentType.ReadOnly<SetPositionOnMap>()
-            );
-
-            m_QueryMap = GetEntityQuery(
-                ComponentType.ReadWrite<Map>()
+                ComponentType.ReadOnly<Move.Moving>()
             );
             RequireForUpdate(m_Query);
         }
@@ -87,9 +91,9 @@ namespace Game.Model.Units
         struct InitPositionJob : IJobEntityBatch
         {
             [ReadOnly]
-            public ComponentTypeHandle<SetPositionOnMap> InputPosition;
+            public ComponentTypeHandle<Move.Moving> InputPosition;
             [ReadOnly]
-            public Map Map;
+            public Map.Data Map;
 
             public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
             {
@@ -97,7 +101,7 @@ namespace Game.Model.Units
 
                 for (var i = 0; i < batchInChunk.Count; i++)
                 {
-                    Map.Tiles.DelEntity(positions[i].TargetPosition);
+                    Map.Tiles.DelEntity(positions[i].CurrentPosition);
                 }
             }
         }
@@ -106,8 +110,8 @@ namespace Game.Model.Units
         {
             var job = new InitPositionJob()
             {
-                Map = m_QueryMap.GetSingleton<Map>(),
-                InputPosition = GetComponentTypeHandle<SetPositionOnMap>(true),
+                Map = Map.Singleton,
+                InputPosition = GetComponentTypeHandle<Move.Moving>(true),
             };
             Dependency = job.ScheduleParallel(m_Query, Dependency);
         }
