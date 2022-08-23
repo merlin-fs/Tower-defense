@@ -22,6 +22,7 @@ namespace Game.Model.Units.Skills
             None,
             Init,
             FindPath,
+            FindPathDone,
             MoveToPoint,
             Error,
             Done,
