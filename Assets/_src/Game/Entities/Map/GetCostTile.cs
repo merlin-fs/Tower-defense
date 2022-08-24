@@ -11,6 +11,9 @@ namespace Game.Model.World
 
             public unsafe double GetCostTile(Entity entity, int2 source, int2 target)
             {
+                if (!Passable(target))
+                    return -1f;
+
                 Entity entityTarget;
                 if (Tiles.EntityExist(target, &entityTarget) && entityTarget != entity)
                     return -1f;

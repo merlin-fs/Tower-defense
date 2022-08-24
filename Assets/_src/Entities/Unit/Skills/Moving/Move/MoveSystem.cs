@@ -126,7 +126,7 @@ namespace Game.Model.Units.Skills
                                         buff.ResizeUninitialized(path.Length);
                                         Parallel.For(0, path.Length, (i) =>
                                         {
-                                            var p = path[path.Length - (i + 1)];
+                                            var p = path[i];
                                             buff[i] = new float3(p.x, p.y, 0);
 
                                         });

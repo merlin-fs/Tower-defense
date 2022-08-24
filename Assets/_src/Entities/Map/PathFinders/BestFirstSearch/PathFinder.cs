@@ -12,7 +12,6 @@ namespace Game.Model.World
 {
     public partial class Map
     {
-
         //TODO: чтото с поиском не так :( Нужно нати другой.
         public struct PathFinder
         {

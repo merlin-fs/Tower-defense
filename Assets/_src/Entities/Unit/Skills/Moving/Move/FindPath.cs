@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Unity.Entities;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -17,7 +18,21 @@ namespace Game.Model.Units.Skills
             var m = moving;
             Task<NativeArray<int2>>.Run(() =>
             {
-                return Map.PathFinder.Execute(map.GetCostTile, entity, m.CurrentPosition, m.TargetPosition, map);
+                var param = new EpPathFinding.JumpPointParam(new EpPathFinding.Grid(map, entity),
+                    new EpPathFinding.GridPos(m.CurrentPosition.x, m.CurrentPosition.y),
+                    new EpPathFinding.GridPos(m.TargetPosition.x, m.TargetPosition.y));
+
+                try
+                {
+                    var list = EpPathFinding.JumpPointFinder.FindPath(param);
+                    return new NativeArray<int2>(list.Select(i => new int2(i.x, i.y)).ToArray(), Allocator.TempJob);
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+
+                //return Map.PathFinder.Execute(map.GetCostTile, entity, m.CurrentPosition, m.TargetPosition, map);
             })
                 .ContinueWith((task) =>
                 {
