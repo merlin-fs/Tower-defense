@@ -60,22 +60,26 @@ namespace Game.Model.World
             Generate.Instance.SetSingleton(value);
         }
 
-        public static unsafe void GeneratePosition(Map.Data map, ref int2 position)
+        public static unsafe bool GeneratePosition(Map.Data map, ref int2 position)
         {
+            bool result = true;
             if (map.Tiles.EntityExist(position, null))
             {
                 using (var cells = Map.GetCells(position, 5,
                     (value) =>
                     {
-                        bool result = map.Tiles.EntityExist(value);
-                        result |= IsNotPassable(map.Tiles.HeightTypes[map.At(value)].Value);
+                        bool pass = map.Tiles.EntityExist(value);
+                        pass |= IsNotPassable(map.Tiles.HeightTypes[map.At(value)].Value);
 
-                        return !result;
+                        return !pass;
                     }))
                 {
-                    position = cells.RandomElement();
-                }
+                    result = cells.Count() > 0;
+                    if (result)
+                        position = cells.RandomElement();
+                };
             }
+            return result;
 
             static bool IsNotPassable(Map.HeightType value)
             {

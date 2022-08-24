@@ -1,6 +1,9 @@
 using System;
 using Unity.Entities;
+using Unity.Collections;
 using Unity.Mathematics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Game.Model.Units.Skills
 {
@@ -8,75 +11,82 @@ namespace Game.Model.Units.Skills
 
     public partial class Move
     {
-        public static bool FindPath(Map.Data map, Entity entity, ref Moving moving, ref Map.Path.Info info, DynamicBuffer<Map.Path.Points> points, DynamicBuffer<Map.Path.Times> times)
+
+        public static void FindPath(Map.Data map, Entity entity, Moving moving, Action<NativeArray<int2>> callback)
         {
-            var path = Map.PathFinder.Execute(map.GetCostTile, entity, moving.CurrentPosition, moving.TargetPosition, map);
-            try
+            var m = moving;
+            Task<NativeArray<int2>>.Run(() =>
             {
-                if (path.Length < 2)
+                return Map.PathFinder.Execute(map.GetCostTile, entity, m.CurrentPosition, m.TargetPosition, map);
+            })
+                .ContinueWith((task) =>
                 {
-                    return false;
-                }
+                    callback(task.Result);
+                });
+        }
 
-                moving.TargetPosition = path[0];
+        public static bool FindPath(Map.Data map, ref Moving moving, ref Map.Path.Info info, DynamicBuffer<Map.Path.Points> points, DynamicBuffer<Map.Path.Times> times)
+        {
+            var path = points;
+            UnityEngine.Debug.Log($"thread: {Thread.CurrentThread.ManagedThreadId}");
+            if (path.Length < 2)
+            {
+                return false;
+            }
 
-                points.ResizeUninitialized(path.Length);
+            moving.TargetPosition = new int2((int)path[path.Length-1].Value.x, (int)path[path.Length-1].Value.y);
+            points.ResizeUninitialized(path.Length);
 
-                int timeLen = path.Length;
-                float step = 1f / timeLen;
-                times.ResizeUninitialized(timeLen);
+            int timeLen = path.Length;
+            float step = 1f / timeLen;
+            times.ResizeUninitialized(timeLen);
 
-                for (int j = 0; j < path.Length; j++)
-                    points[j] = map.MapToWord(path[path.Length - (j + 1)]);
+            for (int j = 0; j < path.Length; j++)
+                points[j] = map.MapToWord(new int2((int)path[j].Value.x, (int)path[j].Value.y));
 
-                info.DeltaTime = 1f / (points.Length - 1);
-                var pts = points.AsNativeArray();
+            info.DeltaTime = 1f / (points.Length - 1);
+            var pts = points.AsNativeArray();
 
-                float len = 0f;
-                float3 vector = Map.Path.GetPosition(0f, false, pts, info.DeltaTime);
-                for (int j = 0; j < timeLen; j++)
+            float len = 0f;
+            float3 vector = Map.Path.GetPosition(0f, false, pts, info.DeltaTime);
+            for (int j = 0; j < timeLen; j++)
+            {
+                float pos = step * (j + 1);
+                float3 point = Map.Path.GetPosition(pos, false, pts, info.DeltaTime);
+                len += math.distance(vector, point);
+                vector = point;
+
+                times[j] = new Map.Path.Times()
                 {
-                    float pos = step * (j + 1);
-                    float3 point = Map.Path.GetPosition(pos, false, pts, info.DeltaTime);
-                    len += math.distance(vector, point);
-                    vector = point;
-
-                    times[j] = new Map.Path.Times()
-                    {
-                        Time = pos,
-                        Length = len,
-                    };
+                    Time = pos,
+                    Length = len,
                 };
-                info.Length = len;
-                /*
-                float diff = 0;
-                vector = pts[0].Value;
-                len = 0;
-                for (int j = 0; j < timeLen; j++)
-                {
-                    var time = times[j];
-                    var staticTime = step * (j + 1);
-
-                    int p = (int)(staticTime / info.DeltaTime);
-                    var point = pts[p].Value;
-                    len += math.distancesq(vector, point);
-                    vector = point;
-                    var staticLen = info.Length * staticTime;
-
-                    diff = (time.Time / time.Length) * (time.Length - staticLen);
-
-                    time.Time += diff;
-                    time.Length = len;
-
-                    times[j] = time;
-                }
-                */
-                return true;
-            }
-            finally
+            };
+            info.Length = len;
+            /*
+            float diff = 0;
+            vector = pts[0].Value;
+            len = 0;
+            for (int j = 0; j < timeLen; j++)
             {
-                path.Dispose();
+                var time = times[j];
+                var staticTime = step * (j + 1);
+
+                int p = (int)(staticTime / info.DeltaTime);
+                var point = pts[p].Value;
+                len += math.distancesq(vector, point);
+                vector = point;
+                var staticLen = info.Length * staticTime;
+
+                diff = (time.Time / time.Length) * (time.Length - staticLen);
+
+                time.Time += diff;
+                time.Length = len;
+
+                times[j] = time;
             }
+            */
+            return true;
         }
     }
 }

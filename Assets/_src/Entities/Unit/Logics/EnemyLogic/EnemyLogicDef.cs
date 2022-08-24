@@ -20,7 +20,8 @@ namespace Game.Model.Units.Logics
             m_System = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<LogicSystem>();
             m_System.Configure
                 .TransitionEnter<InitPlaceJob>()
-                .Transition<InitPlaceJob, FindTargetPlaceJob>();
+                .Transition<InitPlaceJob, FindTargetPlaceJob>()
+                .Transition<FindTargetPlaceJob, FindTargetPlaceJob>(JobResult.Error);
         }
 
         protected override void AddComponentData(Entity entity, EntityManager manager, GameObjectConversionSystem conversionSystem)

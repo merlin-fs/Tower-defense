@@ -12,6 +12,8 @@ namespace Game.Model.World
 {
     public partial class Map
     {
+
+        //TODO: чтото с поиском не так :( Нужно нати другой.
         public struct PathFinder
         {
             public delegate double GetCostTile(Entity entity, int2 source, int2 target);
@@ -23,7 +25,7 @@ namespace Game.Model.World
 
             internal GetCostTile m_GetCostTile;
 
-            public static NativeArray<int2> Execute(GetCostTile getCostTile, Entity entity, int2 source, int2 target, Map.Data map,
+            public static NativeArray<int2> Execute(GetCostTile getCostTile, Entity entity, int2 source, int2 target, Map.Data map, 
                 int? pathLimit = null)
             {
                 var finder = new PathFinder()
@@ -117,8 +119,8 @@ namespace Game.Model.World
                     return new NativeArray<int2>();
 
                 var capacity = pathLimit ?? 100;
-                var previous = new NativeParallelHashMap<int2, int2>(capacity, Allocator.Temp);
-                var costs = new NativeParallelHashMap<int2, Node.Cost>(capacity, Allocator.Temp)
+                var previous = new NativeParallelHashMap<int2, int2>(capacity, Allocator.TempJob);
+                var costs = new NativeParallelHashMap<int2, Node.Cost>(capacity, Allocator.TempJob)
                 {
                     { 
                         source, 
@@ -126,7 +128,7 @@ namespace Game.Model.World
                     }
                 };
 
-                var queue = new SortedNativeHashMap<Node.Cost, int2>(capacity, Allocator.Temp,
+                var queue = new SortedNativeHashMap<Node.Cost, int2>(capacity, Allocator.TempJob,
                     (Node.Cost i1, Node.Cost i2) =>
                     {
                         if (!i1.Value.HasValue)
@@ -146,12 +148,12 @@ namespace Game.Model.World
                 queue.Push(costs[source], source);
 
                 var en = Enum.GetValues(typeof(Direct));
-                var connections = new NativeArray<Node.Edge>(en.Length, Allocator.Temp);
-                int2 limitTarget = target;
+                var connections = new NativeArray<Node.Edge>(en.Length, Allocator.TempJob);
+                //int2 limitTarget = target;
 
                 while (queue.Pop(out (Node.Cost cost, int2 value) values))
                 {
-                    limitTarget = values.value;
+                    //limitTarget = values.value;
 
                     if (values.value.Equals(target))
                         break;
@@ -192,9 +194,9 @@ namespace Game.Model.World
                     if (pathLimit.HasValue && pathLimit.Value <= 0)
                         break;
                 }
-                
-                var path = ShortestPath(limitTarget);
-                //var path = ShortestPath(target);
+
+                //var path = ShortestPath(limitTarget);
+                var path = ShortestPath(target);
                 connections.Dispose();
                 previous.Dispose();
                 costs.Dispose();
@@ -203,11 +205,14 @@ namespace Game.Model.World
 
                 NativeArray <int2> ShortestPath(int2 v)
                 {
-                    var path = new NativeList<int2>(previous.Count(), Allocator.Temp);
+                    var path = new NativeList<int2>(previous.Count(), Allocator.TempJob);
                     while (!v.Equals(source))
                     {
                         if (!previous.TryGetValue(v, out int2 test))
-                            return path.ToArray(Allocator.Temp);
+                        {
+                            path.Dispose();
+                            return new NativeList<int2>(0, Allocator.TempJob);
+                        }
                         else
                         {
                             path.Add(v);
@@ -216,7 +221,7 @@ namespace Game.Model.World
                     };
                     path.Add(source);
                     path.Reverse();
-                    return path.ToArray(Allocator.Temp);
+                    return path.ToArray(Allocator.TempJob);
                 }
             }
 

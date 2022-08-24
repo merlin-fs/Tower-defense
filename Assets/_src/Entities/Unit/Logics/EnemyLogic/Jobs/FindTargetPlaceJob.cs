@@ -34,7 +34,11 @@ namespace Game.Model.Units.Logics
             if (enemy != Entity.Null)
             {
                 var pos = InputMove[enemy].CurrentPosition;
-                Map.GeneratePosition(Map.Singleton, ref pos);
+                if (!Map.GeneratePosition(Map.Singleton, ref pos))
+                {
+                    context.Callback.Invoke(context.Writer, context.Entity, JobResult.Error, context.SortKey);
+                    return;
+                }
                 Move.MoveTo(context.Entity, pos, context.Callback, context.SortKey);
             }
             else
