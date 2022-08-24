@@ -118,6 +118,7 @@ namespace Game.Model.Units.Skills
                                 cmd.Value = State.None;
                                 data.TargetPosition = cmd.TargetPosition;
                                 datas[i] = data;
+                                Writer.SetComponent(batchIndex, entity, cmd);
                                 FindPath(Map, entities[i], data, 
                                     (path) =>
                                     {
@@ -204,7 +205,7 @@ namespace Game.Model.Units.Skills
             }
         }
 
-        [DisableAutoCreation]
+        //[DisableAutoCreation]
         [UpdateInGroup(typeof(GameLogicSystemGroup))]
         public partial class MoveToSystem : SystemBase
         {

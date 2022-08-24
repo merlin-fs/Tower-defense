@@ -12,6 +12,8 @@ namespace Game.Model.World
 {
     public partial class Map
     {
+
+        //TODO: чтото с поиском не так :( Нужно нати другой.
         public struct PathFinder
         {
             public delegate double GetCostTile(Entity entity, int2 source, int2 target);
@@ -147,11 +149,11 @@ namespace Game.Model.World
 
                 var en = Enum.GetValues(typeof(Direct));
                 var connections = new NativeArray<Node.Edge>(en.Length, Allocator.TempJob);
-                int2 limitTarget = target;
+                //int2 limitTarget = target;
 
                 while (queue.Pop(out (Node.Cost cost, int2 value) values))
                 {
-                    limitTarget = values.value;
+                    //limitTarget = values.value;
 
                     if (values.value.Equals(target))
                         break;
@@ -192,9 +194,9 @@ namespace Game.Model.World
                     if (pathLimit.HasValue && pathLimit.Value <= 0)
                         break;
                 }
-                
-                var path = ShortestPath(limitTarget);
-                //var path = ShortestPath(target);
+
+                //var path = ShortestPath(limitTarget);
+                var path = ShortestPath(target);
                 connections.Dispose();
                 previous.Dispose();
                 costs.Dispose();
@@ -207,7 +209,10 @@ namespace Game.Model.World
                     while (!v.Equals(source))
                     {
                         if (!previous.TryGetValue(v, out int2 test))
-                            return path.ToArray(Allocator.TempJob);
+                        {
+                            path.Dispose();
+                            return new NativeList<int2>(0, Allocator.TempJob);
+                        }
                         else
                         {
                             path.Add(v);
