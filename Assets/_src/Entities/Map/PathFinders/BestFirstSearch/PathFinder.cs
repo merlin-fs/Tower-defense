@@ -176,6 +176,9 @@ namespace Game.Model.World
                             costs.Add(iter.Target, cost);
                         }
 
+                        if (previous.ContainsKey(iter.Target) || queue.Has(cost))
+                            continue;
+
                         if (cost.Value.HasValue || previous.ContainsKey(iter.Target))
                             continue;
 
@@ -208,7 +211,7 @@ namespace Game.Model.World
                         if (!previous.TryGetValue(v, out int2 test))
                         {
                             path.Dispose();
-                            return new NativeList<int2>(0, Allocator.TempJob);
+                            return new NativeList<int2>(1, Allocator.TempJob);
                         }
                         else
                         {

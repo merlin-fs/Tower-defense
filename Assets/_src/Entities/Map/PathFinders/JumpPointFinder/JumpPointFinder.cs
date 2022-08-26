@@ -101,6 +101,7 @@ namespace Game.Model.World
                 // push the start node into the open list
                 //tOpenList.Add(tStartNode);
                 //tStartNode.isOpened = true;
+
                 /*
                 if (iParam.AllowEndNodeUnWalkable && !iParam.SearchGrid.IsWalkableAt(tEndNode.x, tEndNode.y))
                 {

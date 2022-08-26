@@ -51,6 +51,7 @@ namespace Game.Model.Units.Skills
                 {
                     throw e;
                 }
+                
                 //return Map.PathFinder.Execute(map.GetCostTile, entity, m.CurrentPosition, m.TargetPosition, map);
             })
                 .ContinueWith((task) =>
