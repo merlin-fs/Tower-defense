@@ -21,12 +21,12 @@ namespace Game.Model.Units.Skills
             {
                 try
                 {
-                    var path = Map.JumpPointFinder.FindPath(map.GetCostTile, map, entity, m.CurrentPosition, m.TargetPosition);
-                    if (path.Length > 1)
+                    using (var path = Map.JumpPointFinder.FindPath(map.GetCostTile, map, entity, m.CurrentPosition, m.TargetPosition))
                     {
-                        var list = new List<int2>(path);
-                        path.Dispose();
+                        if (path.Length < 2)
+                            return new NativeArray<int2>(path, Allocator.TempJob);
 
+                        var list = new List<int2>(path);
                         int idx = 1;
                         int2 point = list[0];
                         while (idx < list.Count)
@@ -39,14 +39,13 @@ namespace Game.Model.Units.Skills
                             for (int i = 1; i < count; i++)
                             {
                                 var pt = new int2(point.x + v.x * i, point.y + v.y * i);
-                                list.Insert(idx + (i-1), pt);
+                                list.Insert(idx + (i - 1), pt);
                             }
                             point = next;
                             idx += count;
                         }
                         return new NativeArray<int2>(list.ToArray(), Allocator.TempJob);
                     }
-                    return path;
                 }
                 catch (Exception e)
                 {
@@ -56,7 +55,14 @@ namespace Game.Model.Units.Skills
             })
                 .ContinueWith((task) =>
                 {
-                    callback(task.Result);
+                    try
+                    {
+                        callback(task.Result);
+                    }
+                    finally
+                    {
+                        task.Result.Dispose();
+                    }
                 });
         }
 

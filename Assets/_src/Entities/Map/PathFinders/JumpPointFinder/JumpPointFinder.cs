@@ -23,8 +23,6 @@ namespace Game.Model.World
                 {
                     m_Entity = entity,
                     m_Map = map,
-
-                    m_EndNode = target,
                 }
                 .Search(source, target);
             }
@@ -41,14 +39,14 @@ namespace Game.Model.World
 
             private int2 m_EndNode, m_StartNode;
             private NativeParallelHashMap<int2, Node.Cost> m_Costs;
-            private NativeParallelHashMap<int2, int2> m_Closed;
             private SortedNativeHashMap<Node.Cost, int2> m_Queue;
 
             public JumpPointFinder(GetCostTile getCostTile, int2 source, int2 target, HeuristicMode iMode)
             {
                 m_StartNode = source;
                 m_EndNode = target;
-
+                m_UseRecursive = false;
+                m_Map = default;
                 switch (iMode)
                 {
                     case HeuristicMode.MANHATTAN:
@@ -66,12 +64,18 @@ namespace Game.Model.World
                 }
                 m_Entity = Entity.Null;
                 m_GetCostTile = getCostTile;
+                m_Hierarchy = default;
+                m_Connections = default;
+                m_Costs = default;
+                m_Queue = default;
+            }
+
+            public NativeArray<int2> Search(int2 source, int2 target)
+            {
+                //var capacity = pathLimit ?? 100;
+                bool revertEndNodeWalkable = false;
                 m_Hierarchy = new NativeParallelHashMap<int2, int2>(100, Allocator.TempJob);
                 m_Connections = new NativeArray<int2>(m_Directs.Length, Allocator.TempJob);
-                m_Map = default;
-                m_UseRecursive = false;
-
-                m_Closed = new NativeParallelHashMap<int2, int2>(100, Allocator.TempJob);
                 m_Costs = new NativeParallelHashMap<int2, Node.Cost>(100, Allocator.TempJob)
                 {
                     {
@@ -82,33 +86,13 @@ namespace Game.Model.World
                         }
                     }
                 };
-
                 m_Queue = new SortedNativeHashMap<Node.Cost, int2>(100, Allocator.TempJob,
                     (Node.Cost i1, Node.Cost i2) =>
                     {
-                        /*
-                        if (!i1.Value.HasValue)
-                            return -1;
-                        if (!i2.Value.HasValue)
-                            return 1;
-                        double res = i1.GetHashCode() - i2.GetHashCode();
-                        if (res == 0)
-                            return 0;
-                        res = (i1.Value.Value + i1.Distance) - (i2.Value.Value + i2.Distance);
-                        return Math.Sign(res);
-
-                        */
                         float result = i1.heuristicStartToEndLen - i2.heuristicStartToEndLen;
                         return Math.Sign(result);
                     }
                 );
-
-            }
-
-            public NativeArray<int2> Search(int2 source, int2 target)
-            {
-                //var capacity = pathLimit ?? 100;
-                bool revertEndNodeWalkable = false;
 
                 // set the `g` and `f` value of the start node to be 0
                 //tStartNode.startToCurNodeLen = 0;
@@ -125,52 +109,64 @@ namespace Game.Model.World
                 }
                 */
                 m_Queue.Push(m_Costs[source], source);
-
-
-                while (m_Queue.Pop(out (Node.Cost cost, int2 value) node))
+                try
                 {
-
-                    if (node.value.Equals(target))
+                    while (m_Queue.Pop(out (Node.Cost cost, int2 value) node))
                     {
-                        if (revertEndNodeWalkable)
-                        {
-                            //iParam.SearchGrid.SetWalkableAt(tEndNode.x, tEndNode.y, false);
-                        }
-                        return ShortestPath(node.value); // rebuilding path
-                    }
 
-                    IdentifySuccessors(node);
+                        if (node.value.Equals(target))
+                        {
+                            if (revertEndNodeWalkable)
+                            {
+                                //iParam.SearchGrid.SetWalkableAt(tEndNode.x, tEndNode.y, false);
+                            }
+                            return ShortestPath(node.value); // rebuilding path
+                        }
+
+                        IdentifySuccessors(node);
+                    }
+                    return new NativeArray<int2>(1, Allocator.TempJob);
                 }
-                return new NativeList<int2>(0, Allocator.TempJob);
+                finally
+                {
+                    m_Hierarchy.Dispose();
+                    m_Connections.Dispose();
+                    m_Costs.Dispose();
+                    m_Queue.Dispose();
+                }
             }
 
             private NativeArray<int2> ShortestPath(int2 v)
             {
-                var path = new NativeList<int2>(m_Hierarchy.Count(), Allocator.TempJob);
-                
-                while (!v.Equals(m_StartNode))
+                var path = new NativeList<int2>(m_Hierarchy.Count(), Allocator.TempJob); 
+                try
                 {
-                    if (!m_Hierarchy.TryGetValue(v, out int2 test))
+                    while (!v.Equals(m_StartNode))
                     {
-                        path.Dispose();
-                        return new NativeList<int2>(0, Allocator.TempJob);
-                    }
-                    else
-                    {
-                        path.Add(v);
-                        v = test;
-                    }
-                };
-                path.Add(m_StartNode);
+                        if (!m_Hierarchy.TryGetValue(v, out int2 test))
+                        {
+                            return new NativeArray<int2>(1, Allocator.TempJob);
+                        }
+                        else
+                        {
+                            path.Add(v);
+                            v = test;
+                        }
 
-                var result = new NativeArray<int2>(path.Length, Allocator.TempJob);
-                var j = path.Length-1;
-                for (var i = 0; i < path.Length; i++, --j)
-                {
-                    result[i] = path[j];
+                        if (path.Length > m_Hierarchy.Count())
+                        {
+                            break;
+                        }
+
+                    };
+                    path.Add(m_StartNode);
+                    path.Reverse();
+                    return path.ToArray(Allocator.TempJob);
                 }
-
-                return result;
+                finally 
+                { 
+                    path.Dispose(); 
+                }
             }
 
             private bool IsWalkableAt(int x, int y)
@@ -188,63 +184,69 @@ namespace Game.Model.World
                 int2 neighbor;
                 int2? tJumpPoint;
 
-                var tNeighbors = FindNeighbors(node.value);
-
-                for (int i = 0; i < tNeighbors.Length; i++)
+                using (var tNeighbors = FindNeighbors(node.value))
                 {
-                    neighbor = tNeighbors[i];
-                    if (m_UseRecursive)
-                        tJumpPoint = Jump(neighbor.x, neighbor.y, node.value.x, node.value.y);
-                    else
-                        tJumpPoint = JumpLoop(neighbor.x, neighbor.y, node.value.x, node.value.y);
-
-                    if (tJumpPoint != null)
+                    for (int i = 0; i < tNeighbors.Length; i++)
                     {
-                        /*
-                        m_Closed
-                        if (IsWalkableAt(tJumpPoint.Value.x, tJumpPoint.Value.y))
-                            tJumpNode = new int2(tJumpPoint.Value.x, tJumpPoint.Value.y);
+                        neighbor = tNeighbors[i];
+                        if (m_UseRecursive)
+                            tJumpPoint = Jump(neighbor.x, neighbor.y, node.value.x, node.value.y);
                         else
-                            tJumpNode = null;
-                        */
+                            tJumpPoint = JumpLoop(neighbor.x, neighbor.y, node.value.x, node.value.y);
 
-                        if (!m_Costs.TryGetValue(tJumpPoint.Value, out Node.Cost cost))
+                        if (tJumpPoint != null)
                         {
-                            cost = new Node.Cost(tJumpPoint.Value, node.value);
-                            m_Costs.Add(tJumpPoint.Value, cost);
-                        }
-
-                        /*
-                        if (tJumpNode == null)
-                        {
-                            if (m_EndNode.x == tJumpPoint.Value.x && m_EndNode.y == tJumpPoint.Value.y)
-                                tJumpNode = iParam.SearchGrid.GetNodeAt(tJumpPoint.Value);
-                        }
-                        */
-
-                        //!!!if (tJumpNode.isClosed)
-                        if (m_Queue.Has(cost))
-                            continue;
-
-                        // include distance, as parent may not be immediately adjacent:
-                        float tCurNodeToJumpNodeLen = m_Heuristic(Math.Abs(tJumpPoint.Value.x - node.value.x), Math.Abs(tJumpPoint.Value.y - node.value.y));
-                        float tStartToJumpNodeLen = node.cost.startToCurNodeLen + tCurNodeToJumpNodeLen; // next `startToCurNodeLen` value
-
-                        if (!cost.Value.HasValue || (tStartToJumpNodeLen < cost.startToCurNodeLen))
-                        //if (!tJumpNode.isOpened || tStartToJumpNodeLen < tJumpNode.startToCurNodeLen)
-                        {
-                            cost.startToCurNodeLen = tStartToJumpNodeLen;
-                            cost.heuristicCurNodeToEndLen = (cost.heuristicCurNodeToEndLen == null ? m_Heuristic(Math.Abs(tJumpPoint.Value.x - tEndX), Math.Abs(tJumpPoint.Value.y - tEndY)) : cost.heuristicCurNodeToEndLen);
-                            cost.heuristicStartToEndLen = cost.startToCurNodeLen + cost.heuristicCurNodeToEndLen.Value;
-                            m_Hierarchy[tJumpPoint.Value] = node.value;
-                            if (!m_Queue.Has(cost))
+                            if (!m_Costs.TryGetValue(tJumpPoint.Value, out Node.Cost cost))
                             {
+                                cost = new Node.Cost(tJumpPoint.Value, node.value);
+                                m_Costs.Add(tJumpPoint.Value, cost);
+                            }
+
+                            /*
+                            if (tJumpNode == null)
+                            {
+                                if (m_EndNode.x == tJumpPoint.Value.x && m_EndNode.y == tJumpPoint.Value.y)
+                                    tJumpNode = iParam.SearchGrid.GetNodeAt(tJumpPoint.Value);
+                            }
+                            */
+                            /*
+                            if (tJumpPoint.Value.Equals(m_EndNode))
+                            {
+                                UnityEngine.Debug.LogWarning($"tJumpPoint == m_EndNode");
                                 m_Queue.Push(cost, tJumpPoint.Value);
+                                m_Hierarchy[tJumpPoint.Value] = node.value;
+                                return;
+                            }
+                            */
+
+                            //!!!if (tJumpNode.isClosed)
+                            if (m_Hierarchy.ContainsKey(tJumpPoint.Value) || m_Queue.Has(cost))
+                            {
+                                UnityEngine.Debug.LogWarning($"m_Queue.Has !!!");
+                                continue;
+                            }
+                                
+
+                            // include distance, as parent may not be immediately adjacent:
+                            float tCurNodeToJumpNodeLen = m_Heuristic(Math.Abs(tJumpPoint.Value.x - node.value.x), Math.Abs(tJumpPoint.Value.y - node.value.y));
+                            float tStartToJumpNodeLen = node.cost.startToCurNodeLen + tCurNodeToJumpNodeLen; // next `startToCurNodeLen` value
+
+                            if (!cost.Value.HasValue || (tStartToJumpNodeLen < cost.startToCurNodeLen))
+                            //if (!tJumpNode.isOpened || tStartToJumpNodeLen < tJumpNode.startToCurNodeLen)
+                            {
+                                cost.startToCurNodeLen = tStartToJumpNodeLen;
+                                cost.heuristicCurNodeToEndLen = (cost.heuristicCurNodeToEndLen == null ? m_Heuristic(Math.Abs(tJumpPoint.Value.x - tEndX), Math.Abs(tJumpPoint.Value.y - tEndY)) : cost.heuristicCurNodeToEndLen);
+                                cost.heuristicStartToEndLen = cost.startToCurNodeLen + cost.heuristicCurNodeToEndLen.Value;
+
+                                if (!m_Queue.Has(cost))
+                                {
+                                    m_Queue.Push(cost, tJumpPoint.Value);
+                                    m_Hierarchy[tJumpPoint.Value] = node.value;
+                                }
                             }
                         }
                     }
                 }
-                tNeighbors.Dispose();
             }
 
             private class JumpSnapshot
