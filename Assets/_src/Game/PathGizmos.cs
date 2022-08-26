@@ -47,6 +47,7 @@ namespace Game.Model.World
                     for (float t = 0; t < 1; t += 1f / 200)
                     {
                         float3 next = Map.Path.GetPosition(t, false, points.AsNativeArray(), path.DeltaTime);
+                        Gizmos.DrawSphere(next, 0.5f);
                         Gizmos.DrawLine(point, next);
                         point = next;
                     }

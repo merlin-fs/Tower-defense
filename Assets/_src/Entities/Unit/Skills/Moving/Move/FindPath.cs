@@ -18,18 +18,41 @@ namespace Game.Model.Units.Skills
             var m = moving;
             Task<NativeArray<int2>>.Run(() =>
             {
-                var param = new EpPathFinding.JumpPointParam(new EpPathFinding.Grid(map, entity),
-                    new EpPathFinding.GridPos(m.CurrentPosition.x, m.CurrentPosition.y),
-                    new EpPathFinding.GridPos(m.TargetPosition.x, m.TargetPosition.y));
-
                 try
                 {
-                    var list = EpPathFinding.JumpPointFinder.FindPath(param);
+                    var path = Map.JumpPointFinder.FindPath(map.GetCostTile, map, entity, m.CurrentPosition, m.TargetPosition);
+                    return path;
+                    /*
+                    if (path.Length > 1)
+                    {
+                        int idx = 1;
+                        int2 point = path[0];
+                        while (idx < list.Count)
+                        {
+                            int2 next = new int2(list[idx].x, list[idx].y);
+                            var diff = next - point;
+                            int count = math.max(math.max(diff.x, diff.y), 1);
+                            int2 v = (int2)math.round(math.normalize(diff));
+
+                            for (int i = 1; i < count; i++)
+                            {
+                                var pt = new EpPathFinding.GridPos(point.x + v.x * i, point.y + v.y * i);
+                                list.Insert(idx + (i-1), pt);
+                            }
+                            point = next;
+                            idx += count;
+                        }
+                    }
                     return new NativeArray<int2>(list.Select(i => new int2(i.x, i.y)).ToArray(), Allocator.TempJob);
+                    */
                 }
                 catch (Exception e)
                 {
                     throw e;
+                }
+                finally
+                {
+                    //path.Dispose();
                 }
 
                 //return Map.PathFinder.Execute(map.GetCostTile, entity, m.CurrentPosition, m.TargetPosition, map);
@@ -63,6 +86,7 @@ namespace Game.Model.Units.Skills
             var pts = points.AsNativeArray();
 
             float len = 0f;
+            
             float3 vector = Map.Path.GetPosition(0f, false, pts, info.DeltaTime);
             for (int j = 0; j < timeLen; j++)
             {

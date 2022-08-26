@@ -80,7 +80,6 @@ namespace Game.Model.World
                     // relative time
                     float lt = (time - deltaTime * p) / deltaTime;
                     return CatmullRom(points[p0].Value, points[p1].Value, points[p2].Value, points[p3].Value, lt);
-
                     //return math.clamp(lt, points[p1].Value, points[p2].Value);
                 }
             }

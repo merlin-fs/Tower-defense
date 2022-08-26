@@ -15,8 +15,6 @@ namespace Game.Model.World
         //TODO: чтото с поиском не так :( Нужно нати другой.
         public struct PathFinder
         {
-            public delegate double GetCostTile(Entity entity, int2 source, int2 target);
-
             internal IReadOnlyList<HeightType> m_HeightsType;
             internal IReadOnlyList<Height> m_Heights;
             internal Map.Data m_Map;
@@ -24,7 +22,7 @@ namespace Game.Model.World
 
             internal GetCostTile m_GetCostTile;
 
-            public static NativeArray<int2> Execute(GetCostTile getCostTile, Entity entity, int2 source, int2 target, Map.Data map, 
+            public static NativeArray<int2> Execute(GetCostTile getCostTile, Entity entity, int2 source, int2 target, Map.Data map,
                 int? pathLimit = null)
             {
                 var finder = new PathFinder()
@@ -78,15 +76,15 @@ namespace Game.Model.World
             private void GetNeighbors(int2 source, Map.Data map, Array en, NativeArray<Node.Edge> inList)
             {
                 var list = inList;
-                Parallel.For(0, en.Length, 
+                Parallel.For(0, en.Length,
                     (idx) =>
                     {
                         var neighbor = map.GetTile(source.x, source.y, idx);
                         list[idx] = !neighbor.IsNull()
-                            ? new Node.Edge(ref source, ref neighbor) 
+                            ? new Node.Edge(ref source, ref neighbor)
                             : default;
                     });
-              
+
                 /*
                 foreach (Tile.Direct direct in en)
                 {
@@ -121,9 +119,9 @@ namespace Game.Model.World
                 var previous = new NativeParallelHashMap<int2, int2>(capacity, Allocator.TempJob);
                 var costs = new NativeParallelHashMap<int2, Node.Cost>(capacity, Allocator.TempJob)
                 {
-                    { 
-                        source, 
-                        new Node.Cost(source, target) { Value = 0.0 } 
+                    {
+                        source,
+                        new Node.Cost(source, target) { Value = 0.0 }
                     }
                 };
 
@@ -202,7 +200,7 @@ namespace Game.Model.World
 
                 return path;
 
-                NativeArray <int2> ShortestPath(int2 v)
+                NativeArray<int2> ShortestPath(int2 v)
                 {
                     var path = new NativeList<int2>(previous.Count(), Allocator.TempJob);
                     while (!v.Equals(source))
@@ -223,143 +221,6 @@ namespace Game.Model.World
                     return path.ToArray(Allocator.TempJob);
                 }
             }
-
-            private struct SortedNativeHashMap<TKey, TValue>
-                where TKey : unmanaged, IEquatable<TKey>
-                where TValue : struct
-            {
-                public delegate int Compare<T>(T x, T y) where T : struct;
-                private readonly Compare<TKey> m_Comparer;
-                private NativeList<TKey> m_Sorted;
-                private NativeParallelHashMap<TKey, TValue> m_Values;
-
-                private struct Value
-                {
-                    public TValue Data;
-                    public int Index;
-                }
-
-                public SortedNativeHashMap(int length, Allocator allocator, Compare<TKey> comparer)
-                {
-                    m_Comparer = comparer;
-                    m_Sorted = new NativeList<TKey>(length, allocator);
-                    m_Values = new NativeParallelHashMap<TKey, TValue>(length, allocator);
-                }
-
-                int Insert(NativeList<TKey> values, TKey key)
-                {
-                    values.Length++;
-                    bool found = false;
-                    int i;
-                    values[values.Length - 1] = key;
-                    for (i = values.Length - 1; i >= 0; i--)
-                    {
-                        var cmp = m_Comparer.Invoke(key, values[i]);
-                        if (cmp < 0)
-                        {
-                            found = true;
-                            values[i + 1] = values[i];
-                        }
-                        else if (found)
-                        {
-                            values[i + 1] = key;
-                            break;
-                        }
-                    }
-                    if (found && i == -1)
-                        values[i + 1] = key;
-                    return i + 1;
-                }
-
-                void Delete(NativeList<TKey> values, int index)
-                {
-                    int i;
-                    for (i = index; i < values.Length - 1; i++)
-                        values[i] = values[i + 1];
-                    values.Length--;
-                }
-
-                public bool Pop(out (TKey, TValue) values)
-                {
-                    if (m_Values.Count() <= 0)
-                    {
-                        values = (default(TKey), default(TValue));
-                        return false;
-                    }
-
-                    TKey key = m_Sorted[0];
-                    TValue value = m_Values[key];
-                    Delete(m_Sorted, 0);
-                    m_Values.Remove(key);
-                    values = (key, value);
-                    return true;
-                }
-
-                public void Push(TKey key, TValue value)
-                {
-                    if (m_Values.ContainsKey(key))
-                        Delete(m_Sorted, m_Sorted.IndexOf(key));
-
-                    Insert(m_Sorted, key);
-                    m_Values[key] = value;
-                }
-
-                public int Count { get => m_Values.Count(); }
-
-                public void Dispose()
-                {
-                    m_Sorted.Dispose();
-                    m_Values.Dispose();
-                }
-            }
-
-            private struct Node
-            {
-                public struct Cost: IEquatable<Cost>
-                {
-                    private readonly int m_Hash;
-                    public double Distance { get; }
-                    //public double StaticCost { get; }
-                    public double? Value { get; set; }
-                    public Cost(int2 source, int2 target)
-                    {
-                        var diff = (target - source);
-                        m_Hash = source.GetHashCode();
-                        Distance = math.distance(target, source);
-                        //Distance = math.abs(diff).magnitude();
-                        Value = null;
-                    }
-
-                    public override int GetHashCode()
-                    {
-                        return m_Hash;
-                    }
-                    public bool Equals(Cost other)
-                    {
-                        return m_Hash == other.m_Hash;
-                    }
-                }
-
-                public struct Edge
-                {
-                    private double? m_Cost;
-                    public int2 Source { get; }
-                    public int2 Target { get; }
-                    public double Cost(ref PathFinder finder)
-                    {
-                        if (!m_Cost.HasValue)
-                            m_Cost = finder.m_GetCostTile(finder.Entity, Source, Target);
-                        return m_Cost.Value;
-                    }
-                    public Edge(ref int2 source, ref int2 target)
-                    {
-                        Source = source;
-                        Target = target;
-                        m_Cost = null;
-                    }
-                }
-            }
         }
-
     }
 }
