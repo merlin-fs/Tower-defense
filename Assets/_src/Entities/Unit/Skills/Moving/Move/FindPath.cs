@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Entities;
 using Unity.Collections;
@@ -21,12 +22,13 @@ namespace Game.Model.Units.Skills
                 try
                 {
                     var path = Map.JumpPointFinder.FindPath(map.GetCostTile, map, entity, m.CurrentPosition, m.TargetPosition);
-                    return path;
-                    /*
                     if (path.Length > 1)
                     {
+                        var list = new List<int2>(path);
+                        path.Dispose();
+
                         int idx = 1;
-                        int2 point = path[0];
+                        int2 point = list[0];
                         while (idx < list.Count)
                         {
                             int2 next = new int2(list[idx].x, list[idx].y);
@@ -36,25 +38,20 @@ namespace Game.Model.Units.Skills
 
                             for (int i = 1; i < count; i++)
                             {
-                                var pt = new EpPathFinding.GridPos(point.x + v.x * i, point.y + v.y * i);
+                                var pt = new int2(point.x + v.x * i, point.y + v.y * i);
                                 list.Insert(idx + (i-1), pt);
                             }
                             point = next;
                             idx += count;
                         }
+                        return new NativeArray<int2>(list.ToArray(), Allocator.TempJob);
                     }
-                    return new NativeArray<int2>(list.Select(i => new int2(i.x, i.y)).ToArray(), Allocator.TempJob);
-                    */
+                    return path;
                 }
                 catch (Exception e)
                 {
                     throw e;
                 }
-                finally
-                {
-                    //path.Dispose();
-                }
-
                 //return Map.PathFinder.Execute(map.GetCostTile, entity, m.CurrentPosition, m.TargetPosition, map);
             })
                 .ContinueWith((task) =>
