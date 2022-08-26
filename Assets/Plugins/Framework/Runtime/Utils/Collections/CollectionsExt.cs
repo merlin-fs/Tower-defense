@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Unity.Collections;
 using Common.Core;
 
@@ -31,6 +32,17 @@ namespace System.Collections.Generic
             return list.Count == 0
                 ? default
                 : list[Dice.Range(0, list.Count)];
+        }
+
+        public static void Reverse<T>(this NativeList<T> self)
+            where T : unmanaged
+        {
+            var idx1 = 0;
+            for (var idx2 = self.Length - 1; idx1 < idx2; --idx2)
+            {
+                (self[idx2], self[idx1]) = (self[idx1], self[idx2]);
+                ++idx1;
+            }
         }
     }
 }

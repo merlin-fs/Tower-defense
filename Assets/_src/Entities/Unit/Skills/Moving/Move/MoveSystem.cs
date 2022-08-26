@@ -122,17 +122,19 @@ namespace Game.Model.Units.Skills
                                 FindPath(Map, entities[i], data, 
                                     (path) =>
                                     {
-                                        var buff = Service.Writer.SetBuffer<Map.Path.Points>(0, entity);
-                                        buff.ResizeUninitialized(path.Length);
-                                        Parallel.For(0, path.Length, (i) =>
+                                        if (path.Length >= 2)
                                         {
-                                            var p = path[path.Length - (i + 1)];
-                                            buff[i] = new float3(p.x, p.y, 0);
+                                            var buff = Service.Writer.SetBuffer<Map.Path.Points>(0, entity);
+                                            buff.ResizeUninitialized(path.Length);
+                                            Parallel.For(0, path.Length, (i) =>
+                                            {
+                                                var p = path[i];
+                                                buff[i] = new float3(p.x, p.y, 0);
 
-                                        });
+                                            });
+                                        }
                                         cmd.Value = State.FindPathDone;
                                         Service.Writer.SetComponent(batchIndex, entity, cmd);
-                                        path.Dispose();
                                     });
                             }
                             break;

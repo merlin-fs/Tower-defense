@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.Entities;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -17,11 +19,51 @@ namespace Game.Model.Units.Skills
             var m = moving;
             Task<NativeArray<int2>>.Run(() =>
             {
-                return Map.PathFinder.Execute(map.GetCostTile, entity, m.CurrentPosition, m.TargetPosition, map);
+                try
+                {
+                    using (var path = Map.JumpPointFinder.FindPath(map.GetCostTile, map, entity, m.CurrentPosition, m.TargetPosition))
+                    {
+                        if (path.Length < 2)
+                            return new NativeArray<int2>(path, Allocator.TempJob);
+
+                        var list = new List<int2>(path);
+                        int idx = 1;
+                        int2 point = list[0];
+                        while (idx < list.Count)
+                        {
+                            int2 next = new int2(list[idx].x, list[idx].y);
+                            var diff = next - point;
+                            int count = math.max(math.max(diff.x, diff.y), 1);
+                            int2 v = (int2)math.round(math.normalize(diff));
+
+                            for (int i = 1; i < count; i++)
+                            {
+                                var pt = new int2(point.x + v.x * i, point.y + v.y * i);
+                                list.Insert(idx + (i - 1), pt);
+                            }
+                            point = next;
+                            idx += count;
+                        }
+                        return new NativeArray<int2>(list.ToArray(), Allocator.TempJob);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+                
+                //return Map.PathFinder.Execute(map.GetCostTile, entity, m.CurrentPosition, m.TargetPosition, map);
             })
                 .ContinueWith((task) =>
                 {
-                    callback(task.Result);
+                    try
+                    {
+                        callback(task.Result);
+                    }
+                    finally
+                    {
+                        task.Result.Dispose();
+                    }
                 });
         }
 
@@ -48,6 +90,7 @@ namespace Game.Model.Units.Skills
             var pts = points.AsNativeArray();
 
             float len = 0f;
+            
             float3 vector = Map.Path.GetPosition(0f, false, pts, info.DeltaTime);
             for (int j = 0; j < timeLen; j++)
             {
