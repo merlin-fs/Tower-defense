@@ -72,7 +72,7 @@ namespace Game.Model.World
                         pass |= IsNotPassable(map.Tiles.HeightTypes[map.At(value)].Value);
 
                         return !pass;
-                    }))
+                    }, Unity.Collections.Allocator.Temp))
                 {
                     result = cells.Count() > 0;
                     if (result)

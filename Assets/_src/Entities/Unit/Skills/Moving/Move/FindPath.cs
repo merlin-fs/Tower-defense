@@ -21,7 +21,10 @@ namespace Game.Model.Units.Skills
             {
                 try
                 {
-                    using (var path = Map.JumpPointFinder.FindPath(map.GetCostTile, map, entity, m.CurrentPosition, m.TargetPosition))
+                    //using (var path = Map.JumpPointFinder.FindPath(map.GetCostTile, map, entity, m.CurrentPosition, m.TargetPosition))
+                    using (var path = Map.JumpPointFinder.FindPath(
+                        (e, s, t) => map.GetCostTileRadius(3, e, s, t), 
+                        map, entity, m.CurrentPosition, m.TargetPosition))
                     {
                         if (path.Length < 2)
                             return new NativeArray<int2>(path, Allocator.TempJob);
