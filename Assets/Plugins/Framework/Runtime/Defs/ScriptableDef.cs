@@ -71,18 +71,18 @@ namespace Common.Defs
         {
             Type DefType = componentData.GetType();
 
-            if (!m_Infos.TryGetValue(DefType, out DefineableInfo value) || value.ManagerAdd == null)
+            if (!m_Infos.TryGetValue(DefType, out DefineableInfo value) || value.WriterAdd == null)
             {
                 var type = manager.GetType();
                 if (value == null)
                     value = new DefineableInfo();
-                value.ManagerAdd = type.GetMethods()
+                value.WriterAdd = type.GetMethods()
                     .First(m => m.Name == "AddComponent" && m.GetParameters().Length == 3 && m.GetParameters()[1].ParameterType == typeof(Entity));
 
-                value.ManagerAdd = value.ManagerAdd.MakeGenericMethod(DefType);
+                value.WriterAdd = value.WriterAdd.MakeGenericMethod(DefType);
                 m_Infos[DefType] = value;
             }
-            value.ManagerAdd.Invoke(manager, new object[] { sortKey, entity, componentData });
+            value.WriterAdd.Invoke(manager, new object[] { sortKey, entity, componentData });
         }
 
         protected class DefineableInfo
