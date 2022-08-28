@@ -22,8 +22,15 @@ namespace Game.Model.Skills
                 manager.AddComponent<Map.Path.Info>(entity);
                 manager.AddBuffer<Map.Path.Points>(entity);
                 manager.AddBuffer<Map.Path.Times>(entity);
+            }
 
-
+            protected override void AddComponentData(Entity entity, EntityCommandBuffer.ParallelWriter writer, int sortKey)
+            {
+                base.AddComponentData(entity, writer, sortKey);
+                writer.AddComponent<Commands>(sortKey, entity);
+                writer.AddComponent<Map.Path.Info>(sortKey, entity);
+                writer.AddBuffer<Map.Path.Points>(sortKey, entity);
+                writer.AddBuffer<Map.Path.Times>(sortKey, entity);
             }
         }
     }
