@@ -17,7 +17,6 @@ namespace Game.Model
 
         }
 
-
         [Defineable(typeof(Data))]
         public class SquadDef : ClassDef<Data>, ISquadDef
         {
@@ -26,10 +25,19 @@ namespace Game.Model
             [SerializeReference, Reference()]
             ILogicDef m_Logic;
 
+            [SerializeReference, Reference()]
+            Move.MovingDef m_Move;
+
             protected override void AddComponentData(Entity entity, EntityManager manager, GameObjectConversionSystem conversionSystem)
             {
                 base.AddComponentData(entity, manager, conversionSystem);
-                //manager.AddBuffer<Map.Path.Times>(entity);
+                (m_Move as IDef).AddComponentData(entity, manager, conversionSystem);
+            }
+
+            protected override void AddComponentData(Entity entity, EntityCommandBuffer.ParallelWriter writer, int sortKey)
+            {
+                base.AddComponentData(entity, writer, sortKey);
+                (m_Move as IDef).AddComponentData(entity, writer, sortKey);
             }
         }
     }
