@@ -26,28 +26,28 @@ MonoBehaviour:
   references:
     version: 1
     00000000:
-      type: {class: Move/MovingDef, ns: Game.Model.Units.Skills, asm: Assembly-CSharp}
+      type: {class: Move/MovingDef, ns: Game.Model.Skills, asm: Assembly-CSharp}
       data:
         m_DefineableType:
-          m_Type: Game.Model.Units.Skills.Move+Moving, Assembly-CSharp, Version=0.0.0.0,
+          m_Type: Game.Model.Skills.Move+Moving, Assembly-CSharp, Version=0.0.0.0,
             Culture=neutral, PublicKeyToken=null
         InitPosition:
           x: 10
           y: 10
         Speed: 200
     00000001:
-      type: {class: HealthDef, ns: Game.Model.Units, asm: Assembly-CSharp}
+      type: {class: HealthDef, ns: Game.Model.Properties, asm: Assembly-CSharp}
       data:
         m_DefineableType:
-          m_Type: Game.Model.Units.Health, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          m_Type: Game.Model.Properties.Health, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
             PublicKeyToken=null
         m_Absorb: []
         m_Resist: []
         m_Value: 140
         m_Prefab: {fileID: 150954280697512265, guid: b738ce36907196e45b199bfb29b62de9, type: 3}
     00000002:
-      type: {class: EnemyLogicDef, ns: Game.Model.Units.Logics, asm: Assembly-CSharp}
+      type: {class: EnemyLogicDef, ns: Game.Model.Logics, asm: Assembly-CSharp}
       data:
         m_DefineableType:
-          m_Type: Game.Model.Units.Logics.EnemyLogic, Assembly-CSharp, Version=0.0.0.0,
+          m_Type: Game.Model.Logics.EnemyLogic, Assembly-CSharp, Version=0.0.0.0,
             Culture=neutral, PublicKeyToken=null

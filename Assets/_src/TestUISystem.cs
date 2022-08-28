@@ -1,17 +1,14 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
 using UnityEngine;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Jobs;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using System.Runtime.InteropServices;
 
 namespace Game.UI
 {
+    using Game.Model;
+    using Game.Model.Properties;
     using Game.Model.Units;
 
     //[DisableAutoCreation]

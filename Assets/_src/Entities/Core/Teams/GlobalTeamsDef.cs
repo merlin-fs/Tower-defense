@@ -4,7 +4,7 @@ using UnityEngine;
 using Unity.Entities;
 using Common.Defs;
 
-namespace Game.Model.Units.Defs
+namespace Game.Model.Core
 {
     [Serializable]
     public struct TeamValue

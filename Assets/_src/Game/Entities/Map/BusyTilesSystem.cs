@@ -6,7 +6,7 @@ using Unity.Jobs;
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace Game.Model.Units
+namespace Game.Model
 {
     using World;
     using Skills;

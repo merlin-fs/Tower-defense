@@ -3,7 +3,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Collections;
 
-namespace Game.Model.Units
+namespace Game.Model.Properties
 {
     //[DisableAutoCreation]
     [UpdateInGroup(typeof(GameLogicSystemGroup))]

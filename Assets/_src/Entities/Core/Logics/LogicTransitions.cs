@@ -1,7 +1,9 @@
 using System;
 
-namespace Game.Core
+namespace Game.Model.Logics
 {
+    using Core;
+
     public abstract partial class LogicSystem
     {
         public LogicStateMachine.Configuration Configure => new LogicStateMachine.Configuration(m_StateMachine);

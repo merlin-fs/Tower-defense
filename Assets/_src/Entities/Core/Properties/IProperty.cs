@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using Common.Defs;
 using Unity.Entities;
 
-namespace Game.Model.Units
+namespace Game.Model.Properties
 {
     /// <summary>
     /// Свойства объекта (Health, shield, armor и т.п.)

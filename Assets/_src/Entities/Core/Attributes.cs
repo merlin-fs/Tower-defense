@@ -4,7 +4,7 @@ using UnityEngine;
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace Game.Model.Units
+namespace Game.Model
 {
     public struct WeaponReady : IComponentData
     {

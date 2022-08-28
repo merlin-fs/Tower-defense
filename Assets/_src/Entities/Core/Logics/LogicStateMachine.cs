@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 
-namespace Game.Core
+namespace Game.Model.Logics
 {
+    using Core;
+
     public partial class LogicStateMachine
     {
         private Dictionary<int, JobInfo> m_Jobs = new Dictionary<int, JobInfo>();

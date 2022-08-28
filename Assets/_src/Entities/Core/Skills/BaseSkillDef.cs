@@ -2,7 +2,7 @@ using System;
 using Unity.Entities;
 using Common.Defs;
 
-namespace Game.Model.Units.Defs
+namespace Game.Model.Skills
 {
     public interface ISkillDef: IDef
     {

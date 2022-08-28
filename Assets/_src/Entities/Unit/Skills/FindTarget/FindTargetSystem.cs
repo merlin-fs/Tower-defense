@@ -10,7 +10,7 @@ using Unity.Entities;
 using Unity.Transforms;
 using Unity.Burst;
 
-namespace Game.Model.Units.Skills
+namespace Game.Model.Skills
 {
     using Core;
 

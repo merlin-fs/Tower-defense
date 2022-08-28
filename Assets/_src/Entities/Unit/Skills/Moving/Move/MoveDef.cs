@@ -2,9 +2,8 @@ using System;
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace Game.Model.Units.Skills
+namespace Game.Model.Skills
 {
-    using Defs;
     using World;
 
     public partial class Move

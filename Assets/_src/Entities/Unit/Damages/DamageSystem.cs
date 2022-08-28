@@ -3,8 +3,11 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Collections;
 
-namespace Game.Model.Units.Skills
+namespace Game.Model.Damages
 {
+    using Model.Properties;
+
+
     [UpdateInGroup(typeof(GameLogicSystemGroup), OrderFirst = true)]
     public partial class DamageSimpleSystem : SystemBase
     {

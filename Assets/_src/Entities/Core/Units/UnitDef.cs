@@ -5,10 +5,15 @@ using Unity.Entities;
 using Common.Defs;
 using Common.Core;
 
-namespace Game.Model.Units.Defs
+namespace Game.Model.Units
 {
-    using Core;
-    using Skills;
+    using Model.Core;
+    using Model.Skills;
+    using Model.Properties;
+    using Model.Damages;
+    using Model.Parts;
+    using Model.Logics;
+
 
     public interface IUnitDef: IDef
     {

@@ -4,8 +4,10 @@ using Unity.Collections;
 using Unity.Transforms;
 using UnityEngine;
 
-namespace Game.Model.Units.Skills
+namespace Game.UI
 {
+    using Game.Model;
+
     [UpdateInGroup(typeof(GamePresentationSystemGroup))]
     public partial class TestParticleSystem : SystemBase
     {

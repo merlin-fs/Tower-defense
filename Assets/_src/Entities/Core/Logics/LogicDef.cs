@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Common.Defs;
 
-namespace Game.Core
+namespace Game.Model.Logics
 {
+    using Core;
+
     public interface ILogicDef : IDef
     {
         LogicStateMachine Logic { get; }

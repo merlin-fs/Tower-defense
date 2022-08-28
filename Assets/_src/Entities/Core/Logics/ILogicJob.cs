@@ -1,6 +1,6 @@
 using System;
 
-namespace Game.Core
+namespace Game.Model.Logics
 {
     public unsafe interface ILogicPart
     {

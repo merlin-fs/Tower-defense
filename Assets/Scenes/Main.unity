@@ -411,13 +411,15 @@ MonoBehaviour:
   m_CanvasParent: {fileID: 948854027}
   m_Prefab: {fileID: 150954280697512265, guid: b738ce36907196e45b199bfb29b62de9, type: 3}
   m_GenerateMap: {fileID: 2123247434}
+  m_Squad:
+    id: 2
   references:
     version: 1
     00000000:
-      type: {class: TeamDef, ns: Game.Model.Units.Defs, asm: Assembly-CSharp}
+      type: {class: TeamDef, ns: Game.Model.Core, asm: Assembly-CSharp}
       data:
         m_DefineableType:
-          m_Type: Game.Model.Units.Teams, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          m_Type: Game.Model.Core.Teams, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
             PublicKeyToken=null
         m_Team:
           Value: 1
@@ -425,7 +427,7 @@ MonoBehaviour:
         - Value: 2
         - Value: 4
     00000001:
-      type: {class: TeamDef, ns: Game.Model.Units.Defs, asm: Assembly-CSharp}
+      type: {class: TeamDef, ns: Game.Model.Core, asm: Assembly-CSharp}
       data:
         m_DefineableType:
           m_Type: 
@@ -433,6 +435,13 @@ MonoBehaviour:
           Value: 2
         m_EnemyTeams:
         - Value: 1
+    00000002:
+      type: {class: Squad/SquadDef, ns: Game.Model, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Model.Squad+Data, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+        Radius: 3
 --- !u!4 &153836793
 Transform:
   m_ObjectHideFlags: 0

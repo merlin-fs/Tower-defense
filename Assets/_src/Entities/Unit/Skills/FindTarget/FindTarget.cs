@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using Unity.Entities;
 using Unity.Burst;
 
-namespace Game.Model.Units.Skills
+namespace Game.Model.Skills
 {
     using Core;
 

@@ -28,8 +28,6 @@ namespace Game.Model.World
             }
 
             private static Array m_Directs = Enum.GetValues(typeof(Direct));
-            private NativeArray<int2> m_Connections;
-
             private HeuristicDelegate m_Heuristic;
             private bool m_UseRecursive;
             private NativeParallelHashMap<int2, int2> m_Hierarchy;
@@ -40,6 +38,7 @@ namespace Game.Model.World
             private int2 m_EndNode, m_StartNode;
             private NativeParallelHashMap<int2, Node.Cost> m_Costs;
             private SortedNativeHashMap<Node.Cost, int2> m_Queue;
+            private NativeParallelHashMap<int2, bool> m_WalkableCache;
 
             public JumpPointFinder(GetCostTile getCostTile, int2 source, int2 target, HeuristicMode iMode)
             {
@@ -65,9 +64,9 @@ namespace Game.Model.World
                 m_Entity = Entity.Null;
                 m_GetCostTile = getCostTile;
                 m_Hierarchy = default;
-                m_Connections = default;
                 m_Costs = default;
                 m_Queue = default;
+                m_WalkableCache = default;
             }
 
             public NativeArray<int2> Search(int2 source, int2 target)
@@ -75,7 +74,7 @@ namespace Game.Model.World
                 //var capacity = pathLimit ?? 100;
                 bool revertEndNodeWalkable = false;
                 m_Hierarchy = new NativeParallelHashMap<int2, int2>(100, Allocator.TempJob);
-                m_Connections = new NativeArray<int2>(m_Directs.Length, Allocator.TempJob);
+                m_WalkableCache = new NativeParallelHashMap<int2, bool>(100, Allocator.TempJob);
                 m_Costs = new NativeParallelHashMap<int2, Node.Cost>(100, Allocator.TempJob)
                 {
                     {
@@ -130,8 +129,8 @@ namespace Game.Model.World
                 }
                 finally
                 {
+                    m_WalkableCache.Dispose();
                     m_Hierarchy.Dispose();
-                    m_Connections.Dispose();
                     m_Costs.Dispose();
                     m_Queue.Dispose();
                 }
@@ -172,8 +171,14 @@ namespace Game.Model.World
 
             private bool IsWalkableAt(int x, int y)
             {
-                var weight = m_GetCostTile(m_Entity, Extension.Int2Null, new int2(x, y));
-                return weight > 0;
+                var pt = new int2(x, y);
+                if (!m_WalkableCache.TryGetValue(pt, out bool result))
+                {
+                    var weight = m_GetCostTile(m_Entity, Extension.Int2Null, pt);
+                    result = weight > 0;
+                    m_WalkableCache.Add(pt, result);
+                }
+                return result;
             }
 
             private void IdentifySuccessors((Node.Cost cost, int2 value) node)
@@ -693,7 +698,7 @@ namespace Game.Model.World
                 int tY = value.y;
                 int tPx, tPy, tDx, tDy;
 
-                var tNeighbors = new NativeList<int2>(Allocator.TempJob);
+                var tNeighbors = new NativeList<int2>(m_Directs.Length, Allocator.TempJob);
 
                 // directed pruning: can ignore most neighbors, unless forced.
                 if (m_Hierarchy.TryGetValue(value, out int2 parent))
@@ -889,11 +894,9 @@ namespace Game.Model.World
                 // return all neighbors
                 else
                 {
-                    var list = m_Connections;
                     var map = m_Map;
                     var neighbors = tNeighbors.AsParallelWriter();
-                    tNeighbors.Capacity += m_Connections.Length;
-                    Parallel.For(0, m_Connections.Length,
+                    Parallel.For(0, m_Directs.Length,
                         (idx) =>
                         {
                             var neighbor = map.GetTile(value.x, value.y, idx);

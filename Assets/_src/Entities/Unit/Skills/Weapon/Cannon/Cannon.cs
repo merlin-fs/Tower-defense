@@ -3,7 +3,7 @@ using System;
 using Common.Core;
 using Common.Defs;
 
-namespace Game.Model.Units
+namespace Game.Model.Skills
 {
     public struct Cannon : ISkill, IDefineable<CannonDef>
     {

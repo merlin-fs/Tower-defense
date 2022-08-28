@@ -4,10 +4,8 @@ using Common.Entities.Tools;
 using Common.Core;
 using UnityEngine;
 
-namespace Game.Model.Units
+namespace Game.Model.Properties
 {
-    using Defs;
-
     public class HealthDef : BasePropertyDef<Health>
     {
         [SerializeField]

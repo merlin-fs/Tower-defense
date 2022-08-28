@@ -3,10 +3,8 @@ using Unity.Entities;
 using Common.Core;
 using Common.Defs;
 
-namespace Game.Model.Units
+namespace Game.Model.Parts
 {
-    using Defs;
-
     public struct Turret : IPart, IDefineable<TurretDef>
     {
         public ReferenceObject<TurretDef> Def;

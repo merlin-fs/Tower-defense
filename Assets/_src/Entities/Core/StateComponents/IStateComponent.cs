@@ -1,8 +1,7 @@
 using System;
-using Common.Defs;
 using Unity.Entities;
 
-namespace Game.Core
+namespace Game.Model.Core
 {
     public enum JobResult
     {
@@ -18,8 +17,4 @@ namespace Game.Core
     }
 
     public delegate void StateCallback(EntityCommandBuffer.ParallelWriter writer, Entity entity, JobResult state, int sortKey);
-
-    public interface ICallbackComponent
-    {
-    }
 }

@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using Common.Core;
 
 
-namespace Game.Model.Units.Logics
+namespace Game.Model.Logics
 {
     using Core;
     using World;

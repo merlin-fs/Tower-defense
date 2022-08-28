@@ -3,10 +3,8 @@ using System;
 using Common.Core;
 using Common.Defs;
 
-namespace Game.Model.Units
+namespace Game.Model.Damages
 {
-    using Defs;
-
     public struct DamageSimple : IDamage, IDefineable<IDamageDef>
     {
         public ReferenceObject<IDamageDef> Def;

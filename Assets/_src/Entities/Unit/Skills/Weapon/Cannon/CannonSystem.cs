@@ -8,7 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Transforms;
 using Unity.Mathematics;
 
-namespace Game.Model.Units.Skills
+namespace Game.Model.Skills
 {
     /*
     [UpdateInGroup(typeof(GameLogicInitSystemGroup))]

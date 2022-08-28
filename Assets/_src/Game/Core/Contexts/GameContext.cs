@@ -5,7 +5,7 @@ using Common.Core;
 
 namespace Game.Core
 {
-    using Model.Units.Defs;
+    using Model.Core;
 
     public class GameContext : DIContext
     {

@@ -3,11 +3,11 @@ using Unity.Entities;
 using Unity.Collections;
 using Unity.Transforms;
 
-namespace Game.Model.Units.Logics
+namespace Game.Model.Logics
 {
     using Core;
-    using Skills;
     using World;
+    using Skills;
 
     public unsafe class FindTargetPlaceJob : ILogicPart
     {
