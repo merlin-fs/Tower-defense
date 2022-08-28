@@ -3,7 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-namespace Game.Model.Units.Skills
+namespace Game.Model.Skills
 {
     using World;
 

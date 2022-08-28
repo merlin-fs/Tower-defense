@@ -4,10 +4,8 @@ using Common.Core;
 using Common.Defs;
 using Unity.Entities;
 
-namespace Game.Model.Units
+namespace Game.Model.Core
 {
-    using Defs;
-
     public struct Teams: IDefineable<TeamDef>, IComponentData
     {
         public ReferenceObject<TeamDef> Def;

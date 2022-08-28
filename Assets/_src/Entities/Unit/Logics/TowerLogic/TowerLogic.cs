@@ -3,7 +3,7 @@ using Unity.Entities;
 using Common.Core;
 
 
-namespace Game.Model.Units.Logics
+namespace Game.Model.Logics
 {
     using Core;
 

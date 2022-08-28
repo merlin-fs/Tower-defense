@@ -25,18 +25,18 @@ MonoBehaviour:
   references:
     version: 1
     00000000:
-      type: {class: Move/MovingDef, ns: Game.Model.Units.Skills, asm: Assembly-CSharp}
+      type: {class: Move/MovingDef, ns: Game.Model.Skills, asm: Assembly-CSharp}
       data:
         m_DefineableType:
-          m_Type: Game.Model.Units.Skills.Move+Moving, Assembly-CSharp, Version=0.0.0.0,
+          m_Type: Game.Model.Skills.Move+Moving, Assembly-CSharp, Version=0.0.0.0,
             Culture=neutral, PublicKeyToken=null
         InitPosition:
           x: 82
           y: 53
         Speed: 80
     00000001:
-      type: {class: TowerLogicDef, ns: Game.Model.Units.Logics, asm: Assembly-CSharp}
+      type: {class: TowerLogicDef, ns: Game.Model.Logics, asm: Assembly-CSharp}
       data:
         m_DefineableType:
-          m_Type: Game.Model.Units.Logics.TowerLogic, Assembly-CSharp, Version=0.0.0.0,
+          m_Type: Game.Model.Logics.TowerLogic, Assembly-CSharp, Version=0.0.0.0,
             Culture=neutral, PublicKeyToken=null

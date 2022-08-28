@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Jobs;
 
-[assembly: RegisterGenericJobType(typeof(Game.Core.LogicSystem<Game.Model.Units.Logics.EnemyLogic, Game.Model.Units.Logics.EnemyLogic.State>.LogicJob))]
+[assembly: RegisterGenericJobType(typeof(Game.Model.Logics.LogicSystem<Game.Model.Logics.EnemyLogic, Game.Model.Logics.EnemyLogic.State>.LogicJob))]
 
-namespace Game.Model.Units.Logics
+namespace Game.Model.Logics
 {
     using Core;
 

@@ -3,7 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Game.Model.Units.Defs
+namespace Game.Model.Parts
 {
     public class TurretDef : BasePartDef<Turret>
     {

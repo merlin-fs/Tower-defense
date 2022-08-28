@@ -6,7 +6,7 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Game.Model.Units.Skills
+namespace Game.Model.Skills
 {
     using World;
 

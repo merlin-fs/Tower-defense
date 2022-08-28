@@ -5,7 +5,7 @@ using System.Reflection.Ext;
 using UnityEngine;
 using Common.Core;
 using Common.Defs;
-using Game.Model.Units.Defs;
+using Game.Model.Core;
 
 namespace UnityEditor.Inspector
 {

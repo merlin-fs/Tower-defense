@@ -1,21 +1,15 @@
 using System;
-using System.Linq;
-using System.Collections.Generic;
-using Common.Defs;
-using Common.Core;
-using System.Threading;
-using System.Threading.Tasks;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Burst;
 using Unity.Jobs;
-using Unity.Jobs.LowLevel.Unsafe;
 using System.Runtime.InteropServices;
 
-namespace Game.Core
+namespace Game.Model.Logics
 {
-    public abstract partial class LogicSystem : CallbackSystem
+    using Core;
+
+    public abstract partial class LogicSystem : SystemBase
     {
         protected EntityCommandBufferSystem m_CommandBuffer;
 

@@ -12,10 +12,12 @@ using TMPro;
 
 using Game.Core;
 using Game.Core.Repositories;
-using Game.Model.Units.Defs;
-using Game.Model.Units.Skills;
+
+using Game.Model.Skills;
+using Game.Model.Core;
 using Game.Model.Units;
 using Game.Model.World;
+using Game.Model;
 
 public class TestSpawn : MonoBehaviour
 {
@@ -148,6 +150,11 @@ public class MainStart : MonoBehaviour
     [SerializeField]
     GenerateMap m_GenerateMap;
 
+    [SerializeReference, Reference()]
+    Squad.ISquadDef m_Squad;
+    
+
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
@@ -184,12 +191,11 @@ public class MainStart : MonoBehaviour
 
         var repo = await Repositories.Instance.RepositoryAsync<UnitDef>();
 
-        HealthDef.Initialize(m_CanvasParent, m_Prefab);
-        
+        Game.Model.Properties.HealthDef.Initialize(m_CanvasParent, m_Prefab);
         
         //TODO: перенести ! (как вариант событие (шина) на инициализацию мира)
-        Game.Model.Units.Logics.EnemyLogicDef.Initialize();
-        Game.Model.Units.Logics.TowerLogicDef.Initialize();
+        Game.Model.Logics.EnemyLogicDef.Initialize();
+        Game.Model.Logics.TowerLogicDef.Initialize();
 
 
         foreach (var iter in repo.Find())

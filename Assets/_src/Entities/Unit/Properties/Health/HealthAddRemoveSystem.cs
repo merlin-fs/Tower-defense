@@ -4,7 +4,7 @@ using Unity.Jobs;
 using Unity.Collections;
 using UnityEngine;
 
-namespace Game.Model.Units
+namespace Game.Model.Properties
 {
     [DisableAutoCreation]
     [UpdateInGroup(typeof(GameSpawnSystemGroup))]

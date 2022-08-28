@@ -6,9 +6,11 @@ using Unity.Transforms;
 using Unity.Mathematics;
 
 
-namespace Game.Model.Units.Skills
+namespace Game.Model
 {
     using World;
+    using Core;
+
 
     [UpdateInGroup(typeof(GameSpawnSystemGroup))]
     public partial class TestSpawnSystem : SystemBase

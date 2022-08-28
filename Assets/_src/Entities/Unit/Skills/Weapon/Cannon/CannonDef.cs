@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 
-namespace Game.Model.Units
+namespace Game.Model.Skills
 {
-    using Defs;
+    using Model.Damages;
+
 
     [Defineable(typeof(Cannon))]
     public class CannonDef : BaseSkillDef

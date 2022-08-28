@@ -5,9 +5,10 @@ using Unity.Mathematics;
 using Unity.Entities;
 using Unity.Burst;
 
-namespace Game.Model.Units.Skills
+namespace Game.Model.Skills
 {
     using Core;
+
     public partial class Move
     {
         public struct Commands: IComponentData
@@ -28,7 +29,7 @@ namespace Game.Model.Units.Skills
             Done,
         }
 
-        public struct Moving : ISkill, ICallbackComponent, IDefineable<MovingDef>
+        public struct Moving : ISkill, IDefineable<MovingDef>
         {
             public ReferenceObject<MovingDef> Def;
 

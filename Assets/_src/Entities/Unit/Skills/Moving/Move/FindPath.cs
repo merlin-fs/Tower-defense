@@ -7,7 +7,7 @@ using Unity.Mathematics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Game.Model.Units.Skills
+namespace Game.Model.Skills
 {
     using World;
 

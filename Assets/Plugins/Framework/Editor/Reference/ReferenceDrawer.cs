@@ -41,7 +41,7 @@ namespace UnityEditor.Inspector
         {
             position = base.GetRect(position, property, label);
             position.height = EditorGUIUtility.singleLineHeight;
-            position.x += 5;
+            position.x += EditorGUI.indentLevel * 15;//5 + 
             position.width -= 5;
             return position;
         }

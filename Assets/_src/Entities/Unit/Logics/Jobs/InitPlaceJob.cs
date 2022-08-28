@@ -2,11 +2,12 @@ using System;
 using Unity.Entities;
 using Unity.Collections;
 
-namespace Game.Model.Units.Logics
+namespace Game.Model.Logics
 {
     using Core;
     using Skills;
     using World;
+
 
     public unsafe class InitPlaceJob : ILogicPart
     {

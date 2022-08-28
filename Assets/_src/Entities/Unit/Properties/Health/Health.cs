@@ -3,10 +3,8 @@ using System;
 using Common.Core;
 using Common.Defs;
 
-namespace Game.Model.Units
+namespace Game.Model.Properties
 {
-    using Defs;
-
     public struct Health : IProperty, IDefineable<IPropertyDef>
     {
         public ReferenceObject<IPropertyDef> Def;

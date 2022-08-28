@@ -6,7 +6,7 @@ using Unity.Transforms;
 using Unity.Collections;
 using Unity.Burst;
 
-namespace Game.Model.Units.Skills
+namespace Game.Model.Skills
 {
     using Core;
     using World;
@@ -26,15 +26,18 @@ namespace Game.Model.Units.Skills
         }
 
         [UpdateInGroup(typeof(GameLogicSystemGroup))]
-        public class System : StateSystem<Moving>
+        public partial class System : SystemBase
         {
             private EntityQuery m_Query;
             private Unity.Mathematics.Random m_Random;
+            private EntityCommandBufferSystem m_CommandBuffer;
+            public EntityCommandBuffer.ParallelWriter Writer => m_CommandBuffer.CreateCommandBuffer().AsParallelWriter();
 
             protected override void OnCreate()
             {
                 base.OnCreate();
                 m_CommandBuffer = World.GetOrCreateSystem<GameLogicCommandBufferSystem>();
+                
                 m_Query = GetEntityQuery(
                     ComponentType.ReadWrite<Commands>()
                 );

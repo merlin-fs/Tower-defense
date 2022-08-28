@@ -4,8 +4,10 @@ using UnityEngine;
 using Unity.Entities;
 using Common.Defs;
 
-namespace Game.Model.Units.Defs
+namespace Game.Model.Properties
 {
+    using Model.Damages;
+
     public interface IPropertyDef : IDef
     {
         float Value { get; }
