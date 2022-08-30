@@ -15,7 +15,6 @@ namespace Game.Model.Logics
             public Entity Entity;
         }
 
-
         private ReferenceObject<ILogicDef> m_Def;
         public int currentJob;
 
@@ -31,6 +30,7 @@ namespace Game.Model.Logics
 
         #region ILogic
         public ILogicDef Def => m_Def.Link;
+        public EnemySquadDef SquadDef => (EnemySquadDef)m_Def.Link;
         public int CurrentJob { get => currentJob; set => currentJob = value; }
         #endregion
 

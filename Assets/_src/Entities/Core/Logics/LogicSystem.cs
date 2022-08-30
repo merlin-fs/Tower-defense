@@ -153,6 +153,12 @@ namespace Game.Model.Logics
         private ArchetypeChunk m_BatchInChunk;
 
 
+        public DynamicBuffer<T> GetData<T>(BufferTypeHandle<T> handle)
+            where T : struct, IBufferElementData
+        {
+            return m_BatchInChunk.GetBufferAccessor(handle)[m_Index];
+        }
+
         public T GetData<T>(ComponentTypeHandle<T> handle)
             where T : struct, IComponentData
         {

@@ -18,9 +18,10 @@ namespace Game.Model.Logics
         public static void Initialize()
         {
             m_System = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<LogicSystem>();
+            
             m_System.Configure
-                .TransitionEnter<InitPlaceJob>()
-                .Transition<InitPlaceJob, FindTargetPlaceJob>()
+                .TransitionEnter<EnemySquadDef.PlaceUnitsJob>()
+                .Transition<EnemySquadDef.PlaceUnitsJob, FindTargetPlaceJob>()
                 .Transition<FindTargetPlaceJob, FindTargetPlaceJob>(JobResult.Error);
         }
 
@@ -29,6 +30,13 @@ namespace Game.Model.Logics
             base.AddComponentData(entity, manager, conversionSystem);
             manager.AddComponent<EnemyLogic.State>(entity);
             manager.AddComponent<EnemyLogic.Target>(entity);
+        }
+
+        protected override void AddComponentData(Entity entity, EntityCommandBuffer.ParallelWriter writer, int sortKey)
+        {
+            base.AddComponentData(entity, writer, sortKey);
+            writer.AddComponent<EnemyLogic.State>(sortKey, entity);
+            writer.AddComponent<EnemyLogic.Target>(sortKey, entity);
         }
 
         public override int GetTransition(int value, JobResult jobResult)

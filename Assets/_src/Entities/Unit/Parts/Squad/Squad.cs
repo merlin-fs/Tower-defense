@@ -10,15 +10,32 @@ namespace Game.Model
     {
         public struct Data : IComponentData, IDefineable<SquadDef>
         {
-            public ReferenceObject<SquadDef> Def;
+            public SquadDef Def => m_Def.Link;
+            private ReferenceObject<SquadDef> m_Def;
             
             public Entity Leader;
 
             public Data(ReferenceObject<SquadDef> def)
             {
-                Def = def;
+                m_Def = def;
                 Leader = Entity.Null;
             }
+        }
+
+        public struct UnitLink: IBufferElementData
+        {
+            public Entity Unit;
+        }
+
+        public struct UnitPosition : IBufferElementData
+        {
+            public int2 Position;
+        }
+
+        public struct Unit : IComponentData
+        {
+            public Entity Squad;
+            public int Index;
         }
     }
 }

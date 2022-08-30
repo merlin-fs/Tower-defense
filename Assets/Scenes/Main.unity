@@ -444,25 +444,39 @@ MonoBehaviour:
           m_Type: Game.Model.Squad+Data, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
             PublicKeyToken=null
         Radius: 3
-        m_Logic:
+        m_Def: {fileID: 11400000, guid: cd6ea3a2d2d315e4bbb9d970dbd75030, type: 2}
+        Count: 7
+        m_Team:
           id: 3
-        m_Move:
+        m_Logic:
           id: 4
+        m_Move:
+          id: 5
     00000003:
+      type: {class: TeamDef, ns: Game.Model.Core, asm: Assembly-CSharp}
+      data:
+        m_DefineableType:
+          m_Type: Game.Model.Core.Teams, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+        m_Team:
+          Value: 2
+        m_EnemyTeams:
+        - Value: 1
+    00000004:
       type: {class: EnemySquadDef, ns: Game.Model.Logics, asm: Assembly-CSharp}
       data:
         m_DefineableType:
           m_Type: Game.Model.Logics.EnemySquad, Assembly-CSharp, Version=0.0.0.0,
             Culture=neutral, PublicKeyToken=null
-    00000004:
+    00000005:
       type: {class: Move/MovingDef, ns: Game.Model.Skills, asm: Assembly-CSharp}
       data:
         m_DefineableType:
           m_Type: Game.Model.Skills.Move+Moving, Assembly-CSharp, Version=0.0.0.0,
             Culture=neutral, PublicKeyToken=null
         InitPosition:
-          x: 0
-          y: 0
+          x: 50
+          y: 50
         Speed: 80
 --- !u!4 &153836793
 Transform:

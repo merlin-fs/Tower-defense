@@ -26,6 +26,12 @@ namespace Game.Model.Logics
             manager.AddComponent<TowerLogic.State>(entity);
         }
 
+        protected override void AddComponentData(Entity entity, EntityCommandBuffer.ParallelWriter writer, int sortKey)
+        {
+            base.AddComponentData(entity, writer, sortKey);
+            writer.AddComponent<TowerLogic.State>(sortKey, entity);
+        }
+
         public override int GetTransition(int value, JobResult jobResult)
         {
             IEnumerable<ILogicPart> list = Logic.GetEnterTransition();

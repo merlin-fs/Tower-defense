@@ -11,17 +11,15 @@ namespace Game.Model.Logics
 
 
     [Defineable(typeof(EnemySquad))]
-    public class EnemySquadDef : BaseLogicDef<EnemySquad>
+    public partial class EnemySquadDef : BaseLogicDef<EnemySquad>
     {
-        public partial class LogicSystem : LogicSystem<EnemySquad, EnemySquad.State> { }
+        public partial class System : LogicSystem<EnemySquad, EnemySquad.State> { }
 
         public static void Initialize()
         {
-            m_System = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<LogicSystem>();
+            m_System = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<System>();
             m_System.Configure
-                .TransitionEnter<InitPlaceJob>()
-                .Transition<InitPlaceJob, FindTargetPlaceJob>()
-                .Transition<FindTargetPlaceJob, FindTargetPlaceJob>(JobResult.Error);
+                .TransitionEnter<InitSquadJob>();
         }
 
         protected override void AddComponentData(Entity entity, EntityManager manager, GameObjectConversionSystem conversionSystem)
@@ -29,6 +27,13 @@ namespace Game.Model.Logics
             base.AddComponentData(entity, manager, conversionSystem);
             manager.AddComponent<EnemySquad.State>(entity);
             manager.AddComponent<EnemySquad.Target>(entity);
+        }
+
+        protected override void AddComponentData(Entity entity, EntityCommandBuffer.ParallelWriter writer, int sortKey)
+        {
+            base.AddComponentData(entity, writer, sortKey);
+            writer.AddComponent<EnemySquad.State>(sortKey, entity);
+            writer.AddComponent<EnemySquad.Target>(sortKey, entity);
         }
 
         public override int GetTransition(int value, JobResult jobResult)

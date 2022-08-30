@@ -8,7 +8,6 @@ namespace Game.Model.Logics
     using Skills;
     using World;
 
-
     public unsafe class InitPlaceJob : ILogicPart
     {
         public float Weight => 1;
