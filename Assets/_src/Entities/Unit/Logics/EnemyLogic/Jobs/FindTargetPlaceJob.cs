@@ -42,8 +42,9 @@ namespace Game.Model.Logics
                 Move.MoveTo(context.Entity, pos, context.Callback, context.SortKey);
             }
             else
+            {
                 context.Callback.Invoke(context.Writer, context.Entity, JobResult.Error, context.SortKey);
-            
+            }
         }
     }
 }

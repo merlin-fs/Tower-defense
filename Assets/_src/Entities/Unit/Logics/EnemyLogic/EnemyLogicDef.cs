@@ -20,8 +20,8 @@ namespace Game.Model.Logics
             m_System = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<LogicSystem>();
             
             m_System.Configure
-                .TransitionEnter<EnemySquadDef.PlaceUnitsJob>()
-                .Transition<EnemySquadDef.PlaceUnitsJob, FindTargetPlaceJob>()
+                .TransitionEnter<EnemySquadLogicDef.PlaceUnitsJob>()
+                .Transition<EnemySquadLogicDef.PlaceUnitsJob, FindTargetPlaceJob>()
                 .Transition<FindTargetPlaceJob, FindTargetPlaceJob>(JobResult.Error);
         }
 

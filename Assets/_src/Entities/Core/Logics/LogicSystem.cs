@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 namespace Game.Model.Logics
 {
     using Core;
+    using static Unity.Burst.Intrinsics.X86.Avx;
 
     public abstract partial class LogicSystem : SystemBase
     {
@@ -60,6 +61,7 @@ namespace Game.Model.Logics
 
         static void SetState(EntityCommandBuffer.ParallelWriter writer, Entity entity, JobState state, int sortKey)
         {
+            //UnityEngine.Debug.Log($"result: {entity}: {state}");
             new S().SetState(writer, entity, state, sortKey);
         }
 
@@ -99,6 +101,7 @@ namespace Game.Model.Logics
                     {
                         if (iter.Def.Logic.TryGetJob(next, out ILogicPart logicJob))
                         {
+                            //UnityEngine.Debug.Log($"{typeof(T)}: {entity}: {logicJob.GetType()}");
                             state.Value = JobState.Running;
                             try
                             {
@@ -137,7 +140,11 @@ namespace Game.Model.Logics
 
             foreach (var iter in StateMachine.Parts)
                 iter.Init(this);
-            Dependency = job.ScheduleParallel(m_Query, Dependency);
+
+            NativeArray<Entity> limitToEntityArray = m_Query.ToEntityArray(Allocator.TempJob);
+            Dependency = job.ScheduleParallel(m_Query, ScheduleGranularity.Entity, limitToEntityArray, Dependency);
+            limitToEntityArray.Dispose(Dependency);
+            //Dependency = job.ScheduleParallel(m_Query, Dependency);
             //m_CommandBuffer.AddJobHandleForProducer(Dependency);
         }
     }
@@ -149,7 +156,7 @@ namespace Game.Model.Logics
         public int SortKey { get; }
         public FunctionPointer<StateCallback> Callback { get; }
 
-        private int m_Index;
+        public int m_Index;
         private ArchetypeChunk m_BatchInChunk;
 
 

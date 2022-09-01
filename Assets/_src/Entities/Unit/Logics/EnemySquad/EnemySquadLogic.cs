@@ -8,7 +8,7 @@ namespace Game.Model.Logics
 {
     using Core;
     using World;
-    public struct EnemySquad : ILogic
+    public struct EnemySquadLogic : ILogic
     {
         public struct Target: IComponentData
         {
@@ -30,11 +30,11 @@ namespace Game.Model.Logics
 
         #region ILogic
         public ILogicDef Def => m_Def.Link;
-        public EnemySquadDef SquadDef => (EnemySquadDef)m_Def.Link;
+        public EnemySquadLogicDef SquadDef => (EnemySquadLogicDef)m_Def.Link;
         public int CurrentJob { get => currentJob; set => currentJob = value; }
         #endregion
 
-        public EnemySquad(ReferenceObject<ILogicDef> def)
+        public EnemySquadLogic(ReferenceObject<ILogicDef> def)
         {
             m_Def = def;
             currentJob = 0;

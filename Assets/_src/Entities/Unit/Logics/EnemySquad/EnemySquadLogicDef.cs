@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Jobs;
 
-[assembly: RegisterGenericJobType(typeof(Game.Model.Logics.LogicSystem<Game.Model.Logics.EnemySquad, Game.Model.Logics.EnemySquad.State>.LogicJob))]
+[assembly: RegisterGenericJobType(typeof(Game.Model.Logics.LogicSystem<Game.Model.Logics.EnemySquadLogic, Game.Model.Logics.EnemySquadLogic.State>.LogicJob))]
 
 namespace Game.Model.Logics
 {
     using Core;
 
 
-    [Defineable(typeof(EnemySquad))]
-    public partial class EnemySquadDef : BaseLogicDef<EnemySquad>
+    [Defineable(typeof(EnemySquadLogic))]
+    public partial class EnemySquadLogicDef : BaseLogicDef<EnemySquadLogic>
     {
-        public partial class System : LogicSystem<EnemySquad, EnemySquad.State> { }
+        public partial class System : LogicSystem<EnemySquadLogic, EnemySquadLogic.State> { }
 
         public static void Initialize()
         {
@@ -25,15 +25,15 @@ namespace Game.Model.Logics
         protected override void AddComponentData(Entity entity, EntityManager manager, GameObjectConversionSystem conversionSystem)
         {
             base.AddComponentData(entity, manager, conversionSystem);
-            manager.AddComponent<EnemySquad.State>(entity);
-            manager.AddComponent<EnemySquad.Target>(entity);
+            manager.AddComponent<EnemySquadLogic.State>(entity);
+            manager.AddComponent<EnemySquadLogic.Target>(entity);
         }
 
         protected override void AddComponentData(Entity entity, EntityCommandBuffer.ParallelWriter writer, int sortKey)
         {
             base.AddComponentData(entity, writer, sortKey);
-            writer.AddComponent<EnemySquad.State>(sortKey, entity);
-            writer.AddComponent<EnemySquad.Target>(sortKey, entity);
+            writer.AddComponent<EnemySquadLogic.State>(sortKey, entity);
+            writer.AddComponent<EnemySquadLogic.Target>(sortKey, entity);
         }
 
         public override int GetTransition(int value, JobResult jobResult)

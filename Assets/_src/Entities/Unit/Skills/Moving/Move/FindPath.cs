@@ -71,7 +71,6 @@ namespace Game.Model.Skills
         public static bool FindPath(Map.Data map, ref Moving moving, ref Map.Path.Info info, DynamicBuffer<Map.Path.Points> points, DynamicBuffer<Map.Path.Times> times)
         {
             var path = points;
-            UnityEngine.Debug.Log($"thread: {Thread.CurrentThread.ManagedThreadId}");
             if (path.Length < 2)
             {
                 return false;

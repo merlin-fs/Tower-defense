@@ -4,17 +4,12 @@ using Unity.Entities;
 using Unity.Collections;
 using Unity.Mathematics;
 
-using Game.Model.Skills;
-using Game.Model.World;
-using static UnityEditor.Progress;
-using static UnityEngine.EventSystems.EventTrigger;
-
-
 namespace Game.Model.Logics
 {
     using Core;
+    using Skills;
 
-    public partial class EnemySquadDef
+    public partial class EnemySquadLogicDef
     {
         public unsafe class InitSquadJob : ILogicPart
         {
@@ -48,6 +43,7 @@ namespace Game.Model.Logics
 
                 NativeArray<Entity> output = new NativeArray<Entity>(squad.Def.Count, Allocator.Temp, NativeArrayOptions.UninitializedMemory);                 
                 context.Writer.Instantiate(context.SortKey, squad.Def.Prefab.EntityPrefab, output);
+
                 for (var i = 0; i < output.Length; i++)
                 {
                     var iter = output[i];
@@ -71,21 +67,25 @@ namespace Game.Model.Logics
             [ReadOnly] private BufferFromEntity<Squad.UnitPosition> m_SquadPositionHandle;
             [ReadOnly] private ComponentDataFromEntity<Move.Moving> m_MoveHandle;
 
+            private static readonly object s_Lock = new object();
+
             public void Init(LogicSystem system)
             {
-                m_SquadPositionHandle = system.GetBufferFromEntity<Squad.UnitPosition>(true);
                 m_SquadSelfHandle = system.GetComponentTypeHandle<Squad.Unit>(true);
+                m_SquadPositionHandle = system.GetBufferFromEntity<Squad.UnitPosition>(true);
                 m_MoveHandle = system.GetComponentDataFromEntity<Move.Moving>(true);
             }
 
             public void Execute(ExecuteContext context)
             {
-                var squad = context.GetData<Squad.Unit>(m_SquadSelfHandle);
-                
-                //var squadPosition = m_MoveHandle[squad.Squad].CurrentPosition;
-                var squadPosition = m_MoveHandle[squad.Squad].Def.Link.InitPosition;
 
-                var position = m_SquadPositionHandle[squad.Squad][squad.Index].Position;
+                var squad = context.GetData<Squad.Unit>(m_SquadSelfHandle);
+                //var squadPosition = m_MoveHandle[squad.Squad].CurrentPosition;
+                UnityEngine.Debug.Log($"Get m_MoveHandle 2: {squad.Squad}, {squad.Index}, {context.Entity}, {context.m_Index}");
+                var move = m_MoveHandle[squad.Squad];
+                var squadPosition = move.Def.Link.InitPosition;
+                var buff = m_SquadPositionHandle[squad.Squad];
+                var position = buff[squad.Index].Position;
                 position += squadPosition;
 
                 Move.Place(context.Entity, position, context.Callback, context.SortKey);

@@ -91,8 +91,7 @@ namespace Game.Model.Skills
                         var data = datas[i];
                         var cmd = commands[i];
                         var entity = entities[i];
-
-
+                        
                         switch (cmd.Value)
                         {
                             case State.Init:
@@ -118,6 +117,7 @@ namespace Game.Model.Skills
 
                             case State.FindPath:
                             {
+                                UnityEngine.Debug.Log($"FindPath: {entity}");
                                 cmd.Value = State.None;
                                 data.TargetPosition = cmd.TargetPosition;
                                 datas[i] = data;
@@ -133,11 +133,12 @@ namespace Game.Model.Skills
                                             {
                                                 var p = path[i];
                                                 buff[i] = new float3(p.x, p.y, 0);
-
                                             });
                                         }
                                         cmd.Value = State.FindPathDone;
+                                        UnityEngine.Debug.Log($"SetComponent: {entity} 1");
                                         Service.Writer.SetComponent(batchIndex, entity, cmd);
+                                        UnityEngine.Debug.Log($"SetComponent: {entity} 2");
                                     });
                             }
                             break;
@@ -151,6 +152,7 @@ namespace Game.Model.Skills
                                     : State.Error;
                                 infos[i] = info;
                                 datas[i] = data;
+                                UnityEngine.Debug.Log($"FindPathDone: {entity}, {cmd.Value}");
                                 Writer.SetComponent(batchIndex, entity, cmd);
                             }
                             break;
@@ -176,10 +178,7 @@ namespace Game.Model.Skills
             protected override void OnUpdate()
             {
 
-                NativeArray<Entity> limitToEntityArray = m_Query.ToEntityArray(Allocator.TempJob);
-
                 var map = Map.Singleton;
-
                 var job = new NewPositionJob()
                 {
                     Map = map,
@@ -202,9 +201,10 @@ namespace Game.Model.Skills
                     InputTranslation = GetComponentTypeHandle<Translation>(false),
                     InputRotation = GetComponentTypeHandle<Rotation>(false),
                 };
-
+                NativeArray<Entity> limitToEntityArray = m_Query.ToEntityArray(Allocator.TempJob);
                 Dependency = job.ScheduleParallel(m_Query, ScheduleGranularity.Entity, limitToEntityArray, Dependency);
                 limitToEntityArray.Dispose(Dependency);
+                //Dependency = job.ScheduleParallel(m_Query, Dependency);
                 //Dependency = job.ScheduleParallel(m_Query, 1, Dependency);
                 //m_CommandBuffer.AddJobHandleForProducer(Dependency);
             }
@@ -314,6 +314,7 @@ namespace Game.Model.Skills
                 };
 
                 Dependency = job.ScheduleParallel(m_Query, Dependency);
+                //m_CommandBuffer.AddJobHandleForProducer(Dependency);
             }
         }
     }

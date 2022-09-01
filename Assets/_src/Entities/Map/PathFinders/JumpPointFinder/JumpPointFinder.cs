@@ -227,10 +227,7 @@ namespace Game.Model.World
 
                             //!!!if (tJumpNode.isClosed)
                             if (m_Hierarchy.ContainsKey(tJumpPoint.Value) || m_Queue.Has(cost))
-                            {
-                                UnityEngine.Debug.LogWarning($"m_Queue.Has !!!");
                                 continue;
-                            }
                                 
 
                             // include distance, as parent may not be immediately adjacent:

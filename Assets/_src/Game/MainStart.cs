@@ -202,7 +202,7 @@ public class MainStart : MonoBehaviour
         //TODO: перенести ! (как вариант событие (шина) на инициализацию мира)
         Game.Model.Logics.EnemyLogicDef.Initialize();
         Game.Model.Logics.TowerLogicDef.Initialize();
-        Game.Model.Logics.EnemySquadDef.Initialize();
+        Game.Model.Logics.EnemySquadLogicDef.Initialize();
         
 
 

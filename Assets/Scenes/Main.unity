@@ -463,10 +463,10 @@ MonoBehaviour:
         m_EnemyTeams:
         - Value: 1
     00000004:
-      type: {class: EnemySquadDef, ns: Game.Model.Logics, asm: Assembly-CSharp}
+      type: {class: EnemySquadLogicDef, ns: Game.Model.Logics, asm: Assembly-CSharp}
       data:
         m_DefineableType:
-          m_Type: Game.Model.Logics.EnemySquad, Assembly-CSharp, Version=0.0.0.0,
+          m_Type: Game.Model.Logics.EnemySquadLogic, Assembly-CSharp, Version=0.0.0.0,
             Culture=neutral, PublicKeyToken=null
     00000005:
       type: {class: Move/MovingDef, ns: Game.Model.Skills, asm: Assembly-CSharp}
