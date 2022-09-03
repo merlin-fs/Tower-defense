@@ -9,20 +9,21 @@ using Unity.Burst;
 namespace Game.Model.Skills
 {
     using Core;
+    using Unity.Jobs;
     using World;
 
     public partial class Move
     {
-        public static System Service;
+        public static System Instance { get; private set; }
 
-        public static void Place(Entity entity, int2 value, FunctionPointer<StateCallback> callback, int sortKey)
+        public static void Place(Entity entity, int2 value, FunctionPointer<StateCallback> callback)
         {
-            Service.Writer.SetComponent(sortKey, entity, new Commands() { Value = State.Init, TargetPosition = value, Callback = callback });
+            Instance.SendData(entity, new Commands() { Value = State.Init, TargetPosition = value, Callback = callback });
         }
 
-        public static void MoveTo(Entity entity, int2 value, FunctionPointer<StateCallback> callback, int sortKey)
+        public static void MoveTo(Entity entity, int2 value, FunctionPointer<StateCallback> callback)
         {
-            Service.Writer.SetComponent(sortKey, entity, new Commands() { Value = State.FindPath, TargetPosition = value, Callback = callback });
+            Instance.SendData(entity, new Commands() { Value = State.FindPath, TargetPosition = value, Callback = callback });
         }
 
         [UpdateInGroup(typeof(GameLogicSystemGroup))]
@@ -31,13 +32,32 @@ namespace Game.Model.Skills
             private EntityQuery m_Query;
             private Unity.Mathematics.Random m_Random;
             private EntityCommandBufferSystem m_CommandBuffer;
-            public EntityCommandBuffer.ParallelWriter Writer => m_CommandBuffer.CreateCommandBuffer().AsParallelWriter();
+            
+            public EntityCommandBuffer NewBuffer => m_CommandBuffer.CreateCommandBuffer();
+
+            public void SendData(Entity entity, Commands value)
+            {
+                UnityEngine.Debug.Log($"SendData: {entity}: {value.Value}");
+                lock(m_Lock)
+                    m_Queue.Enqueue(new QueueItem { Entity = entity, Value = value });
+            }
+
+            private struct QueueItem
+            {
+                public Commands Value;
+                public Entity Entity;
+            }
+
+            private NativeQueue<QueueItem> m_Queue;
+            private readonly object m_Lock = new object();
 
             protected override void OnCreate()
             {
                 base.OnCreate();
+                Instance = this;
+                m_Queue = new NativeQueue<QueueItem>(Allocator.Persistent);
+
                 m_CommandBuffer = World.GetOrCreateSystem<GameLogicCommandBufferSystem>();
-                
                 m_Query = GetEntityQuery(
                     ComponentType.ReadWrite<Commands>()
                 );
@@ -46,9 +66,13 @@ namespace Game.Model.Skills
                 RequireForUpdate(m_Query);
 
                 m_Random = new Unity.Mathematics.Random(847568);
-                Service = this;
             }
 
+            protected override void OnDestroy()
+            {
+                m_Queue.Dispose();
+                base.OnDestroy();
+            }
 
             struct NewPositionJob : IJobEntityBatch
             {
@@ -104,7 +128,7 @@ namespace Game.Model.Skills
                                     cmd.Value = SetToPoint(Map, ref data, ref translation, ref rotation)
                                         ? State.Done
                                         : State.Error;
-                                    Writer.SetComponent(batchIndex, entity, cmd);
+                                    Instance.SendData(entity, cmd);
                                 }
                                 finally
                                 {
@@ -121,24 +145,32 @@ namespace Game.Model.Skills
                                 cmd.Value = State.None;
                                 data.TargetPosition = cmd.TargetPosition;
                                 datas[i] = data;
-                                Writer.SetComponent(batchIndex, entity, cmd);
+                                Instance.SendData(entity, cmd);
+
                                 FindPath(Map, entities[i], data, 
                                     (path) =>
                                     {
                                         if (path.Length >= 2)
                                         {
-                                            var buff = Service.Writer.SetBuffer<Map.Path.Points>(0, entity);
-                                            buff.ResizeUninitialized(path.Length);
-                                            Parallel.For(0, path.Length, (i) =>
+                                            try
                                             {
-                                                var p = path[i];
-                                                buff[i] = new float3(p.x, p.y, 0);
-                                            });
+                                                var writer = Instance.NewBuffer;
+                                                var buff = writer.SetBuffer<Map.Path.Points>(entity);
+
+                                                buff.ResizeUninitialized(path.Length);
+                                                Parallel.For(0, path.Length, (i) =>
+                                                {
+                                                    var p = path[i];
+                                                    buff[i] = new float3(p.x, p.y, 0);
+                                                });
+                                            }
+                                            catch (Exception e)
+                                            {
+                                                UnityEngine.Debug.LogError($"{entity}: {e}");
+                                            }
                                         }
                                         cmd.Value = State.FindPathDone;
-                                        UnityEngine.Debug.Log($"SetComponent: {entity} 1");
-                                        Service.Writer.SetComponent(batchIndex, entity, cmd);
-                                        UnityEngine.Debug.Log($"SetComponent: {entity} 2");
+                                        Instance.SendData(entity, cmd);
                                     });
                             }
                             break;
@@ -153,30 +185,58 @@ namespace Game.Model.Skills
                                 infos[i] = info;
                                 datas[i] = data;
                                 UnityEngine.Debug.Log($"FindPathDone: {entity}, {cmd.Value}");
-                                Writer.SetComponent(batchIndex, entity, cmd);
+                                Instance.SendData(entity, cmd);
                             }
                             break;
                             case State.Done:
                             {
                                 cmd.Value = State.None;
-                                Writer.SetComponent(batchIndex, entity, cmd);
-                                cmd.Callback.Invoke(Writer, entity, JobResult.Done, batchIndex);
+                                Instance.SendData(entity, cmd);
+                                cmd.Callback.Invoke(entity, JobResult.Done);
                             }
                             break;
                             case State.Error:
                             {
                                 cmd.Value = State.None;
-                                Writer.SetComponent(batchIndex, entity, cmd);
-                                cmd.Callback.Invoke(Writer, entity, JobResult.Error, batchIndex);
+                                Instance.SendData(entity, cmd);
+                                cmd.Callback.Invoke(entity, JobResult.Error);
                             }
                             break;
                         }
+                        commands[i] = cmd;
                     }
+                }
+            }
+
+            struct QueueJob : IJobParallelFor
+            {
+                public EntityCommandBuffer.ParallelWriter Writer;
+                public NativeArray<QueueItem> Items;
+
+                public void Execute(int index)
+                {
+                    var iter = Items[index];
+                    UnityEngine.Debug.Log($"SetComponent: {iter.Entity}: {iter.Value.Value}");
+                    Writer.SetComponent(index, iter.Entity, iter.Value);
                 }
             }
 
             protected override void OnUpdate()
             {
+                NativeArray<QueueItem> items;
+                lock (m_Lock)
+                {
+                    items = m_Queue.ToArray(Allocator.TempJob);
+                    m_Queue.Clear();
+                }
+
+                var queueJob = new QueueJob
+                {
+                    Writer = m_CommandBuffer.CreateCommandBuffer().AsParallelWriter(),
+                    Items = items,
+                }.Schedule(items.Length, 1);
+                items.Dispose(queueJob);
+                m_CommandBuffer.AddJobHandleForProducer(queueJob);
 
                 var map = Map.Singleton;
                 var job = new NewPositionJob()
@@ -187,7 +247,7 @@ namespace Game.Model.Skills
 
                     Random = m_Random,
 
-                    Writer = Writer,
+                    Writer = m_CommandBuffer.CreateCommandBuffer().AsParallelWriter(),
 
                     InputEntity = GetEntityTypeHandle(),
 
@@ -206,7 +266,7 @@ namespace Game.Model.Skills
                 limitToEntityArray.Dispose(Dependency);
                 //Dependency = job.ScheduleParallel(m_Query, Dependency);
                 //Dependency = job.ScheduleParallel(m_Query, 1, Dependency);
-                //m_CommandBuffer.AddJobHandleForProducer(Dependency);
+                m_CommandBuffer.AddJobHandleForProducer(Dependency);
             }
         }
 
@@ -215,12 +275,10 @@ namespace Game.Model.Skills
         public partial class MoveToSystem : SystemBase
         {
             private EntityQuery m_Query;
-            protected EntityCommandBufferSystem m_CommandBuffer;
+
             protected override void OnCreate()
             {
                 base.OnCreate();
-                m_CommandBuffer = World.GetOrCreateSystem<GameLogicCommandBufferSystem>();
-
                 m_Query = GetEntityQuery(
                     ComponentType.ReadOnly<Commands>()
                 );
@@ -236,8 +294,6 @@ namespace Game.Model.Skills
                 [ReadOnly] public ComponentTypeHandle<Map.Path.Info> InputPathInfo;
                 [ReadOnly] public BufferTypeHandle<Map.Path.Points> InputPoints;
                 [ReadOnly] public BufferTypeHandle<Map.Path.Times> InputTimes;
-
-                public EntityCommandBuffer.ParallelWriter Writer;
 
                 public ComponentTypeHandle<Moving> InputData;
 
@@ -272,7 +328,7 @@ namespace Game.Model.Skills
                             if (MoveToPoint(Delta, ref data, infos[i], points[i], times[i], ref translation, ref rotation))
                             {
                                 cmd.Value = State.Done;
-                                Writer.SetComponent(batchIndex, entity, cmd);
+                                Instance.SendData(entity, cmd);
                             }
                             datas[i] = data;
                         }
@@ -284,6 +340,7 @@ namespace Game.Model.Skills
                             }
                             translations[i] = new Translation() { Value = translation.Value };
                             rotations[i] = new Rotation() { Value = rotation.Value };
+                            //commands[i] = cmd;
                         }
                     }
                 }
@@ -297,8 +354,6 @@ namespace Game.Model.Skills
                 {
                     Map = map,
                     Delta = Time.DeltaTime,
-
-                    Writer = m_CommandBuffer.CreateCommandBuffer().AsParallelWriter(),
 
                     InputEntity = GetEntityTypeHandle(),
 

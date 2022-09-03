@@ -23,15 +23,15 @@ namespace Game.Model.Logics
             }
 
             public Configuration Transition<From, To>(JobResult jobResult = JobResult.Done)
-                where From : class, ILogicPart
-                where To : class, ILogicPart
+                where From : struct, ILogicJob
+                where To : struct, ILogicJob
             {
                 m_Owner.AddTransition<From, To>(jobResult);
                 return this;
             }
 
             public Configuration TransitionEnter<To>()
-                where To : class, ILogicPart
+                where To : struct, ILogicJob
             {
                 m_Owner.AddEnterTransition<To>();
                 return this;

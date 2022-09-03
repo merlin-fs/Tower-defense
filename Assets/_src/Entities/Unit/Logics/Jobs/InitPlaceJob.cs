@@ -8,14 +8,14 @@ namespace Game.Model.Logics
     using Skills;
     using World;
 
-    public unsafe class InitPlaceJob : ILogicPart
+    public struct InitPlaceJob : ILogicJob
     {
         public float Weight => 1;
 
         [ReadOnly]
         private ComponentTypeHandle<Move.Moving> m_MoveHandle;
 
-        public void Init(LogicSystem system)
+        public InitPlaceJob(LogicSystem system)
         {
             m_MoveHandle = system.GetComponentTypeHandle<Move.Moving>(true);
         }
@@ -27,7 +27,7 @@ namespace Game.Model.Logics
             
             var pos = moving.Def.Link.InitPosition;
             Map.GeneratePosition(Map.Singleton, ref pos);
-            Move.Place(context.Entity, pos, context.Callback, context.SortKey);
+            Move.Place(context.Entity, pos, context.Callback);
         }
     }
 }

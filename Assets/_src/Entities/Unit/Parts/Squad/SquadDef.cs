@@ -3,21 +3,16 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Common.Defs;
 using UnityEngine;
+using Game.Core.Repositories;
 
 namespace Game.Model
 {
-    using System.Globalization;
-
-    using Game.Core.Repositories;
-    using Game.Model.Core;
-    using Game.Model.Units;
-    using Game.Model.World;
-
+    using Core;
+    using Units;
+    using World;
     using Logics;
     using Properties;
     using Skills;
-
-    using UnityEngine.AddressableAssets;
 
     public partial class Squad
     {
@@ -32,9 +27,20 @@ namespace Game.Model
             public int Radius = 3;
 
             //TODO: херня!!! Дефы нужно получать уже из загруженного репозитория! (нужно сделать редактор с выбором ID и в рантайме (по запросу) брать уже из репозитория)
-            [SerializeField]
-            private UnitDef m_Def;
-            public IUnitDef Prefab => m_Def;
+            //[SerializeField]
+            //private UnitDef m_Def;
+            private IUnitDef m_Def;
+            public IUnitDef Prefab
+            {
+                get {
+                    if (m_Def == null)
+                    {
+                        var repo = Repositories.Instance.Repository<UnitDef>();
+                        m_Def = repo?.FindByID("Tank");
+                    }
+                    return m_Def;
+                }
+            }
 
             public int Count = 3;
 

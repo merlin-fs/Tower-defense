@@ -2,9 +2,9 @@ using System;
 
 namespace Game.Model.Logics
 {
-    public unsafe interface ILogicPart
+    public interface ILogicJob
     {
-        void Init(LogicSystem system);
+        //public ILogicJob(LogicSystem system) { }
         void Execute(ExecuteContext context);
         float Weight { get; }
     }

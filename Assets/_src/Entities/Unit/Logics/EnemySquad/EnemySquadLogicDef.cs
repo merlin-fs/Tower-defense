@@ -36,11 +36,11 @@ namespace Game.Model.Logics
             writer.AddComponent<EnemySquadLogic.Target>(sortKey, entity);
         }
 
-        public override int GetTransition(int value, JobResult jobResult)
+        public override int GetTransition(LogicStateMachine.StateJobs jobs, int value, JobResult jobResult)
         {
-            IEnumerable<ILogicPart> list = Logic.GetEnterTransition();
+            IEnumerable<ILogicJob> list = jobs.GetEnterTransition();
             if (value != 0)
-                list = Logic.GetTransition(value, jobResult);
+                list = jobs.GetTransition(value, jobResult);
             var result = Random(list);
             return Logic.GetID(result);
         }

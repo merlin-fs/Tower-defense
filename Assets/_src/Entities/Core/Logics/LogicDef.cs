@@ -11,7 +11,7 @@ namespace Game.Model.Logics
     public interface ILogicDef : IDef
     {
         LogicStateMachine Logic { get; }
-        int GetTransition(int value, JobResult jobResult);
+        int GetTransition(LogicStateMachine.StateJobs jobs, int value, JobResult jobResult);
     }
 
     public abstract class BaseLogicDef<T> : ClassDef<T>, ILogicDef
@@ -23,14 +23,14 @@ namespace Game.Model.Logics
 
         static System.Random m_Random = new System.Random();
 
-        public abstract int GetTransition(int value, JobResult jobResult);
+        public abstract int GetTransition(LogicStateMachine.StateJobs jobs, int value, JobResult jobResult);
 
-        protected static ILogicPart Random(IEnumerable<ILogicPart> list)
+        protected static ILogicJob Random(IEnumerable<ILogicJob> list)
         {
             float max = 0;
             float weight = list.Sum((item) => item.Weight);
-            ILogicPart result = null;
-            foreach (ILogicPart iter in list)
+            ILogicJob result = null;
+            foreach (ILogicJob iter in list)
             {
                 float rnd = (float)m_Random.NextDouble();
                 float rand = Mathf.Pow(rnd, 1 / (iter.Weight / weight));

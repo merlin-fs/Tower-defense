@@ -1,29 +1,20 @@
 using System;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Burst;
 using Unity.Jobs;
-using System.Runtime.InteropServices;
 
 namespace Game.Model.Logics
 {
     using Core;
-    using static Unity.Burst.Intrinsics.X86.Avx;
-
+    
     public abstract partial class LogicSystem : SystemBase
     {
-        protected EntityCommandBufferSystem m_CommandBuffer;
-
-        public EntityQuery BuildEntityQuery(params ComponentType[] componentTypes)
-        {
-            return GetEntityQuery(componentTypes);
-        }
-
         protected override void OnCreate()
         {
             base.OnCreate();
-            m_CommandBuffer = World.GetOrCreateSystem<GameLogicCommandBufferSystem>();
-            m_StateMachine = new LogicStateMachine(EntityManager, this, m_CommandBuffer);
+            m_StateMachine = new LogicStateMachine();
         }
     }
 
@@ -32,14 +23,34 @@ namespace Game.Model.Logics
         where T : struct, ILogic
         where S : struct, ILogicState
     {
-        protected EntityQuery m_Query;
+        public static LogicSystem<T, S> Instance { get; private set; }
+
+        public void SendData(Entity entity, S value)
+        {
+            UnityEngine.Debug.Log($"SendData: {entity}: {value.Value}");
+            lock (m_Lock)
+                m_Queue.Enqueue(new QueueItem { Entity = entity, Value = value });
+        }
+
+        private struct QueueItem
+        {
+            public S Value;
+            public Entity Entity;
+        }
+
+        private NativeQueue<QueueItem> m_Queue;
+        private readonly object m_Lock = new object();
+
+        private EntityCommandBufferSystem m_CommandBuffer;
+        private EntityQuery m_Query;
         private FunctionPointer<StateCallback> m_Callback;
 
         protected override void OnCreate()
         {
             base.OnCreate();
+            Instance = this;
 
-            m_CommandBuffer = World.GetOrCreateSystem<GameLogicCommandBufferSystem>();
+            m_Queue = new NativeQueue<QueueItem>(Allocator.Persistent);
 
             m_Query = GetEntityQuery(new EntityQueryDesc
             {
@@ -49,20 +60,26 @@ namespace Game.Model.Logics
             m_Query.AddChangedVersionFilter(ComponentType.ReadWrite<S>());
             RequireForUpdate(m_Query);
 
+            m_CommandBuffer = World.GetOrCreateSystem<GameLogicCommandBufferSystem>();
             m_Callback = new FunctionPointer<StateCallback>(Marshal.GetFunctionPointerForDelegate<StateCallback>(SetResult));
             //JobsUtility.JobDebuggerEnabled = false;
         }
 
-        static void SetResult(EntityCommandBuffer.ParallelWriter writer, Entity entity, JobResult result, int sortKey)
+        protected override void OnDestroy()
         {
-            var state = result == JobResult.Error ? JobState.Error : JobState.None;
-            SetState(writer, entity, state, sortKey);
+            m_Queue.Dispose();
+            base.OnDestroy();
         }
 
-        static void SetState(EntityCommandBuffer.ParallelWriter writer, Entity entity, JobState state, int sortKey)
+        static void SetResult(Entity entity, JobResult result)
         {
-            //UnityEngine.Debug.Log($"result: {entity}: {state}");
-            new S().SetState(writer, entity, state, sortKey);
+            var state = result == JobResult.Error ? JobState.Error : JobState.None;
+            SetState(entity, state);
+        }
+
+        static void SetState(Entity entity, JobState state)
+        {
+            Instance.SendData(entity, new S { Value = state });
         }
 
         public struct LogicJob : IJobEntityBatch
@@ -75,6 +92,7 @@ namespace Game.Model.Logics
             public ComponentTypeHandle<S> InputState;
 
             public EntityCommandBuffer.ParallelWriter Writer;
+            public LogicStateMachine.StateJobs Jobs;
 
             public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
             {
@@ -96,16 +114,16 @@ namespace Game.Model.Logics
                     var entity = entities[i];
                     var result = state.Value == JobState.Error ? JobResult.Error : JobResult.Done;
 
-                    var next = iter.Def.GetTransition(iter.CurrentJob, result);
+                    var next = iter.Def.GetTransition(Jobs, iter.CurrentJob, result);
                     if (next != 0)
                     {
-                        if (iter.Def.Logic.TryGetJob(next, out ILogicPart logicJob))
+                        if (Jobs.TryGetJob(next, out ILogicJob logicJob))
                         {
-                            //UnityEngine.Debug.Log($"{typeof(T)}: {entity}: {logicJob.GetType()}");
+                            UnityEngine.Debug.Log($"{typeof(T)}: {entity}: {logicJob.GetType()}");
                             state.Value = JobState.Running;
                             try
                             {
-                                SetState(Writer, entity, state.Value, batchIndex);
+                                SetState(entity, state.Value);
                                 iter.CurrentJob = next;
                                 var context = new ExecuteContext(Writer, batchInChunk, entity, i, Callback, batchIndex);
                                 logicJob.Execute(context);
@@ -113,11 +131,12 @@ namespace Game.Model.Logics
                             catch
                             {
                                 state.Value = JobState.Error;
-                                SetState(Writer, entity, state.Value, batchIndex);
+                                SetState(entity, state.Value);
                                 throw;
                             }
                             finally
                             {
+                                states[i] = state;
                                 datas[i] = iter;
                             }
                         }
@@ -126,11 +145,44 @@ namespace Game.Model.Logics
             }
         }
 
-        protected override void OnUpdate()
+        struct QueueJob : IJobParallelFor
         {
+            public EntityCommandBuffer.ParallelWriter Writer;
+            public NativeArray<QueueItem> Items;
+
+            public void Execute(int index)
+            {
+                var iter = Items[index];
+                UnityEngine.Debug.Log($"SetComponent: {iter.Entity}: {iter.Value.Value}");
+                Writer.SetComponent(index, iter.Entity, iter.Value);
+            }
+        }
+
+        protected unsafe override void OnUpdate()
+        {
+            NativeArray<QueueItem> items;
+            lock (m_Lock)
+            {
+                items = m_Queue.ToArray(Allocator.TempJob);
+                m_Queue.Clear();
+            }
+
+            var queueJob = new QueueJob
+            {
+                Writer = m_CommandBuffer.CreateCommandBuffer().AsParallelWriter(),
+                Items = items,
+            }.Schedule(items.Length, 1);
+            items.Dispose(queueJob);
+            m_CommandBuffer.AddJobHandleForProducer(queueJob);
+
+
+            var jobs = StateMachine.PrepareJobs(this);
+
             var job = new LogicJob
             {
                 Writer = m_CommandBuffer.CreateCommandBuffer().AsParallelWriter(),
+                Jobs = jobs,
+
                 LastSystemVersion = LastSystemVersion,
                 Callback = m_Callback,
                 InputLogic = GetComponentTypeHandle<T>(false),
@@ -138,14 +190,12 @@ namespace Game.Model.Logics
                 InputEntity = GetEntityTypeHandle(),
             };
 
-            foreach (var iter in StateMachine.Parts)
-                iter.Init(this);
-
-            NativeArray<Entity> limitToEntityArray = m_Query.ToEntityArray(Allocator.TempJob);
-            Dependency = job.ScheduleParallel(m_Query, ScheduleGranularity.Entity, limitToEntityArray, Dependency);
-            limitToEntityArray.Dispose(Dependency);
-            //Dependency = job.ScheduleParallel(m_Query, Dependency);
-            //m_CommandBuffer.AddJobHandleForProducer(Dependency);
+            //NativeArray<Entity> limitToEntityArray = m_Query.ToEntityArray(Allocator.TempJob);
+            //Dependency = job.ScheduleParallel(m_Query, ScheduleGranularity.Entity, limitToEntityArray, Dependency);
+            //limitToEntityArray.Dispose(Dependency);
+            Dependency = job.ScheduleParallel(m_Query, Dependency);
+            m_CommandBuffer.AddJobHandleForProducer(Dependency);
+            jobs.Dispose(Dependency);
         }
     }
 
@@ -169,7 +219,8 @@ namespace Game.Model.Logics
         public T GetData<T>(ComponentTypeHandle<T> handle)
             where T : struct, IComponentData
         {
-            return m_BatchInChunk.GetNativeArray(handle)[m_Index];
+            var array = m_BatchInChunk.GetNativeArray(handle);
+            return array[m_Index];
         }
 
         public ExecuteContext(EntityCommandBuffer.ParallelWriter writer, ArchetypeChunk batchInChunk, Entity entity, int index, FunctionPointer<StateCallback> callback, int sortKey)

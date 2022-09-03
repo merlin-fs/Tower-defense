@@ -9,41 +9,41 @@ namespace Game.Model.Logics
     using World;
     using Skills;
 
-    public unsafe class FindTargetPlaceJob : ILogicPart
+    public unsafe struct FindTargetPlaceJob : ILogicJob
     {
         public float Weight => 1;
-        [ReadOnly] public ComponentDataFromEntity<Translation> InputTranslation;
-        [ReadOnly] public ComponentDataFromEntity<Teams> InputTeams;
-        [ReadOnly] public ComponentDataFromEntity<Move.Moving> InputMove;
+        [ReadOnly] private ComponentDataFromEntity<Translation> m_InputTranslation;
+        [ReadOnly] private ComponentDataFromEntity<Teams> m_InputTeams;
+        [ReadOnly] private ComponentDataFromEntity<Move.Moving> m_InputMove;
 
-        public void Init(LogicSystem system)
+        public FindTargetPlaceJob(LogicSystem system)
         {
-            InputTranslation = system.GetComponentDataFromEntity<Translation>(true);
-            InputTeams = system.GetComponentDataFromEntity<Teams>(true);
-            InputMove = system.GetComponentDataFromEntity<Move.Moving>(true);
+            m_InputTranslation = system.GetComponentDataFromEntity<Translation>(true);
+            m_InputTeams = system.GetComponentDataFromEntity<Teams>(true);
+            m_InputMove = system.GetComponentDataFromEntity<Move.Moving>(true);
         }
 
         public void Execute(ExecuteContext context)
         {
-            var enemyTeams = InputTeams[context.Entity];
-            var selfRealPosotion = InputTranslation[context.Entity];
-            var moving = InputMove[context.Entity];
+            var enemyTeams = m_InputTeams[context.Entity];
+            var selfRealPosotion = m_InputTranslation[context.Entity];
+            var moving = m_InputMove[context.Entity];
             
-            var enemy = FindTarget.FindEnemy(enemyTeams.EnemyTeams, selfRealPosotion.Value, float.MaxValue, InputTranslation, InputTeams);
+            var enemy = FindTarget.FindEnemy(enemyTeams.EnemyTeams, selfRealPosotion.Value, float.MaxValue, m_InputTranslation, m_InputTeams);
             
             if (enemy != Entity.Null)
             {
-                var pos = InputMove[enemy].CurrentPosition;
+                var pos = m_InputMove[enemy].CurrentPosition;
                 if (!Map.GeneratePosition(Map.Singleton, ref pos))
                 {
-                    context.Callback.Invoke(context.Writer, context.Entity, JobResult.Error, context.SortKey);
+                    context.Callback.Invoke(context.Entity, JobResult.Error);
                     return;
                 }
-                Move.MoveTo(context.Entity, pos, context.Callback, context.SortKey);
+                Move.MoveTo(context.Entity, pos, context.Callback);
             }
             else
             {
-                context.Callback.Invoke(context.Writer, context.Entity, JobResult.Error, context.SortKey);
+                context.Callback.Invoke(context.Entity, JobResult.Error);
             }
         }
     }
