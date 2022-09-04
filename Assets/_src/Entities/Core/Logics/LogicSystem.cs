@@ -84,6 +84,7 @@ namespace Game.Model.Logics
 
         public struct LogicJob : IJobEntityBatch
         {
+            [ReadOnly] public float Delta;
             [ReadOnly] public uint LastSystemVersion;
             [ReadOnly] public EntityTypeHandle InputEntity;
             public FunctionPointer<StateCallback> Callback;
@@ -125,8 +126,8 @@ namespace Game.Model.Logics
                             {
                                 SetState(entity, state.Value);
                                 iter.CurrentJob = next;
-                                var context = new ExecuteContext(Writer, batchInChunk, entity, i, Callback, batchIndex);
-                                logicJob.Execute(context);
+                                var context = new ExecuteContext(Writer, batchInChunk, entity, i, Delta, batchIndex);
+                                logicJob.Execute(context, Callback);
                             }
                             catch
                             {
@@ -185,6 +186,7 @@ namespace Game.Model.Logics
 
                 LastSystemVersion = LastSystemVersion,
                 Callback = m_Callback,
+                Delta = Time.DeltaTime,
                 InputLogic = GetComponentTypeHandle<T>(false),
                 InputState = GetComponentTypeHandle<S>(false),
                 InputEntity = GetEntityTypeHandle(),
@@ -201,14 +203,12 @@ namespace Game.Model.Logics
 
     public struct ExecuteContext
     {
+        public float Delta { get; }
         public Entity Entity { get; }
         public EntityCommandBuffer.ParallelWriter Writer { get; }
         public int SortKey { get; }
-        public FunctionPointer<StateCallback> Callback { get; }
-
         public int m_Index;
         private ArchetypeChunk m_BatchInChunk;
-
 
         public DynamicBuffer<T> GetData<T>(BufferTypeHandle<T> handle)
             where T : struct, IBufferElementData
@@ -223,14 +223,21 @@ namespace Game.Model.Logics
             return array[m_Index];
         }
 
-        public ExecuteContext(EntityCommandBuffer.ParallelWriter writer, ArchetypeChunk batchInChunk, Entity entity, int index, FunctionPointer<StateCallback> callback, int sortKey)
+        public void SetData<T>(ComponentTypeHandle<T> handle, ref T value)
+            where T : struct, IComponentData
+        {
+            var array = m_BatchInChunk.GetNativeArray(handle);
+            array[m_Index] = value;
+        }
+
+        public ExecuteContext(EntityCommandBuffer.ParallelWriter writer, ArchetypeChunk batchInChunk, Entity entity, int index, float delta, int sortKey)
         {
             Writer = writer;
             Entity = entity;
             SortKey = sortKey;
             m_Index = index;
+            Delta = delta;
             m_BatchInChunk = batchInChunk;
-            Callback = callback;
         }
     }
 

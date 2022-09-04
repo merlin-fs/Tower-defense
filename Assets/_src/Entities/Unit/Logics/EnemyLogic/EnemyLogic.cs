@@ -26,6 +26,11 @@ namespace Game.Model.Logics
             public JobState Value { get => value; set => this.value = value; }
         }
 
+        public struct WorkTime : IComponentData
+        {
+            public float Time;
+        }
+
         #region ILogic
         public ILogicDef Def => m_Def.Link;
         public int CurrentJob { get => currentJob; set => currentJob = value; }

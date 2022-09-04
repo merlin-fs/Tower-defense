@@ -444,7 +444,6 @@ MonoBehaviour:
           m_Type: Game.Model.Squad+Data, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
             PublicKeyToken=null
         Radius: 3
-        m_Def: {fileID: 11400000, guid: cd6ea3a2d2d315e4bbb9d970dbd75030, type: 2}
         Count: 7
         m_Team:
           id: 3

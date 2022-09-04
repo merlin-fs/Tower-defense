@@ -13,6 +13,7 @@ namespace Game.Model
     using Logics;
     using Properties;
     using Skills;
+    using Unity.Transforms;
 
     public partial class Squad
     {
@@ -56,9 +57,11 @@ namespace Game.Model
             protected override void AddComponentData(Entity entity, EntityManager manager, GameObjectConversionSystem conversionSystem)
             {
                 base.AddComponentData(entity, manager, conversionSystem);
+                manager.AddComponent<Translation>(entity);
+                manager.AddComponent<Rotation>(entity);
+
                 manager.AddBuffer<UnitLink>(entity);
                 manager.AddBuffer<UnitPosition>(entity);
-
 
                 (m_Move as IDef).AddComponentData(entity, manager, conversionSystem);
                 m_Team.AddComponentData(entity, manager, conversionSystem);
@@ -68,6 +71,10 @@ namespace Game.Model
             protected override void AddComponentData(Entity entity, EntityCommandBuffer.ParallelWriter writer, int sortKey)
             {
                 base.AddComponentData(entity, writer, sortKey);
+                writer.AddComponent<Translation>(sortKey, entity);
+                writer.AddComponent<Rotation>(sortKey, entity);
+
+
                 writer.AddBuffer<UnitLink>(sortKey, entity);
                 writer.AddBuffer<UnitPosition>(sortKey, entity);
 

@@ -15,6 +15,12 @@ namespace Game.Model.World
                 return math.transform(ViewData.LocalToWorldMatrix, pos);
             }
 
+            public int2 WordToMap(float3 value)
+            {
+                var pos = math.transform(ViewData.WorldToLocalMatrix, value);
+                return (int2)math.round(new float2(pos.x, pos.z));
+            }
+
             public float3 MapToWord(int2 value)
             {
                 int idx = this.At(value);

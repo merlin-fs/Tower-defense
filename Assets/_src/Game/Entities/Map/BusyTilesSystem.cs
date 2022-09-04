@@ -44,12 +44,12 @@ namespace Game.Model
                 {
                     switch (commands[i].Value)
                     {
-                        case Move.State.Init:
+                        case Move.Command.Init:
                         {
                             Map.Tiles.AddEntity(commands[i].TargetPosition, entities[i]);
                         }
                         break;
-                        case Move.State.MoveToPoint:
+                        case Move.Command.MoveToPoint:
                         {
                             Map.Tiles.DelEntity(positions[i].CurrentPosition);
                             Map.Tiles.AddEntity(commands[i].TargetPosition, entities[i]);

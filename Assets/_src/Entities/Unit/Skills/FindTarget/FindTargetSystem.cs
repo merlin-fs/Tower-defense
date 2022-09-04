@@ -31,27 +31,25 @@ namespace Game.Model.Skills
             var CounterLock = new object();
             var entities = Map.Entities.Values;
             Parallel.ForEach(entities, (target) => 
-            //Parallel.For(0, entities.Length, j =>
-                {
-                    //var target = entities[j];
-                    var team = teams[target];
-                    //Проверка нужной коммнады
-                    if ((team.Team & findTeams) == 0)
-                        return;
+            {
+                var team = teams[target];
+                //Проверка нужной коммнады
+                if ((team.Team & findTeams) == 0)
+                    return;
 
-                    var targetPos = translations[target].Value;
-                    var magnitude = (selfPosition - targetPos).magnitude();
-                    //Проверка пересечения двух сфер
-                    if (magnitude < find.Magnitude &&
-                        utils.SpheresIntersect(selfPosition, selfRadius, targetPos, 5f, out float3 vector))
+                var targetPos = translations[target].Value;
+                var magnitude = (selfPosition - targetPos).magnitude();
+                //Проверка пересечения двух сфер
+                if (magnitude < find.Magnitude &&
+                    utils.SpheresIntersect(selfPosition, selfRadius, targetPos, 5f, out float3 vector))
+                {
+                    lock (CounterLock)
                     {
-                        lock (CounterLock)
-                        {
-                            find.Magnitude = magnitude;
-                            find.Entity = target;
-                        }
+                        find.Magnitude = magnitude;
+                        find.Entity = target;
                     }
-                });
+                }
+            });
             return find.Entity;
         }
     }

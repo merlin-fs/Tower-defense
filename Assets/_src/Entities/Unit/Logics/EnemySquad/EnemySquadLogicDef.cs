@@ -19,7 +19,9 @@ namespace Game.Model.Logics
         {
             m_System = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<System>();
             m_System.Configure
-                .TransitionEnter<InitSquadJob>();
+                .TransitionEnter<InitSquadJob>()
+                .Transition<InitSquadJob, FindPathToTargetJob>()
+                .Transition<FindPathToTargetJob, MovingJob>();
         }
 
         protected override void AddComponentData(Entity entity, EntityManager manager, GameObjectConversionSystem conversionSystem)

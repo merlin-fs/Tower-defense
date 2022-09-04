@@ -8,21 +8,29 @@ using Unity.Jobs;
 namespace Game.Model.Logics
 {
     using Core;
-
+    using static Game.Model.Logics.EnemyLogic;
 
     [Defineable(typeof(EnemyLogic))]
-    public class EnemyLogicDef : BaseLogicDef<EnemyLogic>
+    public partial class EnemyLogicDef : BaseLogicDef<EnemyLogic>
     {
         public partial class LogicSystem : LogicSystem<EnemyLogic, EnemyLogic.State> { }
 
         public static void Initialize()
         {
             m_System = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<LogicSystem>();
-            
+
             m_System.Configure
                 .TransitionEnter<EnemySquadLogicDef.PlaceUnitsJob>()
-                .Transition<EnemySquadLogicDef.PlaceUnitsJob, FindTargetPlaceJob>()
-                .Transition<FindTargetPlaceJob, FindTargetPlaceJob>(JobResult.Error);
+                .Transition<EnemySquadLogicDef.PlaceUnitsJob, EnemySquadLogicDef.FindPathUnitsJob>()
+                
+                .Transition<EnemySquadLogicDef.FindPathUnitsJob, MovingJob>()
+                .Transition<EnemySquadLogicDef.FindPathUnitsJob, EnemySquadLogicDef.FindPathUnitsJob>(JobResult.Error)
+                
+                .Transition<MovingJob, EnemySquadLogicDef.FindPathUnitsJob>();
+            
+
+                //.Transition<EnemySquadLogicDef.PlaceUnitsJob, FindTargetPlaceJob>()
+                //.Transition<FindTargetPlaceJob, FindTargetPlaceJob>(JobResult.Error);
         }
 
         protected override void AddComponentData(Entity entity, EntityManager manager, GameObjectConversionSystem conversionSystem)
@@ -30,6 +38,7 @@ namespace Game.Model.Logics
             base.AddComponentData(entity, manager, conversionSystem);
             manager.AddComponent<EnemyLogic.State>(entity);
             manager.AddComponent<EnemyLogic.Target>(entity);
+            manager.AddComponent<EnemyLogic.WorkTime>(entity);
         }
 
         protected override void AddComponentData(Entity entity, EntityCommandBuffer.ParallelWriter writer, int sortKey)
@@ -37,6 +46,7 @@ namespace Game.Model.Logics
             base.AddComponentData(entity, writer, sortKey);
             writer.AddComponent<EnemyLogic.State>(sortKey, entity);
             writer.AddComponent<EnemyLogic.Target>(sortKey, entity);
+            writer.AddComponent<EnemyLogic.WorkTime>(sortKey, entity);
         }
 
         public override int GetTransition(LogicStateMachine.StateJobs jobs, int value, JobResult jobResult)
