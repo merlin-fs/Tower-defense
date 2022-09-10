@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -40,11 +39,14 @@ namespace Common.UI.Windows
 				RecalcLayers();
 
 				window.InitWindow();
-				
+
+				yield return null;
+                /*
 				yield return window.Animate(IWindow.AnimationMode.Open, m_InteractiveAnimateTime).Play()
 					.AsUniTask()
 					.ToCoroutine();
-			}
+				*/
+            }
             finally
             {
 				RecalcLayers();
@@ -65,9 +67,12 @@ namespace Common.UI.Windows
 				m_Stack.Add(window);
 				try
 				{
-					yield return window.Animate(IWindow.AnimationMode.Hide, m_InteractiveAnimateTime).Play()
+					yield return null;
+					/*
+                    yield return window.Animate(IWindow.AnimationMode.Hide, m_InteractiveAnimateTime).Play()
 						.AsUniTask()
 						.ToCoroutine();
+					*/
 				}
 				finally
 				{
@@ -90,9 +95,12 @@ namespace Common.UI.Windows
 				m_Stack.Add(window);
 				try
 				{
-					yield return window.Animate(IWindow.AnimationMode.Show, m_InteractiveAnimateTime).Play()
+                    yield return null;
+					/*
+                    yield return window.Animate(IWindow.AnimationMode.Show, m_InteractiveAnimateTime).Play()
 						.AsUniTask()
 						.ToCoroutine();
+					*/
 				}
 				finally
 				{
@@ -115,9 +123,12 @@ namespace Common.UI.Windows
 				m_Stack.Add(window);
 				try
                 {
-					yield return window.Animate(IWindow.AnimationMode.Close, m_InteractiveAnimateTime).Play()
+                    yield return null;
+					/*
+                    yield return window.Animate(IWindow.AnimationMode.Close, m_InteractiveAnimateTime).Play()
 						.AsUniTask()
 						.ToCoroutine();
+					*/
 				}
                 finally
                 {

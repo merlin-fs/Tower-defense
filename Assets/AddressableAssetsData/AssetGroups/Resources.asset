@@ -15,27 +15,36 @@ MonoBehaviour:
   m_GroupName: Resources
   m_Data:
     m_SerializedData: []
-  m_GUID: 807d4e302781962428ced4877593cba8
+  m_GUID: 060f0f55daf1d6b448476038c910e228
   m_SerializeEntries:
-  - m_GUID: e4401e9165f516f48966ff8e72fea20e
-    m_Address: Assets/_data/Units/BossTank.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-  - m_GUID: f573bbdb89cdb9447b683ae67dcbbea7
-    m_Address: Assets/_data/Units/Buggy.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-  - m_GUID: 177c4415a5370da498b0da9c6378cd74
-    m_Address: Assets/_data/Units/Tank.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
   - m_GUID: a1840f1a4eb2acf42bdbde1f9fb7b1d8
     m_Address: Assets/_data/Units/TestPlayerBuild.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 177c4415a5370da498b0da9c6378cd74
+    m_Address: Assets/_data/Units/Tank.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e1914b5dd59b41a40bc5b5543c9b7135
+    m_Address: Assets/_data/Units/Helicopter.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f573bbdb89cdb9447b683ae67dcbbea7
+    m_Address: Assets/_data/Units/Buggy.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e4401e9165f516f48966ff8e72fea20e
+    m_Address: Assets/_data/Units/BossTank.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
-  m_Settings: {fileID: 11400000, guid: a66cba797a916a24f9cc2af836dc1dae, type: 2}
+  m_Settings: {fileID: 11400000, guid: cb2dbdd7658ec0345b8e18d547f8c21d, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: 7929c47cc91515b449a660b37b692426, type: 2}
-    - {fileID: 11400000, guid: b001759d07609ca40a61f78516d72514, type: 2}
+    - {fileID: 11400000, guid: 948d2fde70b21304eae07ad712c8aa67, type: 2}
+    - {fileID: 11400000, guid: ea52918b9f86219438c34c449b7c6cf4, type: 2}
