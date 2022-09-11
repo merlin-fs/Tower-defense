@@ -9,20 +9,45 @@ using Unity.Burst;
 namespace Game.Model.Skills
 {
     using Core;
+    using Unity.Jobs;
     using World;
+    using static Unity.Burst.Intrinsics.X86.Avx;
 
     public partial class Move
     {
-        public static System Service;
+        public static System Instance { get; private set; }
 
-        public static void Place(Entity entity, int2 value, FunctionPointer<StateCallback> callback, int sortKey)
+        public static void MoveTo(Entity entity, FunctionPointer<StateCallback> callback)
         {
-            Service.Writer.SetComponent(sortKey, entity, new Commands() { Value = State.Init, TargetPosition = value, Callback = callback });
+            Instance.SendData(entity, new Commands() { Value = Command.MoveToPoint, Callback = callback });
         }
 
-        public static void MoveTo(Entity entity, int2 value, FunctionPointer<StateCallback> callback, int sortKey)
+        public static void FindPath(Map.Data map, Entity entity, ref Moving moving, Action<NativeArray<int2>> callback)
         {
-            Service.Writer.SetComponent(sortKey, entity, new Commands() { Value = State.FindPath, TargetPosition = value, Callback = callback });
+            FindPath(map, entity, moving, callback);
+        }
+
+        public static void SetPath(Map.Data map, Entity entity, ref Moving moving, Action<NativeArray<int2>> callback)
+        {
+            FindPath(map, entity, moving, callback);
+        }
+
+        public static void FindAndSetPath(Map.Data map, Entity entity, Moving moving, FunctionPointer<StateCallback> callback)
+        {
+            FindPath(map, entity, moving, path =>
+            {
+                var cmd = new Commands
+                {
+                    Callback = callback,
+                    Value = Command.SetPath,
+                };
+                cmd.Path.Length = path.Length;
+                Parallel.For(0, path.Length, (i) =>
+                {
+                    cmd.Path[i] = path[i];
+                });
+                Instance.SendData(entity, cmd);
+            });
         }
 
         [UpdateInGroup(typeof(GameLogicSystemGroup))]
@@ -31,13 +56,35 @@ namespace Game.Model.Skills
             private EntityQuery m_Query;
             private Unity.Mathematics.Random m_Random;
             private EntityCommandBufferSystem m_CommandBuffer;
-            public EntityCommandBuffer.ParallelWriter Writer => m_CommandBuffer.CreateCommandBuffer().AsParallelWriter();
+            
+            public EntityCommandBuffer NewBuffer => m_CommandBuffer.CreateCommandBuffer();
+
+            public void SendData(Entity entity, Commands value)
+            {
+                UnityEngine.Debug.Log($"SendData: {entity}: {value.Value}");
+                m_CommandBuffer.CreateCommandBuffer().SetComponent(entity, value);
+                /*
+                lock (m_Lock)
+                    m_Queue.Enqueue(new QueueItem { Entity = entity, Value = value });
+                */
+            }
+
+            private struct QueueItem
+            {
+                public Commands Value;
+                public Entity Entity;
+            }
+
+            private NativeQueue<QueueItem> m_Queue;
+            private readonly object m_Lock = new object();
 
             protected override void OnCreate()
             {
                 base.OnCreate();
+                Instance = this;
+                m_Queue = new NativeQueue<QueueItem>(Allocator.Persistent);
+
                 m_CommandBuffer = World.GetOrCreateSystem<GameLogicCommandBufferSystem>();
-                
                 m_Query = GetEntityQuery(
                     ComponentType.ReadWrite<Commands>()
                 );
@@ -46,9 +93,13 @@ namespace Game.Model.Skills
                 RequireForUpdate(m_Query);
 
                 m_Random = new Unity.Mathematics.Random(847568);
-                Service = this;
             }
 
+            protected override void OnDestroy()
+            {
+                m_Queue.Dispose();
+                base.OnDestroy();
+            }
 
             struct NewPositionJob : IJobEntityBatch
             {
@@ -71,7 +122,6 @@ namespace Game.Model.Skills
 
                 public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
                 {
-
                     var change = batchInChunk.DidChange(InputCommand, LastSystemVersion);
                     if (!change)
                         return;
@@ -91,95 +141,74 @@ namespace Game.Model.Skills
                         var data = datas[i];
                         var cmd = commands[i];
                         var entity = entities[i];
-
-
+                        
                         switch (cmd.Value)
                         {
-                            case State.Init:
+                            case Command.MoveToPoint:
                             {
-                                var translation = translations[i];
-                                var rotation = rotations[i];
-                                try
-                                {
-                                    data.TargetPosition = cmd.TargetPosition;
-                                    cmd.Value = SetToPoint(Map, ref data, ref translation, ref rotation)
-                                        ? State.Done
-                                        : State.Error;
-                                    Writer.SetComponent(batchIndex, entity, cmd);
-                                }
-                                finally
-                                {
-                                    datas[i] = data;
-                                    translations[i] = new Translation() { Value = translation.Value };
-                                    rotations[i] = new Rotation() { Value = rotation.Value };
-                                }
+                                if (data.State != Moving.InternalState.None)
+                                    continue;
+                               data.State = Moving.InternalState.MoveToPoint;
                             }
                             break;
 
-                            case State.FindPath:
+                            case Command.SetPath:
                             {
-                                cmd.Value = State.None;
-                                data.TargetPosition = cmd.TargetPosition;
-                                datas[i] = data;
-                                Writer.SetComponent(batchIndex, entity, cmd);
-                                FindPath(Map, entities[i], data, 
-                                    (path) =>
-                                    {
-                                        if (path.Length >= 2)
-                                        {
-                                            var buff = Service.Writer.SetBuffer<Map.Path.Points>(0, entity);
-                                            buff.ResizeUninitialized(path.Length);
-                                            Parallel.For(0, path.Length, (i) =>
-                                            {
-                                                var p = path[i];
-                                                buff[i] = new float3(p.x, p.y, 0);
-
-                                            });
-                                        }
-                                        cmd.Value = State.FindPathDone;
-                                        Service.Writer.SetComponent(batchIndex, entity, cmd);
-                                    });
-                            }
-                            break;
-                            case State.FindPathDone:
-                            {
+                                data.State = Moving.InternalState.None;
                                 data.TargetPosition = cmd.TargetPosition;
                                 data.PathPrecent = 0;
                                 var info = infos[i];
-                                cmd.Value = FindPath(Map, ref data, ref info, points[i], times[i])
-                                    ? State.MoveToPoint
-                                    : State.Error;
+                                
+                                var result = FindPath(Map, cmd.Path, ref data, ref info, points[i], times[i])
+                                    ? JobResult.Done
+                                    : JobResult.Error;
                                 infos[i] = info;
-                                datas[i] = data;
-                                Writer.SetComponent(batchIndex, entity, cmd);
-                            }
-                            break;
-                            case State.Done:
-                            {
-                                cmd.Value = State.None;
-                                Writer.SetComponent(batchIndex, entity, cmd);
-                                cmd.Callback.Invoke(Writer, entity, JobResult.Done, batchIndex);
-                            }
-                            break;
-                            case State.Error:
-                            {
-                                cmd.Value = State.None;
-                                Writer.SetComponent(batchIndex, entity, cmd);
-                                cmd.Callback.Invoke(Writer, entity, JobResult.Error, batchIndex);
+                                cmd.Path.Clear();
+                                UnityEngine.Debug.Log($"SetPath: {entity}, {cmd.Value}");
+                                cmd.Callback.Invoke(entity, result);
                             }
                             break;
                         }
+                        cmd.Value = Command.None;
+                        datas[i] = data;
+                        commands[i] = cmd;
                     }
+                }
+            }
+
+            struct QueueJob : IJobParallelFor
+            {
+                public EntityCommandBuffer.ParallelWriter Writer;
+                public NativeArray<QueueItem> Items;
+
+                public void Execute(int index)
+                {
+                    var iter = Items[index];
+                    UnityEngine.Debug.Log($"SetComponent: {iter.Entity}: {iter.Value.Value}");
+                    Writer.SetComponent(index, iter.Entity, iter.Value);
                 }
             }
 
             protected override void OnUpdate()
             {
+                /*
+                NativeArray<QueueItem> items;
+                lock (m_Lock)
+                {
+                    items = m_Queue.ToArray(Allocator.TempJob);
+                    m_Queue.Clear();
+                }
 
-                NativeArray<Entity> limitToEntityArray = m_Query.ToEntityArray(Allocator.TempJob);
+                var queueJob = new QueueJob
+                {
+                    Writer = m_CommandBuffer.CreateCommandBuffer().AsParallelWriter(),
+                    Items = items,
+                }.Schedule(items.Length, 1);
+                items.Dispose(queueJob);
+                m_CommandBuffer.AddJobHandleForProducer(queueJob);
+                */
 
                 var map = Map.Singleton;
-
                 var job = new NewPositionJob()
                 {
                     Map = map,
@@ -188,7 +217,7 @@ namespace Game.Model.Skills
 
                     Random = m_Random,
 
-                    Writer = Writer,
+                    Writer = m_CommandBuffer.CreateCommandBuffer().AsParallelWriter(),
 
                     InputEntity = GetEntityTypeHandle(),
 
@@ -202,11 +231,12 @@ namespace Game.Model.Skills
                     InputTranslation = GetComponentTypeHandle<Translation>(false),
                     InputRotation = GetComponentTypeHandle<Rotation>(false),
                 };
-
+                NativeArray<Entity> limitToEntityArray = m_Query.ToEntityArray(Allocator.TempJob);
                 Dependency = job.ScheduleParallel(m_Query, ScheduleGranularity.Entity, limitToEntityArray, Dependency);
                 limitToEntityArray.Dispose(Dependency);
+                //Dependency = job.ScheduleParallel(m_Query, Dependency);
                 //Dependency = job.ScheduleParallel(m_Query, 1, Dependency);
-                //m_CommandBuffer.AddJobHandleForProducer(Dependency);
+                m_CommandBuffer.AddJobHandleForProducer(Dependency);
             }
         }
 
@@ -215,12 +245,10 @@ namespace Game.Model.Skills
         public partial class MoveToSystem : SystemBase
         {
             private EntityQuery m_Query;
-            protected EntityCommandBufferSystem m_CommandBuffer;
+
             protected override void OnCreate()
             {
                 base.OnCreate();
-                m_CommandBuffer = World.GetOrCreateSystem<GameLogicCommandBufferSystem>();
-
                 m_Query = GetEntityQuery(
                     ComponentType.ReadOnly<Commands>()
                 );
@@ -232,13 +260,11 @@ namespace Game.Model.Skills
                 [ReadOnly] public Map.Data Map;
                 [ReadOnly] public float Delta;
                 [ReadOnly] public EntityTypeHandle InputEntity;
-                [ReadOnly] public ComponentTypeHandle<Commands> InputCommand;
                 [ReadOnly] public ComponentTypeHandle<Map.Path.Info> InputPathInfo;
                 [ReadOnly] public BufferTypeHandle<Map.Path.Points> InputPoints;
                 [ReadOnly] public BufferTypeHandle<Map.Path.Times> InputTimes;
 
-                public EntityCommandBuffer.ParallelWriter Writer;
-
+                public ComponentTypeHandle<Commands> InputCommand;
                 public ComponentTypeHandle<Moving> InputData;
 
                 public ComponentTypeHandle<Translation> InputTranslation;
@@ -262,7 +288,7 @@ namespace Game.Model.Skills
                         var cmd = commands[i];
                         var entity = entities[i];
 
-                        if (cmd.Value != State.MoveToPoint)
+                        if (data.State != Moving.InternalState.MoveToPoint)
                             continue;
 
                         var translation = translations[i];
@@ -271,8 +297,9 @@ namespace Game.Model.Skills
                         {
                             if (MoveToPoint(Delta, ref data, infos[i], points[i], times[i], ref translation, ref rotation))
                             {
-                                cmd.Value = State.Done;
-                                Writer.SetComponent(batchIndex, entity, cmd);
+                                data.State = Moving.InternalState.None;
+                                if (cmd.Callback.IsCreated)
+                                    cmd.Callback.Invoke(entity, JobResult.Done);
                             }
                             datas[i] = data;
                         }
@@ -298,11 +325,9 @@ namespace Game.Model.Skills
                     Map = map,
                     Delta = Time.DeltaTime,
 
-                    Writer = m_CommandBuffer.CreateCommandBuffer().AsParallelWriter(),
-
                     InputEntity = GetEntityTypeHandle(),
 
-                    InputCommand = GetComponentTypeHandle<Commands>(true),
+                    InputCommand = GetComponentTypeHandle<Commands>(false),
                     InputData = GetComponentTypeHandle<Moving>(false),
 
                     InputPathInfo = GetComponentTypeHandle<Map.Path.Info>(true),
@@ -314,6 +339,7 @@ namespace Game.Model.Skills
                 };
 
                 Dependency = job.ScheduleParallel(m_Query, Dependency);
+                //m_CommandBuffer.AddJobHandleForProducer(Dependency);
             }
         }
     }

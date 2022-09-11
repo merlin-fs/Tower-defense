@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 namespace Game.Model.Skills
 {
     using World;
+    using static Unity.Burst.Intrinsics.X86.Avx;
 
     public partial class Move
     {
@@ -21,10 +22,8 @@ namespace Game.Model.Skills
             {
                 try
                 {
-                    //using (var path = Map.JumpPointFinder.FindPath(map.GetCostTile, map, entity, m.CurrentPosition, m.TargetPosition))
-                    using (var path = Map.JumpPointFinder.FindPath(
-                        (e, s, t) => map.GetCostTileRadius(3, e, s, t), 
-                        map, entity, m.CurrentPosition, m.TargetPosition))
+                    using (var path = Map.JumpPointFinder.FindPath(map.GetCostTile, map, entity, m.CurrentPosition, m.TargetPosition))
+                    //using (var path = Map.JumpPointFinder.FindPath((e, s, t) => map.GetCostTileRadius(3, e, s, t), map, entity, m.CurrentPosition, m.TargetPosition))
                     {
                         if (path.Length < 2)
                             return new NativeArray<int2>(path, Allocator.TempJob);
@@ -70,16 +69,13 @@ namespace Game.Model.Skills
                 });
         }
 
-        public static bool FindPath(Map.Data map, ref Moving moving, ref Map.Path.Info info, DynamicBuffer<Map.Path.Points> points, DynamicBuffer<Map.Path.Times> times)
+        public static bool FindPath(Map.Data map, IIndexable<int2> path, ref Moving moving, ref Map.Path.Info info, DynamicBuffer<Map.Path.Points> points, DynamicBuffer<Map.Path.Times> times)
         {
-            var path = points;
-            UnityEngine.Debug.Log($"thread: {Thread.CurrentThread.ManagedThreadId}");
             if (path.Length < 2)
             {
                 return false;
             }
-
-            moving.TargetPosition = new int2((int)path[path.Length-1].Value.x, (int)path[path.Length-1].Value.y);
+            moving.TargetPosition = path.ElementAt(path.Length - 1);
             points.ResizeUninitialized(path.Length);
 
             int timeLen = path.Length;
@@ -87,7 +83,7 @@ namespace Game.Model.Skills
             times.ResizeUninitialized(timeLen);
 
             for (int j = 0; j < path.Length; j++)
-                points[j] = map.MapToWord(new int2((int)path[j].Value.x, (int)path[j].Value.y));
+                points[j] = map.MapToWord(path.ElementAt(j));
 
             info.DeltaTime = 1f / (points.Length - 1);
             var pts = points.AsNativeArray();

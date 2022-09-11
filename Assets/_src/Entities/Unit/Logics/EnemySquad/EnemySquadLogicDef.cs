@@ -3,33 +3,41 @@ using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Jobs;
 
-[assembly: RegisterGenericJobType(typeof(Game.Model.Logics.LogicSystem<Game.Model.Logics.TowerLogic, Game.Model.Logics.TowerLogic.State>.LogicJob))]
+[assembly: RegisterGenericJobType(typeof(Game.Model.Logics.LogicSystem<Game.Model.Logics.EnemySquadLogic, Game.Model.Logics.EnemySquadLogic.State>.LogicJob))]
 
 namespace Game.Model.Logics
 {
     using Core;
 
-    [Defineable(typeof(TowerLogic))]
-    public class TowerLogicDef : BaseLogicDef<TowerLogic>
+
+    [Defineable(typeof(EnemySquadLogic))]
+    public partial class EnemySquadLogicDef : BaseLogicDef<EnemySquadLogic>
     {
-        public partial class LogicSystem : LogicSystem<TowerLogic, TowerLogic.State> {}
+        public partial class System : LogicSystem<EnemySquadLogic, EnemySquadLogic.State> { }
+
         public static void Initialize()
         {
-            m_System = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<LogicSystem>();
+            m_System = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<System>();
             m_System.Configure
-                .TransitionEnter<InitPlaceJob>();
+                .Add<InitPlaceJob>()
+
+                .TransitionEnter<InitSquadJob>()
+                .Transition<InitSquadJob, FindPathToTargetJob>()
+                .Transition<FindPathToTargetJob, MovingJob>();
         }
 
         protected override void AddComponentData(Entity entity, EntityManager manager, GameObjectConversionSystem conversionSystem)
         {
             base.AddComponentData(entity, manager, conversionSystem);
-            manager.AddComponent<TowerLogic.State>(entity);
+            manager.AddComponent<EnemySquadLogic.State>(entity);
+            manager.AddComponent<EnemySquadLogic.Target>(entity);
         }
 
         protected override void AddComponentData(Entity entity, EntityCommandBuffer.ParallelWriter writer, int sortKey)
         {
             base.AddComponentData(entity, writer, sortKey);
-            writer.AddComponent<TowerLogic.State>(sortKey, entity);
+            writer.AddComponent<EnemySquadLogic.State>(sortKey, entity);
+            writer.AddComponent<EnemySquadLogic.Target>(sortKey, entity);
         }
 
         public override int GetTransition(LogicStateMachine.StateJobs jobs, int value, JobResult jobResult)

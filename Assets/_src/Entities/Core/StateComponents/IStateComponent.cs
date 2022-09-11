@@ -16,5 +16,5 @@ namespace Game.Model.Core
         Error,
     }
 
-    public delegate void StateCallback(EntityCommandBuffer.ParallelWriter writer, Entity entity, JobResult state, int sortKey);
+    public delegate void StateCallback(Entity entity, JobResult state);
 }

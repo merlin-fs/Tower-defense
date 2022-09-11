@@ -3,12 +3,17 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Common.Defs;
 using UnityEngine;
+using Game.Core.Repositories;
 
 namespace Game.Model
 {
+    using Core;
+    using Units;
+    using World;
     using Logics;
     using Properties;
     using Skills;
+    using Unity.Transforms;
 
     public partial class Squad
     {
@@ -17,19 +22,65 @@ namespace Game.Model
 
         }
 
-
         [Defineable(typeof(Data))]
         public class SquadDef : ClassDef<Data>, ISquadDef
         {
-            public float Radius = 3;
+            public int Radius = 3;
+
+            //TODO: херня!!! Дефы нужно получать уже из загруженного репозитория! (нужно сделать редактор с выбором ID и в рантайме (по запросу) брать уже из репозитория)
+            //[SerializeField]
+            //private UnitDef m_Def;
+            private IUnitDef m_Def;
+            public IUnitDef Prefab
+            {
+                get {
+                    if (m_Def == null)
+                    {
+                        var repo = Repositories.Instance.Repository<UnitDef>();
+                        m_Def = repo?.FindByID("Tank");
+                    }
+                    return m_Def;
+                }
+            }
+
+            public int Count = 3;
+
+            [SerializeReference, Reference()]
+            ITeamDef m_Team;
 
             [SerializeReference, Reference()]
             ILogicDef m_Logic;
 
+            [SerializeReference, Reference()]
+            Move.MovingDef m_Move;
+
             protected override void AddComponentData(Entity entity, EntityManager manager, GameObjectConversionSystem conversionSystem)
             {
                 base.AddComponentData(entity, manager, conversionSystem);
-                //manager.AddBuffer<Map.Path.Times>(entity);
+                manager.AddComponent<Translation>(entity);
+                manager.AddComponent<Rotation>(entity);
+
+                manager.AddBuffer<UnitLink>(entity);
+                manager.AddBuffer<UnitPosition>(entity);
+
+                (m_Move as IDef).AddComponentData(entity, manager, conversionSystem);
+                m_Team.AddComponentData(entity, manager, conversionSystem);
+                m_Logic.AddComponentData(entity, manager, conversionSystem);
+            }
+
+            protected override void AddComponentData(Entity entity, EntityCommandBuffer.ParallelWriter writer, int sortKey)
+            {
+                base.AddComponentData(entity, writer, sortKey);
+                writer.AddComponent<Translation>(sortKey, entity);
+                writer.AddComponent<Rotation>(sortKey, entity);
+
+
+                writer.AddBuffer<UnitLink>(sortKey, entity);
+                writer.AddBuffer<UnitPosition>(sortKey, entity);
+
+                (m_Move as IDef).AddComponentData(entity, writer, sortKey);
+                m_Team.AddComponentData(entity, writer, sortKey);
+                m_Logic.AddComponentData(entity, writer, sortKey);
             }
         }
     }

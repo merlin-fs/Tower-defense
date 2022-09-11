@@ -10,9 +10,9 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 using TMPro;
 
+using Game;
 using Game.Core;
 using Game.Core.Repositories;
-
 using Game.Model.Skills;
 using Game.Model.Core;
 using Game.Model.Units;
@@ -128,6 +128,9 @@ public class MainStart : MonoBehaviour
     private Button m_Pack;
     [SerializeField]
     private Button m_GenerateMapButton;
+    [SerializeField]
+    private Button m_CreateSquad;
+    
 
     [SerializeField]
     AssetReferenceT<UnitDef> m_Build;
@@ -171,6 +174,9 @@ public class MainStart : MonoBehaviour
 
         m_GenerateMapButton.onClick.AddListener(() => GenerateMap(null));
 
+        m_CreateSquad.onClick.AddListener(() => OnSpawnSquad());
+
+
         foreach (var iter in m_Defs)
         {
             if (!iter.IsValid())
@@ -196,6 +202,8 @@ public class MainStart : MonoBehaviour
         //TODO: перенести ! (как вариант событие (шина) на инициализацию мира)
         Game.Model.Logics.EnemyLogicDef.Initialize();
         Game.Model.Logics.TowerLogicDef.Initialize();
+        Game.Model.Logics.EnemySquadLogicDef.Initialize();
+        
 
 
         foreach (var iter in repo.Find())
@@ -246,6 +254,11 @@ public class MainStart : MonoBehaviour
         StartCoroutine(SpawnObjects(count));
     }
 
+    private void OnSpawnSquad()
+    {
+        SpawnObject(Map.Singleton, m_Squad, m_Team, World.DefaultGameObjectInjectionWorld.EntityManager);
+    }
+
     private void SpawnObject(Map.Data map, IUnitDef def, ITeamDef team, EntityManager manager)
     {
         var entity = manager.CreateEntity(typeof(TestSpawn.SpawnState), typeof(Teams), typeof(HealthView));
@@ -256,6 +269,17 @@ public class MainStart : MonoBehaviour
 
         //GeneratePosition(map, ref position);
         //manager.AddComponentData(entity, position);
+    }
+
+    private void SpawnObject(Map.Data map, Squad.ISquadDef def, ITeamDef team, EntityManager manager)
+    {
+        var buff = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<GameSpawnSystemCommandBufferSystem>();
+        var writer = buff.CreateCommandBuffer().AsParallelWriter();
+
+        var entity = manager.CreateEntity();
+        m_Squad.AddComponentData(entity, writer, 0);
+        manager.SetName(entity, "Squad");
+
     }
 
     IEnumerator SpawnObjects(int count)

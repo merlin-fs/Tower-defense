@@ -1,11 +1,14 @@
 using System;
 
+using Game.Model.Core;
+using Unity.Burst;
+
 namespace Game.Model.Logics
 {
-    public unsafe interface ILogicPart
+    public interface ILogicJob
     {
-        void Init(LogicSystem system);
-        void Execute(ExecuteContext context);
+        //public ILogicJob(LogicSystem system) { }
+        void Execute(ExecuteContext context, FunctionPointer<StateCallback> callback);
         float Weight { get; }
     }
 } 

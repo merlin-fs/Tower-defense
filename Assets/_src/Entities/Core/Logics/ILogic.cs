@@ -15,7 +15,5 @@ namespace Game.Model.Logics
     public interface ILogicState : IComponentData
     {
         JobState Value { get; set; }
-
-        void SetState(EntityCommandBuffer.ParallelWriter writer, Entity entity, JobState state, int sortKey);
     }
 }
