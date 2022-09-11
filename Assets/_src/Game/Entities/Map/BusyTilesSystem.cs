@@ -12,7 +12,7 @@ namespace Game.Model
     using Skills;
 
     //[DisableAutoCreation]
-    [UpdateInGroup(typeof(GameSpawnSystemGroup))]
+    [UpdateInGroup(typeof(GameLogicSystemGroup))]
     public partial class BusyAddTilesSystem : SystemBase
     {
         private EntityQuery m_Query;

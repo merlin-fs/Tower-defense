@@ -1,17 +1,12 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Unity.Jobs;
 
 namespace Game.Model.Logics
 {
     using Common.Core;
-
     using Core;
-
-    using Unity.Collections;
-    using Unity.Collections.LowLevel.Unsafe;
-    using Unity.Entities.UniversalDelegates;
-    using Unity.Jobs;
 
     public partial class LogicStateMachine
     {
@@ -67,6 +62,16 @@ namespace Game.Model.Logics
                 return result;
             }
 
+            public bool TryGetJob<T>(int id, out T value)
+                where T : struct, ILogicJob
+            {
+                var result = Owner.m_Jobs.TryGetValue(id, out JobInfo info);
+                value = result
+                    ? (T)Jobs[info.ID]
+                    : default;
+                return result;
+            }
+
         }
 
 
@@ -87,6 +92,12 @@ namespace Game.Model.Logics
             var from = GetInfo(typeof(From), true);
             var to = GetInfo(typeof(To), true);
             from.AddTransition(to, jobResult);
+        }
+
+        private void Add<State>()
+            where State : struct, ILogicJob
+        {
+            GetInfo(typeof(State), true);
         }
 
         private void AddEnterTransition<To>()

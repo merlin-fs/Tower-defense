@@ -28,8 +28,11 @@ namespace Game.Model.Logics
         public void SendData(Entity entity, S value)
         {
             UnityEngine.Debug.Log($"SendData: {entity}: {value.Value}");
+            m_CommandBuffer.CreateCommandBuffer().SetComponent(entity, value);
+            /*
             lock (m_Lock)
                 m_Queue.Enqueue(new QueueItem { Entity = entity, Value = value });
+            */
         }
 
         private struct QueueItem
@@ -126,7 +129,7 @@ namespace Game.Model.Logics
                             {
                                 SetState(entity, state.Value);
                                 iter.CurrentJob = next;
-                                var context = new ExecuteContext(Writer, batchInChunk, entity, i, Delta, batchIndex);
+                                var context = new ExecuteContext(Jobs, Writer, batchInChunk, entity, i, Delta, batchIndex);
                                 logicJob.Execute(context, Callback);
                             }
                             catch
@@ -161,6 +164,7 @@ namespace Game.Model.Logics
 
         protected unsafe override void OnUpdate()
         {
+            /*
             NativeArray<QueueItem> items;
             lock (m_Lock)
             {
@@ -174,9 +178,9 @@ namespace Game.Model.Logics
                 Items = items,
             }.Schedule(items.Length, 1);
             items.Dispose(queueJob);
+            //queueJob.Complete();
             m_CommandBuffer.AddJobHandleForProducer(queueJob);
-
-
+            */
             var jobs = StateMachine.PrepareJobs(this);
 
             var job = new LogicJob
@@ -192,10 +196,10 @@ namespace Game.Model.Logics
                 InputEntity = GetEntityTypeHandle(),
             };
 
-            //NativeArray<Entity> limitToEntityArray = m_Query.ToEntityArray(Allocator.TempJob);
-            //Dependency = job.ScheduleParallel(m_Query, ScheduleGranularity.Entity, limitToEntityArray, Dependency);
-            //limitToEntityArray.Dispose(Dependency);
-            Dependency = job.ScheduleParallel(m_Query, Dependency);
+            NativeArray<Entity> limitToEntityArray = m_Query.ToEntityArray(Allocator.TempJob);
+            Dependency = job.ScheduleParallel(m_Query, ScheduleGranularity.Entity, limitToEntityArray, Dependency);
+            limitToEntityArray.Dispose(Dependency);
+            //Dependency = job.ScheduleParallel(m_Query, Dependency);
             m_CommandBuffer.AddJobHandleForProducer(Dependency);
             jobs.Dispose(Dependency);
         }
@@ -206,6 +210,7 @@ namespace Game.Model.Logics
         public float Delta { get; }
         public Entity Entity { get; }
         public EntityCommandBuffer.ParallelWriter Writer { get; }
+        public LogicStateMachine.StateJobs Jobs { get; }
         public int SortKey { get; }
         public int m_Index;
         private ArchetypeChunk m_BatchInChunk;
@@ -230,8 +235,9 @@ namespace Game.Model.Logics
             array[m_Index] = value;
         }
 
-        public ExecuteContext(EntityCommandBuffer.ParallelWriter writer, ArchetypeChunk batchInChunk, Entity entity, int index, float delta, int sortKey)
+        public ExecuteContext(LogicStateMachine.StateJobs jobs, EntityCommandBuffer.ParallelWriter writer, ArchetypeChunk batchInChunk, Entity entity, int index, float delta, int sortKey)
         {
+            Jobs = jobs;
             Writer = writer;
             Entity = entity;
             SortKey = sortKey;

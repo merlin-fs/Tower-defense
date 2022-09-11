@@ -19,6 +19,8 @@ namespace Game.Model.Logics
         {
             m_System = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<System>();
             m_System.Configure
+                .Add<InitPlaceJob>()
+
                 .TransitionEnter<InitSquadJob>()
                 .Transition<InitSquadJob, FindPathToTargetJob>()
                 .Transition<FindPathToTargetJob, MovingJob>();

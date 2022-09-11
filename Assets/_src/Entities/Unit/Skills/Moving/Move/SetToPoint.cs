@@ -9,7 +9,7 @@ namespace Game.Model.Skills
 
     public partial class Move
     {
-        public static bool SetToPoint(Map.Data map, ref Moving moving,
+        public static bool SetToPoint(Map.Data map, Entity entity, ref Moving moving,
             ref Translation translation, ref Rotation rotation)
         {
 
@@ -17,7 +17,9 @@ namespace Game.Model.Skills
             moving.CurrentPosition = moving.TargetPosition;
             //rotation.Value = quaternion.LookRotation(math.normalize(position - translation.Value), UP);
             translation.Value = position;
-            
+
+            Instance.SendData(entity, new Commands { Value = Command.Init, TargetPosition = moving.TargetPosition });
+
             return true;
         }
     }

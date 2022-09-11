@@ -2,13 +2,13 @@ using System;
 using Unity.Entities;
 using Unity.Collections;
 using Unity.Transforms;
+using Unity.Burst;
 
 namespace Game.Model.Logics
 {
     using Core;
     using World;
     using Skills;
-    using Unity.Burst;
 
     public unsafe struct FindPathToTargetJob : ILogicJob
     {
@@ -42,7 +42,8 @@ namespace Game.Model.Logics
                     callback.Invoke(context.Entity, JobResult.Error);
                     return;
                 }
-                Move.FindPath(context.Entity, pos, callback);
+                moving.TargetPosition = pos;
+                Move.FindAndSetPath(map, context.Entity, moving, callback);
             }
             else
             {

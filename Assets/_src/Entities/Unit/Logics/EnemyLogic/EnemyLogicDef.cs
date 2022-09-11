@@ -8,7 +8,6 @@ using Unity.Jobs;
 namespace Game.Model.Logics
 {
     using Core;
-    using static Game.Model.Logics.EnemyLogic;
 
     [Defineable(typeof(EnemyLogic))]
     public partial class EnemyLogicDef : BaseLogicDef<EnemyLogic>
@@ -20,14 +19,16 @@ namespace Game.Model.Logics
             m_System = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<LogicSystem>();
 
             m_System.Configure
+                .Add<InitPlaceJob>()
+
                 .TransitionEnter<EnemySquadLogicDef.PlaceUnitsJob>()
-                .Transition<EnemySquadLogicDef.PlaceUnitsJob, EnemySquadLogicDef.FindPathUnitsJob>()
+                .Transition<EnemySquadLogicDef.PlaceUnitsJob, EnemySquadLogicDef.WaitMoveSquadJob>()
+
+                .Transition<EnemySquadLogicDef.WaitMoveSquadJob, EnemySquadLogicDef.WaitMoveSquadJob>(JobResult.Error)
+                .Transition<EnemySquadLogicDef.WaitMoveSquadJob, EnemySquadLogicDef.FindPathUnitsJob>()
                 
                 .Transition<EnemySquadLogicDef.FindPathUnitsJob, MovingJob>()
-                .Transition<EnemySquadLogicDef.FindPathUnitsJob, EnemySquadLogicDef.FindPathUnitsJob>(JobResult.Error)
-                
                 .Transition<MovingJob, EnemySquadLogicDef.FindPathUnitsJob>();
-            
 
                 //.Transition<EnemySquadLogicDef.PlaceUnitsJob, FindTargetPlaceJob>()
                 //.Transition<FindTargetPlaceJob, FindTargetPlaceJob>(JobResult.Error);

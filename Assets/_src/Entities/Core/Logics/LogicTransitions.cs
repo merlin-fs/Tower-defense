@@ -22,6 +22,13 @@ namespace Game.Model.Logics
                 m_Owner = owner;
             }
 
+            public Configuration Add<State>()
+                where State : struct, ILogicJob
+            {
+                m_Owner.Add<State>();
+                return this;
+            }
+
             public Configuration Transition<From, To>(JobResult jobResult = JobResult.Done)
                 where From : struct, ILogicJob
                 where To : struct, ILogicJob

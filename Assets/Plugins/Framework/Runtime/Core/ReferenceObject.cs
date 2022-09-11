@@ -9,8 +9,6 @@ namespace Common.Core
 
         public T Link => (T)m_Handle.Target;
 
-        public GCHandle Info => m_Handle;
-
         public ReferenceObject(object target)
         {
             m_Handle = GCHandle.Alloc(target);

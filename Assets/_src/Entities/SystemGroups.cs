@@ -36,8 +36,10 @@ namespace Game
     //public class GameWeaponWorkCommandBufferSystem : BeginSimulationEntityCommandBufferSystem { }
     //public class GameWeaponWorkCommandBufferSystem : EndSimulationEntityCommandBufferSystem { }
 
-    [UpdateInGroup(typeof(InitializationSystemGroup), OrderFirst = true)]
-    public class GameLogicCommandBufferSystem : BeginInitializationEntityCommandBufferSystem { }
+    //[UpdateInGroup(typeof(InitializationSystemGroup), OrderFirst = true)]
+    [UpdateInGroup(typeof(GameLogicInitSystemGroup), OrderFirst = true)]
+    //public class GameLogicCommandBufferSystem : BeginInitializationEntityCommandBufferSystem { }
+    public class GameLogicCommandBufferSystem : BeginSimulationEntityCommandBufferSystem { }
 
     [UpdateAfter(typeof(GameLogicSystemGroup))]
     public class GameLogicDoneSystemGroup : ComponentSystemGroup { }

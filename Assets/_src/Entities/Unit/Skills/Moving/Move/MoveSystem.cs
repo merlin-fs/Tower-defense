@@ -11,24 +11,43 @@ namespace Game.Model.Skills
     using Core;
     using Unity.Jobs;
     using World;
+    using static Unity.Burst.Intrinsics.X86.Avx;
 
     public partial class Move
     {
         public static System Instance { get; private set; }
-
-        public static void Place(Entity entity, int2 value, FunctionPointer<StateCallback> callback)
-        {
-            Instance.SendData(entity, new Commands() { Value = Command.Init, TargetPosition = value, Callback = callback });
-        }
 
         public static void MoveTo(Entity entity, FunctionPointer<StateCallback> callback)
         {
             Instance.SendData(entity, new Commands() { Value = Command.MoveToPoint, Callback = callback });
         }
 
-        public static void FindPath(Entity entity, int2 value, FunctionPointer<StateCallback> callback)
+        public static void FindPath(Map.Data map, Entity entity, ref Moving moving, Action<NativeArray<int2>> callback)
         {
-            Instance.SendData(entity, new Commands() { Value = Command.FindPath, TargetPosition = value, Callback = callback });
+            FindPath(map, entity, moving, callback);
+        }
+
+        public static void SetPath(Map.Data map, Entity entity, ref Moving moving, Action<NativeArray<int2>> callback)
+        {
+            FindPath(map, entity, moving, callback);
+        }
+
+        public static void FindAndSetPath(Map.Data map, Entity entity, Moving moving, FunctionPointer<StateCallback> callback)
+        {
+            FindPath(map, entity, moving, path =>
+            {
+                var cmd = new Commands
+                {
+                    Callback = callback,
+                    Value = Command.SetPath,
+                };
+                cmd.Path.Length = path.Length;
+                Parallel.For(0, path.Length, (i) =>
+                {
+                    cmd.Path[i] = path[i];
+                });
+                Instance.SendData(entity, cmd);
+            });
         }
 
         [UpdateInGroup(typeof(GameLogicSystemGroup))]
@@ -43,8 +62,11 @@ namespace Game.Model.Skills
             public void SendData(Entity entity, Commands value)
             {
                 UnityEngine.Debug.Log($"SendData: {entity}: {value.Value}");
-                lock(m_Lock)
+                m_CommandBuffer.CreateCommandBuffer().SetComponent(entity, value);
+                /*
+                lock (m_Lock)
                     m_Queue.Enqueue(new QueueItem { Entity = entity, Value = value });
+                */
             }
 
             private struct QueueItem
@@ -126,80 +148,13 @@ namespace Game.Model.Skills
                             {
                                 if (data.State != Moving.InternalState.None)
                                     continue;
-                                cmd.Value = Command.None;
-                                data.State = Moving.InternalState.MoveToPoint;
+                               data.State = Moving.InternalState.MoveToPoint;
                             }
                             break;
 
-                            case Command.Init:
+                            case Command.SetPath:
                             {
-                                if (data.State != Moving.InternalState.None)
-                                    continue;
-
-                                data.State = Moving.InternalState.Init;
-                                cmd.Value = Command.None;
-                                var translation = translations[i];
-                                var rotation = rotations[i];
-                                try
-                                {
-                                    data.TargetPosition = cmd.TargetPosition;
-                                    var result = SetToPoint(Map, ref data, ref translation, ref rotation)
-                                        ? JobResult.Done
-                                        : JobResult.Error;
-
-                                    data.State = Moving.InternalState.None;
-                                    cmd.Callback.Invoke(entity, result);
-                                    Instance.SendData(entity, new Commands { Value = Command.None });
-                                }
-                                finally
-                                {
-                                    translations[i] = new Translation() { Value = translation.Value };
-                                    rotations[i] = new Rotation() { Value = rotation.Value };
-                                }
-                            }
-                            break;
-
-                            case Command.FindPath:
-                            {
-                                if (data.State != Moving.InternalState.None)
-                                    continue;
-
-                                data.State = Moving.InternalState.FindPath;
-                                UnityEngine.Debug.Log($"FindPath: {entity}");
-                                data.TargetPosition = cmd.TargetPosition;
-                                cmd.Value = Command.None;
-
-                                FindPath(Map, entities[i], data, 
-                                    (path) =>
-                                    {
-                                        if (path.Length >= 2)
-                                        {
-                                            try
-                                            {
-                                                cmd.Path.Length = path.Length;
-
-                                                Parallel.For(0, path.Length, (i) =>
-                                                {
-                                                    cmd.Path[i] = path[i];
-                                                });
-                                            }
-                                            catch (Exception e)
-                                            {
-                                                UnityEngine.Debug.LogError($"{entity}: {e}");
-                                            }
-                                        }
-                                        cmd.Value = Command.FindPathDone;
-                                        Instance.SendData(entity, cmd);
-                                    });
-                            }
-                            break;
-                            case Command.FindPathDone:
-                            {
-                                if (data.State != Moving.InternalState.FindPath)
-                                    continue;
-
                                 data.State = Moving.InternalState.None;
-                                cmd.Value = Command.None;
                                 data.TargetPosition = cmd.TargetPosition;
                                 data.PathPrecent = 0;
                                 var info = infos[i];
@@ -209,12 +164,12 @@ namespace Game.Model.Skills
                                     : JobResult.Error;
                                 infos[i] = info;
                                 cmd.Path.Clear();
-                                UnityEngine.Debug.Log($"FindPathDone: {entity}, {cmd.Value}");
+                                UnityEngine.Debug.Log($"SetPath: {entity}, {cmd.Value}");
                                 cmd.Callback.Invoke(entity, result);
-                                Instance.SendData(entity, new Commands { Value = Command.None });
                             }
                             break;
                         }
+                        cmd.Value = Command.None;
                         datas[i] = data;
                         commands[i] = cmd;
                     }
@@ -236,6 +191,7 @@ namespace Game.Model.Skills
 
             protected override void OnUpdate()
             {
+                /*
                 NativeArray<QueueItem> items;
                 lock (m_Lock)
                 {
@@ -250,6 +206,7 @@ namespace Game.Model.Skills
                 }.Schedule(items.Length, 1);
                 items.Dispose(queueJob);
                 m_CommandBuffer.AddJobHandleForProducer(queueJob);
+                */
 
                 var map = Map.Singleton;
                 var job = new NewPositionJob()
@@ -343,7 +300,6 @@ namespace Game.Model.Skills
                                 data.State = Moving.InternalState.None;
                                 if (cmd.Callback.IsCreated)
                                     cmd.Callback.Invoke(entity, JobResult.Done);
-                                Instance.SendData(entity, new Commands { Value = Command.None });
                             }
                             datas[i] = data;
                         }

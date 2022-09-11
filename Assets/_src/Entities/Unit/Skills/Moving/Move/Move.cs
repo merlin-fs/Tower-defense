@@ -26,8 +26,7 @@ namespace Game.Model.Skills
         {
             None,
             Init,
-            FindPath,
-            FindPathDone,
+            SetPath,
             MoveToPoint,
         }
 
