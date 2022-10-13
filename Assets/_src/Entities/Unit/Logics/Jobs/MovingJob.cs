@@ -2,6 +2,7 @@ using System;
 using Unity.Entities;
 using Unity.Collections;
 
+/*
 namespace Game.Model.Logics
 {
     using Core;
@@ -22,3 +23,4 @@ namespace Game.Model.Logics
     }
 }
 
+*/

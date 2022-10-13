@@ -6,14 +6,19 @@ namespace Game.Model.Logics
 {
     using Core;
 
-    public interface ILogic : IComponentData, IDefineable<ILogicDef>
-    {
-        ILogicDef Def { get; }
-        int CurrentJob { get; set; }
-    }
-
     public interface ILogicState : IComponentData
     {
         JobState Value { get; set; }
+    }
+
+    public interface ILogic : ILogicState, IDefineable<ILogicDef>
+    {
+        int CurrentState { get; set; }
+        ILogicState GetNextTransition(int current);
+    }
+
+    public interface ILogicPart : IJobEntityBatch
+    {
+        void Init(SystemBase system);
     }
 }

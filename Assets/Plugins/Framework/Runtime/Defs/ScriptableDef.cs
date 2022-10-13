@@ -49,7 +49,7 @@ namespace Common.Defs
     public static class DefExtensions
     {
         public static void AddComponentIData<T>(this EntityManager manager, Entity entity, T componentData)
-            where T : IDefineable, IComponentData
+            where T : IComponentData
         {
             Type DefType = componentData.GetType();
 
@@ -67,7 +67,7 @@ namespace Common.Defs
         }
 
         public static void AddComponentIData<T>(this EntityCommandBuffer.ParallelWriter manager, Entity entity, T componentData, int sortKey)
-            where T : IDefineable, IComponentData
+            where T : IComponentData
         {
             Type DefType = componentData.GetType();
 

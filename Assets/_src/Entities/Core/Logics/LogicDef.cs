@@ -25,6 +25,7 @@ namespace Game.Model.Logics
 
         public abstract int GetTransition(LogicStateMachine.StateJobs jobs, int value, JobResult jobResult);
 
+        /*
         protected static ILogicJob Random(IEnumerable<ILogicJob> list)
         {
             float max = 0;
@@ -42,5 +43,6 @@ namespace Game.Model.Logics
             }
             return result;
         }
+        */
     }
 }

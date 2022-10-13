@@ -5,6 +5,7 @@ using Unity.Entities;
 using Unity.Burst;
 using Unity.Jobs;
 
+/*
 namespace Game.Model.Logics
 {
     using Core;
@@ -29,10 +30,8 @@ namespace Game.Model.Logics
         {
             UnityEngine.Debug.Log($"SendData: {entity}: {value.Value}");
             m_CommandBuffer.CreateCommandBuffer().SetComponent(entity, value);
-            /*
-            lock (m_Lock)
-                m_Queue.Enqueue(new QueueItem { Entity = entity, Value = value });
-            */
+            //lock (m_Lock)
+            //    m_Queue.Enqueue(new QueueItem { Entity = entity, Value = value });
         }
 
         private struct QueueItem
@@ -164,23 +163,6 @@ namespace Game.Model.Logics
 
         protected unsafe override void OnUpdate()
         {
-            /*
-            NativeArray<QueueItem> items;
-            lock (m_Lock)
-            {
-                items = m_Queue.ToArray(Allocator.TempJob);
-                m_Queue.Clear();
-            }
-
-            var queueJob = new QueueJob
-            {
-                Writer = m_CommandBuffer.CreateCommandBuffer().AsParallelWriter(),
-                Items = items,
-            }.Schedule(items.Length, 1);
-            items.Dispose(queueJob);
-            //queueJob.Complete();
-            m_CommandBuffer.AddJobHandleForProducer(queueJob);
-            */
             var jobs = StateMachine.PrepareJobs(this);
 
             var job = new LogicJob
@@ -248,3 +230,4 @@ namespace Game.Model.Logics
     }
 
 }
+*/

@@ -200,9 +200,11 @@ public class MainStart : MonoBehaviour
         Game.Model.Properties.HealthDef.Initialize(m_CanvasParent, m_Prefab);
         
         //TODO: перенести ! (как вариант событие (шина) на инициализацию мира)
+        /*
         Game.Model.Logics.EnemyLogicDef.Initialize();
         Game.Model.Logics.TowerLogicDef.Initialize();
         Game.Model.Logics.EnemySquadLogicDef.Initialize();
+        */
         
 
 

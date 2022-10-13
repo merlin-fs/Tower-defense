@@ -2,7 +2,7 @@ using System;
 using Unity.Entities;
 using Common.Core;
 
-
+/*
 namespace Game.Model.Logics
 {
     using Core;
@@ -25,6 +25,10 @@ namespace Game.Model.Logics
         #region ILogic
         public ILogicDef Def => m_Def.Link;
         public int CurrentJob { get => currentJob; set => currentJob = value; }
+        public IComponentData GetNextTransition(int current)
+        {
+            return null;
+        }
         #endregion
 
         public TowerLogic(ReferenceObject<ILogicDef> def)
@@ -34,3 +38,4 @@ namespace Game.Model.Logics
         }
     }
 }
+*/

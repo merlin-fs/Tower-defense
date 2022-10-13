@@ -13,6 +13,7 @@ namespace Game.Model.Core
     {
         None,
         Running,
+        Dune,
         Error,
     }
 

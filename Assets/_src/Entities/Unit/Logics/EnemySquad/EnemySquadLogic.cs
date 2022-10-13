@@ -3,11 +3,12 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Common.Core;
 
-
+/*
 namespace Game.Model.Logics
 {
     using Core;
     using World;
+
     public struct EnemySquadLogic : ILogic
     {
         public struct Target: IComponentData
@@ -32,6 +33,10 @@ namespace Game.Model.Logics
         public ILogicDef Def => m_Def.Link;
         public EnemySquadLogicDef SquadDef => (EnemySquadLogicDef)m_Def.Link;
         public int CurrentJob { get => currentJob; set => currentJob = value; }
+        public IComponentData GetNextTransition(int current)
+        {
+            return null;
+        }
         #endregion
 
         public EnemySquadLogic(ReferenceObject<ILogicDef> def)
@@ -41,3 +46,4 @@ namespace Game.Model.Logics
         }
     }
 }
+*/

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Jobs;
 
+/*
 [assembly: RegisterGenericJobType(typeof(Game.Model.Logics.LogicSystem<Game.Model.Logics.EnemySquadLogic, Game.Model.Logics.EnemySquadLogic.State>.LogicJob))]
 
 namespace Game.Model.Logics
@@ -50,3 +51,4 @@ namespace Game.Model.Logics
         }
     }
 }
+*/

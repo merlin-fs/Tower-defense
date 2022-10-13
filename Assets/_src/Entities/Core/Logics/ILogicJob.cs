@@ -2,7 +2,7 @@ using System;
 
 using Game.Model.Core;
 using Unity.Burst;
-
+/*
 namespace Game.Model.Logics
 {
     public interface ILogicJob
@@ -12,3 +12,4 @@ namespace Game.Model.Logics
         float Weight { get; }
     }
 } 
+*/

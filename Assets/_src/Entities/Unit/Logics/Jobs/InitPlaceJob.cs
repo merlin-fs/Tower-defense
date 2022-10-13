@@ -5,6 +5,7 @@ using Unity.Burst;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+/*
 namespace Game.Model.Logics
 {
     using Core;
@@ -53,3 +54,4 @@ namespace Game.Model.Logics
     }
 }
 
+*/

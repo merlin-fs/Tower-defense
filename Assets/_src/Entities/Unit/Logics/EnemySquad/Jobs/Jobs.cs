@@ -6,12 +6,12 @@ using Unity.Entities;
 using Unity.Collections;
 using Unity.Mathematics;
 
+/*
 namespace Game.Model.Logics
 {
     using Core;
     using World;
     using Skills;
-    using TMPro;
 
     public partial class EnemySquadLogicDef
     {
@@ -188,22 +188,6 @@ namespace Game.Model.Logics
             public void Execute(ExecuteContext context, FunctionPointer<StateCallback> callback)
             {
                 var squad = context.GetData<Squad.Unit>(m_SquadSelfHandle);
-                /*
-                var logic = context.GetData(m_EnemyLogicHandle);
-                if (m_MoveHandle[squad.Squad].State != Move.Moving.InternalState.MoveToPoint)
-                {
-                    logic.Time += context.Delta;
-                    context.SetData(m_EnemyLogicHandle, ref logic);
-                    if (logic.Time < .2f)
-                    {
-                        Task.Delay(100);
-                        callback.Invoke(context.Entity, JobResult.Error);
-                        return;
-                    }
-                }
-                logic.Time = 0;
-                context.SetData(m_EnemyLogicHandle, ref logic);
-                */
                 if (!m_SquadPositionHandle.TryGetBuffer(squad.Squad, out var buff))
                 {
                     callback.Invoke(context.Entity, JobResult.Error);
@@ -239,3 +223,4 @@ namespace Game.Model.Logics
         }
     }
 }
+*/

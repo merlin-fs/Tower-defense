@@ -4,6 +4,7 @@ using Unity.Collections;
 using Unity.Transforms;
 using Unity.Burst;
 
+/*
 namespace Game.Model.Logics
 {
     using Core;
@@ -53,3 +54,4 @@ namespace Game.Model.Logics
     }
 }
 
+*/
