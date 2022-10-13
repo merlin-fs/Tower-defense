@@ -14,7 +14,7 @@ namespace Game.Model.Properties
 
         protected override void OnCreate()
         {
-            m_CommandBuffer = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+            m_CommandBuffer = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
             m_Query = GetEntityQuery(
                 ComponentType.ReadOnly<Health>(),
                 ComponentType.ReadWrite<StateCalcProperty>()

@@ -22,6 +22,7 @@ namespace Game.Model.Logics
                 m_Owner = owner;
             }
 
+            /*
             public Configuration Add<State>()
                 where State : struct, ILogicJob
             {
@@ -43,6 +44,7 @@ namespace Game.Model.Logics
                 m_Owner.AddEnterTransition<To>();
                 return this;
             }
+            */
         }
     }
 

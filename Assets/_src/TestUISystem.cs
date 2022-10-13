@@ -26,7 +26,7 @@ namespace Game.UI
         {
             m_Query = GetEntityQuery(
                 ComponentType.ReadOnly<Health>(),
-                ComponentType.ReadOnly<Translation>(),
+                ComponentType.ReadOnly<LocalToWorldTransform>(),
                 ComponentType.ReadWrite<HealthView>()
             );
             RequireForUpdate(m_Query);
@@ -35,7 +35,7 @@ namespace Game.UI
         struct PositionUIJob : IJobEntityBatch
         {
             [ReadOnly] public ComponentTypeHandle<Health> InputHealth;
-            [ReadOnly] public ComponentTypeHandle<Translation> InputTranslation;
+            [ReadOnly] public ComponentTypeHandle<LocalToWorldTransform> InputTranslation;
             [ReadOnly] public ComponentTypeHandle<HealthView> InputHealthView;
 
             [ReadOnly]
@@ -49,7 +49,7 @@ namespace Game.UI
 
                 for (var i = 0; i < batchInChunk.Count; i++)
                 {
-                    var pos = positions[i].Value;
+                    var pos = positions[i].Value.Position;
                     views[i].Value.SetPosition(pos);
                     views[i].Value.SetValue(healths[i].Property.Normalize);
                 }
@@ -62,9 +62,9 @@ namespace Game.UI
 
             var job = new PositionUIJob()
             {
-                Delta = Time.DeltaTime,
+                Delta = SystemAPI.Time.DeltaTime,
                 InputHealth = GetComponentTypeHandle<Health>(true),
-                InputTranslation = GetComponentTypeHandle<Translation>(true),
+                InputTranslation = GetComponentTypeHandle<LocalToWorldTransform>(true),
                 InputHealthView = GetComponentTypeHandle<HealthView>(),
             };
             Dependency = job.ScheduleParallel(m_Query, Dependency);

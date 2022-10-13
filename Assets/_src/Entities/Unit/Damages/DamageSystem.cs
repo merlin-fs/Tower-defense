@@ -16,7 +16,7 @@ namespace Game.Model.Damages
 
         protected override void OnCreate()
         {
-            m_CommandBuffer = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+            m_CommandBuffer = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
             m_Query = GetEntityQuery(
                 ComponentType.ReadWrite<StateShotDone>(),
                 ComponentType.ReadWrite<DamageSimple>(),
@@ -75,9 +75,6 @@ namespace Game.Model.Damages
             }
         }
 
-
-
-        [NotBurstCompatible]
         protected override void OnUpdate()
         {
             var job = new ProduceDamageJob()
@@ -90,7 +87,7 @@ namespace Game.Model.Damages
 
                 Writer = m_CommandBuffer.CreateCommandBuffer().AsParallelWriter(),
                 
-                Delta = Time.DeltaTime,
+                Delta = SystemAPI.Time.DeltaTime,
             };
             Dependency = job.ScheduleParallel(m_Query, Dependency);
             m_CommandBuffer.AddJobHandleForProducer(Dependency);

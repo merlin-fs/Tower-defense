@@ -52,7 +52,7 @@ namespace Game.Model.Logics
             m_Query = GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { ComponentType.ReadWrite<T>() },
-                Options = EntityQueryOptions.IncludeDisabled
+                Options = EntityQueryOptions.IncludeDisabledEntities
             });
             m_Query.AddChangedVersionFilter(ComponentType.ReadWrite<T>());
             RequireForUpdate(m_Query);
@@ -111,7 +111,7 @@ namespace Game.Model.Logics
             m_Query = GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { ComponentType.ReadWrite<T>(), ComponentType.ReadWrite<J>() },
-                Options = EntityQueryOptions.IncludeDisabled
+                Options = EntityQueryOptions.IncludeDisabledEntities
             });
             m_Query.AddChangedVersionFilter(ComponentType.ReadWrite<J>());
             RequireForUpdate(m_Query);

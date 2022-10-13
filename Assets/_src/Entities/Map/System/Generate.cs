@@ -12,7 +12,7 @@ namespace Game.Model.World
 
     public partial class Map
     {
-        public struct GenerateMapTag : ISystemStateComponentData
+        public struct GenerateMapTag : ICleanupComponentData
         {
             [NativeDisableUnsafePtrRestriction]
             private readonly IntPtr m_Initialization;
@@ -35,7 +35,7 @@ namespace Game.Model.World
             }
         };
 
-        public struct DisposeMapTag : ISystemStateComponentData
+        public struct DisposeMapTag : ICleanupComponentData
         {
         };
 

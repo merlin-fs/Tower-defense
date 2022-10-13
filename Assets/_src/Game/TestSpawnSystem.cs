@@ -20,7 +20,7 @@ namespace Game.Model
         private EntityQuery m_Query;
         protected override void OnCreate()
         {
-            m_CommandBuffer = World.GetOrCreateSystem<GameSpawnSystemCommandBufferSystem>();
+            m_CommandBuffer = World.GetOrCreateSystemManaged<GameSpawnSystemCommandBufferSystem>();
 
             m_Query = GetEntityQuery(
                 ComponentType.ReadOnly<TestSpawn.SpawnState>(),

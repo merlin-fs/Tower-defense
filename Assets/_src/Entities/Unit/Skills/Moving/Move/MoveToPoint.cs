@@ -13,7 +13,7 @@ namespace Game.Model.Skills
 
         public static bool MoveToPoint(float delta, ref Moving moving,
             Map.Path.Info info, DynamicBuffer<Map.Path.Points> points, DynamicBuffer<Map.Path.Times> times,
-            ref Translation translation, ref Rotation rotation)
+            ref LocalToWorldTransform translation)
         {
             if (moving.PathPrecent >= 1f)
             {
@@ -28,12 +28,12 @@ namespace Game.Model.Skills
             float time = Map.Path.ConvertToConstantPathTime(moving.PathPrecent, info.Length, times.AsNativeArray());
             float3 position = Map.Path.GetPosition(time, false, points.AsNativeArray(), info.DeltaTime);
 
-            var look = math.normalize(position - translation.Value);
+            var look = math.normalize(position - translation.Value.Position);
             //look.y = -0.5f;
 
-            rotation.Value = quaternion.LookRotation(look, UP);
+            translation.Value.Rotation = quaternion.LookRotation(look, UP);
             //rotation.Value = quaternion.LookRotation(position - translation.Value, UP);
-            translation.Value = position;
+            translation.Value.Position = position;
             return false;
         }
     }

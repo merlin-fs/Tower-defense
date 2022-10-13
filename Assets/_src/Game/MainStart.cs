@@ -21,7 +21,7 @@ using Game.Model;
 
 public class TestSpawn : MonoBehaviour
 {
-    public struct SpawnState : ISystemStateComponentData
+    public struct SpawnState : ICleanupComponentData
     {
         public Entity Prefab;
     }
@@ -188,7 +188,7 @@ public class MainStart : MonoBehaviour
     {
         Instance = this;
 
-        GameObjectConversionSettings settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, null);
+        GameObjectConversionSettings settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, new BlobAssetStore());
         var DstEntityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
         settings.ConversionFlags |= GameObjectConversionUtility.ConversionFlags.AssignName;
@@ -199,7 +199,7 @@ public class MainStart : MonoBehaviour
 
         Game.Model.Properties.HealthDef.Initialize(m_CanvasParent, m_Prefab);
         
-        //TODO: перенести ! (как вариант событие (шина) на инициализацию мира)
+        //TODO: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ! (пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅ) пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ)
         /*
         Game.Model.Logics.EnemyLogicDef.Initialize();
         Game.Model.Logics.TowerLogicDef.Initialize();

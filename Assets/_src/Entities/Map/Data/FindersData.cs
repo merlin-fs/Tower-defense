@@ -10,7 +10,7 @@ namespace Game.Model.World
         public delegate double GetCostTile(Entity entity, int2 source, int2 target);
         public struct SortedNativeHashMap<TKey, TValue>
             where TKey : unmanaged, IEquatable<TKey>
-            where TValue : struct
+            where TValue : unmanaged
         {
             public delegate int Compare<T>(T x, T y) where T : struct;
             private readonly Compare<TKey> m_Comparer;

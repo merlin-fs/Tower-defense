@@ -12,23 +12,23 @@ namespace Game.Model
         public static implicit operator WeaponReady(bool value) => new WeaponReady { IsReady = value };
     }
 
-    public struct StateShot : ISystemStateComponentData
+    public struct StateShot : ICleanupComponentData
     {
     }
 
-    public struct StateCalcProperty : ISystemStateComponentData
+    public struct StateCalcProperty : ICleanupComponentData
     {
     }
 
-    public struct StateInit : ISystemStateComponentData
+    public struct StateInit : ICleanupComponentData
     {
     }
 
-    public struct StateDead : ISystemStateComponentData
+    public struct StateDead : ICleanupComponentData
     {
     }
 
-    public struct StateShotDone : ISystemStateComponentData
+    public struct StateShotDone : ICleanupComponentData
     {
         public float Delay;
         public float Time;

@@ -25,7 +25,7 @@ namespace Game.Model.Skills
         }
 
         public static Entity FindEnemy(uint findTeams, float3 selfPosition, float selfRadius,
-            ComponentDataFromEntity<Translation> translations, ComponentDataFromEntity<Teams> teams)
+            ComponentLookup<LocalToWorldTransform> translations, ComponentLookup<Teams> teams)
         {
             TempFindTarget find = new TempFindTarget { Entity = Entity.Null, Magnitude = float.MaxValue };
             var CounterLock = new object();
@@ -33,15 +33,15 @@ namespace Game.Model.Skills
             Parallel.ForEach(entities, (target) => 
             {
                 var team = teams[target];
-                //Проверка нужной коммнады
+                //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 if ((team.Team & findTeams) == 0)
                     return;
 
                 var targetPos = translations[target].Value;
-                var magnitude = (selfPosition - targetPos).magnitude();
-                //Проверка пересечения двух сфер
+                var magnitude = (selfPosition - targetPos.Position).magnitude();
+                //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
                 if (magnitude < find.Magnitude &&
-                    utils.SpheresIntersect(selfPosition, selfRadius, targetPos, 5f, out float3 vector))
+                    utils.SpheresIntersect(selfPosition, selfRadius, targetPos.Position, 5f, out float3 vector))
                 {
                     lock (CounterLock)
                     {

@@ -10,27 +10,35 @@ namespace Game.Model.Logics
 
     public partial class LogicStateMachine
     {
+        /*
         private Dictionary<int, JobInfo> m_Jobs = new Dictionary<int, JobInfo>();
         private List<JobInfo> m_Enter = new List<JobInfo>();
+        */
        
         public struct StateJobs
         {
             private ReferenceObject<LogicStateMachine> m_Owner;
-            private ReferenceObject<Dictionary<int, ILogicJob>> m_Jobs;
             private LogicStateMachine Owner => m_Owner.Link;
+
+            /*
+            private ReferenceObject<Dictionary<int, ILogicJob>> m_Jobs;
             private Dictionary<int, ILogicJob> Jobs => m_Jobs.Link;
+            */
 
             internal StateJobs(LogicStateMachine owner, LogicSystem system)
             {
                 m_Owner = new ReferenceObject<LogicStateMachine>(owner);
+                /*
                 m_Jobs = new ReferenceObject<Dictionary<int, ILogicJob>>(new Dictionary<int, ILogicJob>());
 
                 foreach(var iter in Owner.m_Jobs.Values)
                 {
                     Jobs.Add(iter.ID, iter.Create(system));
                 }
+                */
             }
 
+            /*
             internal ILogicJob GetJob(int id) => Jobs[id];
 
             public void Dispose(JobHandle inputDeps)
@@ -71,10 +79,10 @@ namespace Game.Model.Logics
                     : default;
                 return result;
             }
-
+            */
         }
 
-
+        /*
         internal LogicStateMachine()
         {
         }
@@ -164,6 +172,7 @@ namespace Game.Model.Logics
                 throw new NotImplementedException();
             }
         }
+        */
     }
 
     /*

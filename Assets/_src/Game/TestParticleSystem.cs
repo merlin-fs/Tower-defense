@@ -15,7 +15,7 @@ namespace Game.UI
         private EntityQuery m_Query;
         protected override void OnCreate()
         {
-            m_CommandBuffer = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+            m_CommandBuffer = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
             m_Query = GetEntityQuery(
                 ComponentType.ReadOnly<ParticleSpawner>(),
                 ComponentType.ReadOnly<StateShot>()
@@ -25,7 +25,7 @@ namespace Game.UI
 
         protected override void OnUpdate()
         {
-            var childs = GetBufferFromEntity<Child>();
+            var childs = GetBufferLookup<Child>();
             var entities = m_Query.ToEntityArray(Allocator.Temp);
             var writer = m_CommandBuffer.CreateCommandBuffer();
             try
@@ -52,7 +52,7 @@ namespace Game.UI
             }
         }
 
-        void RecursiveChilds(Entity entity, BufferFromEntity<Child> childs, Action<Entity> action)
+        void RecursiveChilds(Entity entity, BufferLookup<Child> childs, Action<Entity> action)
         {
             action?.Invoke(entity);
             if (!childs.HasComponent(entity))

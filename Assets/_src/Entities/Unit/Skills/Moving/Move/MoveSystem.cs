@@ -117,8 +117,7 @@ namespace Game.Model.Skills
                 public BufferTypeHandle<Map.Path.Points> InputPoints;
                 public BufferTypeHandle<Map.Path.Times> InputTimes;
 
-                public ComponentTypeHandle<Translation> InputTranslation;
-                public ComponentTypeHandle<Rotation> InputRotation;
+                public ComponentTypeHandle<LocalToWorldTransform> InputTranslation;
 
                 public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
                 {
@@ -133,8 +132,6 @@ namespace Game.Model.Skills
                     var times = batchInChunk.GetBufferAccessor(InputTimes);
                     var entities = batchInChunk.GetNativeArray(InputEntity);
                     var translations = batchInChunk.GetNativeArray(InputTranslation);
-                    var rotations = batchInChunk.GetNativeArray(InputRotation);
-
 
                     for (var i = 0; i < batchInChunk.Count; i++)
                     {
@@ -213,7 +210,7 @@ namespace Game.Model.Skills
                 {
                     Map = map,
                     LastSystemVersion = LastSystemVersion,
-                    Delta = Time.DeltaTime,
+                    Delta = SystemAPI.Time.DeltaTime,
 
                     Random = m_Random,
 
@@ -228,8 +225,7 @@ namespace Game.Model.Skills
                     InputPoints = GetBufferTypeHandle<Map.Path.Points>(false),
                     InputTimes = GetBufferTypeHandle<Map.Path.Times>(false),
 
-                    InputTranslation = GetComponentTypeHandle<Translation>(false),
-                    InputRotation = GetComponentTypeHandle<Rotation>(false),
+                    InputTranslation = GetComponentTypeHandle<LocalToWorldTransform>(false),
                 };
                 NativeArray<Entity> limitToEntityArray = m_Query.ToEntityArray(Allocator.TempJob);
                 Dependency = job.ScheduleParallel(m_Query, ScheduleGranularity.Entity, limitToEntityArray, Dependency);
@@ -267,8 +263,7 @@ namespace Game.Model.Skills
                 public ComponentTypeHandle<Commands> InputCommand;
                 public ComponentTypeHandle<Moving> InputData;
 
-                public ComponentTypeHandle<Translation> InputTranslation;
-                public ComponentTypeHandle<Rotation> InputRotation;
+                public ComponentTypeHandle<LocalToWorldTransform> InputTranslation;
 
                 public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
                 {
@@ -279,7 +274,6 @@ namespace Game.Model.Skills
                     var times = batchInChunk.GetBufferAccessor(InputTimes);
                     var entities = batchInChunk.GetNativeArray(InputEntity);
                     var translations = batchInChunk.GetNativeArray(InputTranslation);
-                    var rotations = batchInChunk.GetNativeArray(InputRotation);
 
 
                     for (var i = 0; i < batchInChunk.Count; i++)
@@ -292,10 +286,10 @@ namespace Game.Model.Skills
                             continue;
 
                         var translation = translations[i];
-                        var rotation = rotations[i];
+                        var rotation = translations[i].Value.Rotation;
                         try
                         {
-                            if (MoveToPoint(Delta, ref data, infos[i], points[i], times[i], ref translation, ref rotation))
+                            if (MoveToPoint(Delta, ref data, infos[i], points[i], times[i], ref translation))
                             {
                                 data.State = Moving.InternalState.None;
                                 if (cmd.Callback.IsCreated)
@@ -305,12 +299,6 @@ namespace Game.Model.Skills
                         }
                         finally
                         {
-                            var diff = translation.Value - translations[i].Value;
-                            if (math.length(diff) < 0)
-                            {
-                            }
-                            translations[i] = new Translation() { Value = translation.Value };
-                            rotations[i] = new Rotation() { Value = rotation.Value };
                         }
                     }
                 }
@@ -323,7 +311,7 @@ namespace Game.Model.Skills
                 var job = new MoveToJob()
                 {
                     Map = map,
-                    Delta = Time.DeltaTime,
+                    Delta = SystemAPI.Time.DeltaTime,
 
                     InputEntity = GetEntityTypeHandle(),
 
@@ -334,8 +322,7 @@ namespace Game.Model.Skills
                     InputPoints = GetBufferTypeHandle<Map.Path.Points>(true),
                     InputTimes = GetBufferTypeHandle<Map.Path.Times>(true),
 
-                    InputTranslation = GetComponentTypeHandle<Translation>(false),
-                    InputRotation = GetComponentTypeHandle<Rotation>(false),
+                    InputTranslation = GetComponentTypeHandle<LocalToWorldTransform>(false),
                 };
 
                 Dependency = job.ScheduleParallel(m_Query, Dependency);

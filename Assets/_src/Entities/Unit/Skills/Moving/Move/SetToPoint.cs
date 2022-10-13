@@ -10,13 +10,13 @@ namespace Game.Model.Skills
     public partial class Move
     {
         public static bool SetToPoint(Map.Data map, Entity entity, ref Moving moving,
-            ref Translation translation, ref Rotation rotation)
+            ref LocalToWorldTransform translation)
         {
 
             float3 position = map.MapToWord(moving.TargetPosition);
             moving.CurrentPosition = moving.TargetPosition;
             //rotation.Value = quaternion.LookRotation(math.normalize(position - translation.Value), UP);
-            translation.Value = position;
+            translation.Value.Position = position;
 
             Instance.SendData(entity, new Commands { Value = Command.Init, TargetPosition = moving.TargetPosition });
 

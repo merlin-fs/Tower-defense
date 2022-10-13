@@ -25,8 +25,8 @@ namespace Common.Entities.Tools
             where TSystem : ComponentSystemBase
             where TGroup : ComponentSystemGroup
         {
-            var group = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<TGroup>();
-            var system = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<TSystem>();
+            var group = World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<TGroup>();
+            var system = World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<TSystem>();
             group.AddSystemToUpdateList(system);
             return system;
         }
